@@ -64,7 +64,7 @@ const TransformerVisualization = () => {
       transition: {
         duration: 0.5,
         ease: "easeOut",
-        staggerChildren: 0.1
+        staggerChildren: 0.15
       }
     }
   };
@@ -75,7 +75,7 @@ const TransformerVisualization = () => {
       opacity: 1, 
       x: 0,
       transition: {
-        duration: 0.3,
+        duration: 0.4,
         ease: "easeOut"
       }
     }
@@ -87,13 +87,35 @@ const TransformerVisualization = () => {
       scale: 1, 
       opacity: 1,
       transition: {
-        duration: 0.5,
+        duration: 0.6,
         ease: "easeOut"
       }
     },
     exit: {
       scale: 0.95,
       opacity: 0,
+      transition: {
+        duration: 0.4,
+        ease: "easeIn"
+      }
+    }
+  };
+
+  const dataFlowAnimation = {
+    initial: { scale: 0.9, opacity: 0, y: 20 },
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      scale: 0.9,
+      opacity: 0,
+      y: -20,
       transition: {
         duration: 0.3,
         ease: "easeIn"
@@ -108,7 +130,7 @@ const TransformerVisualization = () => {
       variants={containerAnimation}
       className="space-y-8"
     >
-      <Card className="p-6 space-y-6 overflow-hidden">
+      <Card className="p-6 space-y-6 overflow-hidden bg-gradient-to-br from-white to-gray-50">
         <motion.h2 
           className="text-2xl font-bold text-primary mb-4"
           variants={itemAnimation}
@@ -158,7 +180,7 @@ const TransformerVisualization = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            variants={flowAnimation}
+            variants={dataFlowAnimation}
             initial="initial"
             animate="animate"
             exit="exit"

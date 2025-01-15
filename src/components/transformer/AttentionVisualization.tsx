@@ -24,13 +24,27 @@ const AttentionVisualization: React.FC<AttentionVisualizationProps> = ({
     }
   };
 
-  const itemVariants = {
+  const rowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: custom * 0.1,
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    })
+  };
+
+  const cellVariants = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 0.3
+        duration: 0.3,
+        ease: "easeOut"
       }
     }
   };
@@ -42,19 +56,27 @@ const AttentionVisualization: React.FC<AttentionVisualizationProps> = ({
       variants={containerVariants}
       className="bg-muted p-4 rounded-lg"
     >
-      <h3 className="font-semibold mb-2">Attention Weights:</h3>
+      <motion.h3 
+        className="font-semibold mb-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        Attention Weights:
+      </motion.h3>
       <div className="grid grid-cols-1 gap-2">
         {attentionWeights.map((row, i) => (
           <motion.div 
             key={i} 
             className="flex gap-2"
-            variants={containerVariants}
+            custom={i}
+            variants={rowVariants}
           >
             {row.map((weight, j) => (
               <motion.div
                 key={j}
-                variants={itemVariants}
-                className="w-12 h-12 flex items-center justify-center rounded transition-colors duration-300"
+                variants={cellVariants}
+                className="w-12 h-12 flex items-center justify-center rounded transition-colors duration-300 text-sm font-medium"
                 style={{
                   backgroundColor: `rgba(59, 130, 246, ${weight})`,
                   color: weight > 0.5 ? "white" : "black",
@@ -63,8 +85,9 @@ const AttentionVisualization: React.FC<AttentionVisualizationProps> = ({
                   scale: 1.1,
                   transition: { duration: 0.2 }
                 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {weight}
+                {weight.toFixed(2)}
               </motion.div>
             ))}
           </motion.div>
