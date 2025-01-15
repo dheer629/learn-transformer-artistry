@@ -34,6 +34,22 @@ const EncoderLayer: React.FC<EncoderLayerProps> = ({
           {step.formula}
         </div>
       </div>
+
+      {index === currentStep && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="mt-4 bg-blue-50 p-4 rounded-lg space-y-4"
+        >
+          <div>
+            <h5 className="font-medium text-lg">{step.explanation.title}</h5>
+            <p className="text-gray-700 mt-2">{step.explanation.simpleExplanation}</p>
+            <p className="text-gray-600 mt-2">{step.explanation.vectorExplanation}</p>
+            <p className="text-gray-600 mt-2 italic">{step.explanation.example}</p>
+          </div>
+        </motion.div>
+      )}
+      
       <ul className="mt-2 space-y-1">
         {step.details.map((detail, i) => (
           <li key={i} className="text-sm text-gray-600">

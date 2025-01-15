@@ -5,11 +5,19 @@ export interface EmbeddingVector {
   contextualVector?: number[];
 }
 
+export interface StepExplanation {
+  title: string;
+  simpleExplanation: string;
+  vectorExplanation: string;
+  example: string;
+}
+
 export interface LayerStep {
   title: string;
   description: string;
   formula: string;
   details: string[];
+  explanation: StepExplanation;
   outputVector?: number[];
   attentionWeights?: number[][];
 }
