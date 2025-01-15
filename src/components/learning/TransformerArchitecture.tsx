@@ -35,6 +35,10 @@ const TransformerArchitecture: React.FC<TransformerArchitectureProps> = ({
               src={mainImageUrl} 
               alt="Complete Transformer Architecture"
               className="rounded-lg shadow-lg hover:shadow-xl transition-shadow max-w-full h-auto"
+              onError={(e) => {
+                console.error("Error loading image:", mainImageUrl);
+                e.currentTarget.src = "/placeholder.svg";
+              }}
             />
             <p className="text-sm text-gray-600 text-center mt-4 font-medium">
               Complete Transformer Architecture Overview
