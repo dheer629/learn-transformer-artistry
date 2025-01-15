@@ -123,6 +123,31 @@ const TransformerVisualization = () => {
     }
   };
 
+  const architectureAnimation = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const layerAnimation = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <motion.div
       initial="hidden"
@@ -140,22 +165,26 @@ const TransformerVisualization = () => {
         
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          variants={itemAnimation}
+          variants={architectureAnimation}
         >
-          <InputSection
-            inputText={inputText}
-            setInputText={setInputText}
-            learningRate={learningRate}
-            setLearningRate={setLearningRate}
-            handleProcess={handleProcess}
-            isProcessing={isProcessing}
-          />
+          <motion.div variants={layerAnimation}>
+            <InputSection
+              inputText={inputText}
+              setInputText={setInputText}
+              learningRate={learningRate}
+              setLearningRate={setLearningRate}
+              handleProcess={handleProcess}
+              isProcessing={isProcessing}
+            />
+          </motion.div>
           
-          <OutputSection outputText={outputText} />
+          <motion.div variants={layerAnimation}>
+            <OutputSection outputText={outputText} />
+          </motion.div>
         </motion.div>
 
         <motion.div 
-          variants={itemAnimation}
+          variants={layerAnimation}
           className="relative"
         >
           <ControlsSection
@@ -168,8 +197,10 @@ const TransformerVisualization = () => {
         </motion.div>
 
         <motion.div 
-          variants={itemAnimation}
+          variants={architectureAnimation}
           className="relative"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
         >
           <LayersVisualization
             currentStep={currentStep}
@@ -186,14 +217,26 @@ const TransformerVisualization = () => {
             exit="exit"
             className="space-y-6"
           >
-            <EmbeddingsVisualization 
-              embeddings={embeddings}
-              currentStep={currentStep}
-            />
-            <AttentionVisualization 
-              attentionWeights={attentionWeights}
-              currentStep={currentStep}
-            />
+            <motion.div
+              variants={flowAnimation}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EmbeddingsVisualization 
+                embeddings={embeddings}
+                currentStep={currentStep}
+              />
+            </motion.div>
+            <motion.div
+              variants={flowAnimation}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AttentionVisualization 
+                attentionWeights={attentionWeights}
+                currentStep={currentStep}
+              />
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </Card>
