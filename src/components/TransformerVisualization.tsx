@@ -22,6 +22,7 @@ const TransformerVisualization = () => {
   const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
+  const [nextWordProbabilities, setNextWordProbabilities] = useState<{ word: string; probability: number }[]>([]);
   const { toast } = useToast();
   const totalSteps = encoderSteps.length + decoderSteps.length;
 
@@ -32,20 +33,41 @@ const TransformerVisualization = () => {
         setLayerOutputs(prev => [...prev, output]);
         setCurrentStep(prev => prev + 1);
         
-        // Show detailed formula and calculation for current step
+        // Show detailed formula, calculation, and token values for current step
         const stepInfo = currentStep < encoderSteps.length 
           ? encoderSteps[currentStep]
           : decoderSteps[currentStep - encoderSteps.length];
         
+        const tokenValues = embeddings.map(embed => ({
+          word: embed.word,
+          vector: embed.vector,
+          positionalEncoding: embed.positionalVector,
+          contextualVector: embed.contextualVector
+        }));
+
         const formulaExplanation = `
           ${stepInfo.explanation.vectorExplanation}
           
-          Example calculation:
+          Token Values:
+          ${tokenValues.map(token => `
+            Word: "${token.word}"
+            Base Vector: [${token.vector.map(v => v.toFixed(3)).join(", ")}]
+            Position Encoding: [${token.positionalEncoding?.map(v => v.toFixed(3)).join(", ") || ''}]
+            Context Vector: [${token.contextualVector?.map(v => v.toFixed(3)).join(", ") || ''}]
+          `).join('\n')}
+          
+          Calculations:
           ${output.intermediateOutputs?.queryVectors ? 
-            `Query vectors: [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            `Query vectors (Q = W_q * X):
+             [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
             ''}
           ${output.intermediateOutputs?.keyVectors ? 
-            `Key vectors: [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            `Key vectors (K = W_k * X):
+             [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+          ${output.intermediateOutputs?.valueVectors ? 
+            `Value vectors (V = W_v * X):
+             [${output.intermediateOutputs.valueVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
             ''}
         `;
         
@@ -56,11 +78,33 @@ const TransformerVisualization = () => {
               <MathJax>
                 <p className="font-medium">Formula: {stepInfo.formula}</p>
               </MathJax>
-              <p className="text-sm text-muted-foreground">{formulaExplanation}</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap font-mono">{formulaExplanation}</p>
             </div>
           ),
-          duration: 5000,
+          duration: 8000,
         });
+
+        // Generate next word predictions if we're in the decoder phase
+        if (currentStep >= encoderSteps.length) {
+          const predictions = generateNextWordPredictions(output);
+          setNextWordProbabilities(predictions);
+          
+          toast({
+            title: "Next Word Predictions",
+            description: (
+              <div className="space-y-2">
+                <p className="font-medium">Top 5 predicted next words:</p>
+                {predictions.slice(0, 5).map((pred, i) => (
+                  <div key={i} className="flex justify-between">
+                    <span>{pred.word}</span>
+                    <span className="font-mono">{(pred.probability * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            ),
+            duration: 5000,
+          });
+        }
       } catch (error) {
         console.error("Error in processing step:", error);
         toast({
@@ -69,46 +113,34 @@ const TransformerVisualization = () => {
           variant: "destructive",
         });
       }
-    } else if (currentStep === totalSteps - 1) {
-      // Generate final output using attention mechanism with detailed explanation
-      const finalOutput = embeddings.map(embed => {
-        const contextVector = embed.contextualVector || embed.vector;
-        const weightedSum = contextVector.reduce((sum, val) => sum + val, 0);
-        const average = weightedSum / contextVector.length;
-        
-        // Log detailed calculation for debugging
-        console.log(`Final calculation for word "${embed.word}":`, {
-          contextVector,
-          weightedSum,
-          average
-        });
-        
-        return average;
-      });
-      
-      // Convert numerical output to text with explanation
-      const outputWords = finalOutput.map((val, idx) => {
-        const word = embeddings[idx].word;
-        const sentiment = val > 0 ? "positive" : "negative";
-        return `${word} (${sentiment}: ${val.toFixed(3)})`;
-      }).join(" ");
-      
-      setOutputText(outputWords);
-      setIsProcessing(false);
-      
-      toast({
-        title: "Processing Complete",
-        description: (
-          <div className="space-y-2">
-            <p>Transformation sequence finished successfully.</p>
-            <p className="text-sm text-muted-foreground">
-              Final vector values have been converted to sentiment scores.
-              Positive values indicate positive sentiment, negative values indicate negative sentiment.
-            </p>
-          </div>
-        ),
-      });
     }
+  };
+
+  const generateNextWordPredictions = (output: LayerOutput) => {
+    // Simplified next word prediction using the last token's output
+    const lastTokenVector = output.outputEmbeddings[output.outputEmbeddings.length - 1].contextualVector;
+    if (!lastTokenVector) return [];
+
+    // Generate mock vocabulary with probabilities
+    const mockVocabulary = [
+      "the", "is", "are", "was", "were", "will", "would", "could", "should", "may",
+      "might", "must", "can", "shall", "have", "has", "had", "been", "being", "do"
+    ];
+
+    // Calculate softmax scores for each word based on vector similarity
+    const scores = mockVocabulary.map(word => {
+      const hash = word.split("").reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      
+      // Generate a probability based on hash and last token vector
+      const probability = Math.abs(Math.sin(hash + lastTokenVector.reduce((a, b) => a + b, 0)));
+      return { word, probability };
+    });
+
+    // Sort by probability
+    return scores.sort((a, b) => b.probability - a.probability);
   };
 
   const handleProcess = () => {
@@ -125,6 +157,7 @@ const TransformerVisualization = () => {
     setCurrentStep(0);
     setOutputText("");
     setLayerOutputs([]);
+    setNextWordProbabilities([]);
     
     try {
       const newEmbeddings = generateEmbeddings(inputText);
@@ -141,9 +174,20 @@ const TransformerVisualization = () => {
       const initialOutput = generateLayerOutput(newEmbeddings, 0);
       setLayerOutputs([initialOutput]);
       
+      // Show initial token values
       toast({
-        title: "Processing Started",
-        description: "Input text has been embedded and initial weights generated.",
+        title: "Initial Token Embeddings",
+        description: (
+          <div className="space-y-2">
+            {newEmbeddings.map((embed, i) => (
+              <div key={i} className="font-mono text-sm">
+                <p className="font-medium">{embed.word}:</p>
+                <p className="text-xs">[{embed.vector.map(v => v.toFixed(3)).join(", ")}]</p>
+              </div>
+            ))}
+          </div>
+        ),
+        duration: 5000,
       });
     } catch (error) {
       console.error("Error in initial processing:", error);
@@ -206,6 +250,7 @@ const TransformerVisualization = () => {
           <LayersVisualization
             currentStep={currentStep}
             layerOutputs={layerOutputs}
+            nextWordProbabilities={nextWordProbabilities}
           />
         </motion.div>
 
@@ -213,6 +258,7 @@ const TransformerVisualization = () => {
           currentStep={currentStep}
           embeddings={embeddings}
           attentionWeights={attentionWeights}
+          nextWordProbabilities={nextWordProbabilities}
         />
       </Card>
     </motion.div>
