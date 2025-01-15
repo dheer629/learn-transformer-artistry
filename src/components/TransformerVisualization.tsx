@@ -7,7 +7,7 @@ import EncoderLayer from "./transformer/EncoderLayer";
 import DecoderLayer from "./transformer/DecoderLayer";
 import EmbeddingsVisualization from "./transformer/EmbeddingsVisualization";
 import AttentionVisualization from "./transformer/AttentionVisualization";
-import type { EmbeddingVector, LayerStep } from "./transformer/types";
+import type { EmbeddingVector, LayerStep, LayerOutput } from "./transformer/types";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -16,6 +16,7 @@ const TransformerVisualization = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
+  const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
 
   const encoderSteps: LayerStep[] = [
     {
@@ -98,25 +99,78 @@ const TransformerVisualization = () => {
     }
   ];
 
-  const generateEmbeddings = (text: string): EmbeddingVector[] => {
-    return text.split(" ").map(word => ({
-      word,
-      vector: Array.from({ length: 4 }, () => Number((Math.random() * 2 - 1).toFixed(3)))
-    }));
+  const generatePositionalEncoding = (position: number, dim: number): number[] => {
+    return Array.from({ length: dim }, (_, i) => {
+      const angle = position / Math.pow(10000, (2 * Math.floor(i / 2)) / dim);
+      return i % 2 === 0 ? Math.sin(angle) : Math.cos(angle);
+    });
   };
 
-  const calculateAttention = (embeddings: EmbeddingVector[]): number[][] => {
-    const dim = embeddings.length;
+  const generateEmbeddings = (text: string): EmbeddingVector[] => {
+    return text.split(" ").map((word, position) => {
+      const baseVector = Array.from(
+        { length: 4 }, 
+        () => Number((Math.random() * 2 - 1).toFixed(3))
+      );
+      const positionalVector = generatePositionalEncoding(position, 4);
+      
+      const contextualVector = baseVector.map(
+        (v, i) => Number((v + positionalVector[i]).toFixed(3))
+      );
+      
+      return {
+        word,
+        vector: baseVector,
+        positionalVector,
+        contextualVector
+      };
+    });
+  };
+
+  const generateLayerOutput = (
+    inputEmbeddings: EmbeddingVector[],
+    step: number
+  ): LayerOutput => {
+    const dim = inputEmbeddings.length;
+    const vectorDim = 4;
+
+    const generateRandomVectors = () => 
+      Array(dim).fill(0).map(() => 
+        Array(vectorDim).fill(0).map(() => 
+          Number((Math.random() * 2 - 1).toFixed(3))
+        )
+      );
+
+    const queryVectors = generateRandomVectors();
+    const keyVectors = generateRandomVectors();
+    const valueVectors = generateRandomVectors();
+
     const weights = Array(dim).fill(0).map(() => 
-      Array(dim).fill(0).map(() => Number((Math.random()).toFixed(2)))
+      Array(dim).fill(0).map(() => 
+        Number((Math.random()).toFixed(2))
+      )
     );
-    
-    for (let i = 0; i < dim; i++) {
-      const sum = weights[i].reduce((a, b) => a + Math.exp(b), 0);
-      weights[i] = weights[i].map(w => Number((Math.exp(w) / sum).toFixed(2)));
-    }
-    
-    return weights;
+
+    const weightedSum = queryVectors.map(vec => 
+      vec.map(v => Number((v * Math.random()).toFixed(3)))
+    );
+
+    const outputEmbeddings = inputEmbeddings.map(embed => ({
+      ...embed,
+      contextualVector: weightedSum[0]
+    }));
+
+    return {
+      inputEmbeddings,
+      outputEmbeddings,
+      attentionWeights: weights,
+      intermediateOutputs: {
+        queryVectors,
+        keyVectors,
+        valueVectors,
+        weightedSum
+      }
+    };
   };
 
   const handleProcess = () => {
@@ -129,12 +183,21 @@ const TransformerVisualization = () => {
     const newEmbeddings = generateEmbeddings(inputText);
     setEmbeddings(newEmbeddings);
     
-    const weights = calculateAttention(newEmbeddings);
+    const weights = Array(newEmbeddings.length).fill(0).map(() => 
+      Array(newEmbeddings.length).fill(0).map(() => 
+        Number((Math.random()).toFixed(2))
+      )
+    );
     setAttentionWeights(weights);
 
+    const outputs: LayerOutput[] = [];
+    const totalSteps = encoderSteps.length + decoderSteps.length;
+    
     const processSteps = async () => {
-      const totalSteps = encoderSteps.length + decoderSteps.length;
       for (let i = 0; i < totalSteps; i++) {
+        const output = generateLayerOutput(newEmbeddings, i);
+        outputs.push(output);
+        setLayerOutputs([...outputs]);
         await new Promise(resolve => setTimeout(resolve, 1500));
         setCurrentStep(i);
       }
@@ -185,6 +248,7 @@ const TransformerVisualization = () => {
                 step={step}
                 index={index}
                 currentStep={currentStep}
+                layerOutput={layerOutputs[index]}
               />
             ))}
           </div>
@@ -200,6 +264,7 @@ const TransformerVisualization = () => {
                 index={index}
                 currentStep={currentStep}
                 encoderStepsLength={encoderSteps.length}
+                layerOutput={layerOutputs[index + encoderSteps.length]}
               />
             ))}
           </div>
@@ -207,7 +272,10 @@ const TransformerVisualization = () => {
       </div>
 
       <AnimatePresence>
-        <EmbeddingsVisualization embeddings={embeddings} />
+        <EmbeddingsVisualization 
+          embeddings={embeddings}
+          currentStep={currentStep}
+        />
         <AttentionVisualization 
           attentionWeights={attentionWeights}
           currentStep={currentStep}

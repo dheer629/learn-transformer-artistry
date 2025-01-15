@@ -1,14 +1,20 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { LayerStep } from "./types";
+import { LayerStep, LayerOutput } from "./types";
 
 interface EncoderLayerProps {
   step: LayerStep;
   index: number;
   currentStep: number;
+  layerOutput?: LayerOutput;
 }
 
-const EncoderLayer: React.FC<EncoderLayerProps> = ({ step, index, currentStep }) => {
+const EncoderLayer: React.FC<EncoderLayerProps> = ({ 
+  step, 
+  index, 
+  currentStep,
+  layerOutput 
+}) => {
   return (
     <motion.div
       className={`p-4 rounded-lg ${
@@ -35,6 +41,66 @@ const EncoderLayer: React.FC<EncoderLayerProps> = ({ step, index, currentStep })
           </li>
         ))}
       </ul>
+      
+      {layerOutput && index === currentStep && (
+        <motion.div 
+          className="mt-4 space-y-3 bg-blue-50 p-3 rounded"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+        >
+          {layerOutput.intermediateOutputs?.queryVectors && (
+            <div className="text-sm">
+              <div className="font-medium text-blue-700">Query Vectors:</div>
+              <div className="font-mono text-xs overflow-x-auto">
+                {layerOutput.intermediateOutputs.queryVectors.map((vec, i) => (
+                  <div key={i}>
+                    [{vec.map(v => v.toFixed(3)).join(", ")}]
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {layerOutput.intermediateOutputs?.keyVectors && (
+            <div className="text-sm">
+              <div className="font-medium text-blue-700">Key Vectors:</div>
+              <div className="font-mono text-xs overflow-x-auto">
+                {layerOutput.intermediateOutputs.keyVectors.map((vec, i) => (
+                  <div key={i}>
+                    [{vec.map(v => v.toFixed(3)).join(", ")}]
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {layerOutput.intermediateOutputs?.valueVectors && (
+            <div className="text-sm">
+              <div className="font-medium text-blue-700">Value Vectors:</div>
+              <div className="font-mono text-xs overflow-x-auto">
+                {layerOutput.intermediateOutputs.valueVectors.map((vec, i) => (
+                  <div key={i}>
+                    [{vec.map(v => v.toFixed(3)).join(", ")}]
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {layerOutput.intermediateOutputs?.weightedSum && (
+            <div className="text-sm">
+              <div className="font-medium text-blue-700">Weighted Sum:</div>
+              <div className="font-mono text-xs overflow-x-auto">
+                {layerOutput.intermediateOutputs.weightedSum.map((vec, i) => (
+                  <div key={i}>
+                    [{vec.map(v => v.toFixed(3)).join(", ")}]
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
     </motion.div>
   );
 };
