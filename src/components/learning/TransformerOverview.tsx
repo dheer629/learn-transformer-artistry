@@ -2,6 +2,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { MathJax } from "better-react-mathjax";
+import { useTransformerImages } from "@/hooks/useTransformerImages";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const fadeInUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -28,6 +30,14 @@ const listItemVariants = {
 };
 
 const TransformerOverview = () => {
+  const { data: images, isLoading } = useTransformerImages();
+
+  const getImageUrl = (category: string) => {
+    return images?.find(img => img.category === category)?.url;
+  };
+
+  const mainImage = images?.find(img => img.category === 'overview');
+
   return (
     <motion.div
       initial="hidden"
@@ -48,12 +58,18 @@ const TransformerOverview = () => {
             variants={fadeInUpVariants}
           >
             <div className="relative">
-              <img 
-                src="https://images.datacamp.com/image/upload/v1676302499/image3_d7c7d9ef4c.png" 
-                alt="Complete Transformer Architecture" 
-                className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-              />
-              <p className="text-sm text-gray-600 text-center mt-4 font-medium">Complete Transformer Architecture</p>
+              {isLoading ? (
+                <Skeleton className="w-full h-64 rounded-lg" />
+              ) : mainImage ? (
+                <img 
+                  src={mainImage.url} 
+                  alt={mainImage.title} 
+                  className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+                />
+              ) : null}
+              <p className="text-sm text-gray-600 text-center mt-4 font-medium">
+                {mainImage?.title || "Complete Transformer Architecture"}
+              </p>
             </div>
           </motion.div>
           
@@ -77,28 +93,28 @@ const TransformerOverview = () => {
                   description: "Converts input tokens into vectors and adds positional information.",
                   formula: "\\[ E(x) = W_e x + PE_{pos} \\]",
                   formulaDescription: "Where PE_{pos} is positional encoding using sine and cosine functions.",
-                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image4_c6f69c5f5c.png"
+                  category: "embedding"
                 },
                 {
                   title: "Self-Attention Mechanism",
                   description: "Computes relationships between all words simultaneously.",
                   formula: "\\[ Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V \\]",
                   formulaDescription: "Q, K, V are query, key, and value matrices; d_k is key dimension.",
-                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image5_d7c7d9ef4c.png"
+                  category: "attention"
                 },
                 {
                   title: "Multi-Head Attention",
                   description: "Multiple attention heads working in parallel.",
                   formula: "\\[ MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O \\]",
                   formulaDescription: "Where each head_i is a separate attention mechanism.",
-                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image6_c6f69c5f5c.png"
+                  category: "attention"
                 },
                 {
                   title: "Feed-Forward Networks",
                   description: "Processes attention outputs through neural networks.",
                   formula: "\\[ FFN(x) = max(0, xW_1 + b_1)W_2 + b_2 \\]",
                   formulaDescription: "Two-layer neural network with ReLU activation.",
-                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image7_d7c7d9ef4c.png"
+                  category: "ffn"
                 }
               ].map((item, index) => (
                 <motion.li
@@ -118,11 +134,15 @@ const TransformerOverview = () => {
                       </div>
                     </div>
                     <div className="flex items-center justify-center">
-                      <img 
-                        src={item.imageUrl} 
-                        alt={`${item.title} Visualization`}
-                        className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      />
+                      {isLoading ? (
+                        <Skeleton className="w-full h-48 rounded-lg" />
+                      ) : (
+                        <img 
+                          src={getImageUrl(item.category)} 
+                          alt={`${item.title} Visualization`}
+                          className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                        />
+                      )}
                     </div>
                   </div>
                 </motion.li>
