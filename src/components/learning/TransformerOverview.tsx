@@ -32,11 +32,13 @@ const listItemVariants = {
 const TransformerOverview = () => {
   const { data: images, isLoading } = useTransformerImages();
 
-  const getImageUrl = (category: string) => {
-    return images?.find(img => img.category === category)?.url;
+  const getImageUrl = (category: string, index: number) => {
+    const categoryImages = images?.filter(img => img.category === category) || [];
+    const selectedImage = categoryImages[index % categoryImages.length];
+    return selectedImage?.url;
   };
 
-  const mainImage = images?.find(img => img.category === 'overview');
+  const mainImage = images?.find(img => img.category === 'architecture');
 
   const transformerSteps = [
     {
@@ -154,7 +156,7 @@ const TransformerOverview = () => {
                         <Skeleton className="w-full h-48 rounded-lg" />
                       ) : (
                         <img 
-                          src={getImageUrl(step.category)} 
+                          src={getImageUrl(step.category, index)} 
                           alt={`${step.title} Visualization`}
                           className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
                         />
