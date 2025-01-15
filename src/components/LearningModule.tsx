@@ -49,6 +49,45 @@ const modules: Module[] = [
 const LearningModule = () => {
   return (
     <div className="space-y-8">
+      <Card className="p-8 hover:shadow-lg transition-shadow animate-fade-in">
+        <h2 className="text-2xl font-bold text-primary mb-6">Understanding Transformer Architecture</h2>
+        <div className="flex flex-col space-y-6">
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
+              alt="Transformer Architecture Diagram" 
+              className="w-full max-w-4xl h-auto rounded-lg shadow-lg"
+            />
+          </div>
+          <div className="space-y-4 text-gray-600">
+            <h3 className="text-xl font-semibold text-primary">Step-by-Step Transformer Process:</h3>
+            <ol className="list-decimal list-inside space-y-3 pl-4">
+              <li className="font-medium">Input Embedding & Positional Encoding
+                <p className="ml-6 mt-1 text-sm">Converts input tokens into vectors and adds position information to maintain sequence order.</p>
+              </li>
+              <li className="font-medium">Encoder Stack
+                <p className="ml-6 mt-1 text-sm">Multiple identical layers process input through self-attention and feed-forward networks, creating rich contextual representations.</p>
+              </li>
+              <li className="font-medium">Multi-Head Attention
+                <p className="ml-6 mt-1 text-sm">Parallel attention mechanisms capture different aspects of relationships between words.</p>
+              </li>
+              <li className="font-medium">Add & Normalize
+                <p className="ml-6 mt-1 text-sm">Residual connections and layer normalization maintain stable learning throughout the network.</p>
+              </li>
+              <li className="font-medium">Feed-Forward Networks
+                <p className="ml-6 mt-1 text-sm">Process attention outputs through neural networks to capture complex patterns.</p>
+              </li>
+              <li className="font-medium">Decoder Stack
+                <p className="ml-6 mt-1 text-sm">Similar to encoder but includes masked attention to prevent looking at future tokens during generation.</p>
+              </li>
+              <li className="font-medium">Output Generation
+                <p className="ml-6 mt-1 text-sm">Final linear and softmax layers convert processed information into output probabilities.</p>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {modules.map((module, index) => (
           <Card key={index} className="p-6 hover:shadow-lg transition-shadow animate-fade-in">
@@ -75,20 +114,6 @@ const LearningModule = () => {
           </Card>
         ))}
       </div>
-      <Card className="p-6 hover:shadow-lg transition-shadow animate-fade-in">
-        <h3 className="text-xl font-semibold text-primary mb-4">Transformer Architecture Diagram</h3>
-        <div className="flex justify-center">
-          <img 
-            src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
-            alt="Transformer Architecture Diagram" 
-            className="max-w-full h-auto rounded-lg shadow-lg"
-          />
-        </div>
-        <p className="mt-4 text-gray-600 text-center">
-          This diagram illustrates the complete architecture of a Transformer model, showing both encoder and decoder components,
-          including the multi-head attention mechanisms, feed-forward networks, and normalization layers.
-        </p>
-      </Card>
     </div>
   );
 };
