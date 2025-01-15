@@ -8,6 +8,8 @@ export const useTransformerImages = () => {
   return useQuery({
     queryKey: ["transformer-visualization-images"],
     queryFn: async () => {
+      console.log("Starting to fetch transformer visualization images...");
+      
       const { data: images, error } = await supabase
         .from("transformer_visualization_images")
         .select("*")
@@ -18,10 +20,17 @@ export const useTransformerImages = () => {
         throw error;
       }
 
-      console.log("Fetched images:", images);
-      return images || [];
+      if (!images || images.length === 0) {
+        console.warn("No images found in the database");
+        return [];
+      }
+
+      console.log("Successfully fetched images:", images);
+      console.log("Image URLs:", images.map(img => img.image_url));
+      return images;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 2
+    retry: 3,
+    retryDelay: 1000
   });
 };

@@ -5,6 +5,7 @@ import { useTransformerImages } from "@/hooks/useTransformerImages";
 import TransformerArchitecture from "./TransformerArchitecture";
 import TransformerStepsList from "./sections/TransformerStepsList";
 import KeyFeatures from "./sections/KeyFeatures";
+import { useToast } from "@/components/ui/use-toast";
 
 const fadeInUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -54,13 +55,28 @@ const transformerSteps = [
 ];
 
 const TransformerOverview = () => {
-  const { data: images, isLoading } = useTransformerImages();
+  const { data: images, isLoading, error } = useTransformerImages();
+  const { toast } = useToast();
 
   const getImageUrl = (category: string) => {
-    if (!images || images.length === 0) return null;
+    if (error) {
+      console.error("Error fetching images:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch images. Please try again later.",
+      });
+      return null;
+    }
+
+    if (!images || images.length === 0) {
+      console.warn("No images available");
+      return null;
+    }
     
     const normalizedCategory = category.toLowerCase().trim();
     console.log(`Looking for image with category: ${normalizedCategory}`);
+    console.log("Available categories:", images.map(img => img.category.toLowerCase().trim()));
     
     const image = images.find(img => 
       img.category.toLowerCase().trim() === normalizedCategory
@@ -71,11 +87,12 @@ const TransformerOverview = () => {
       return image.image_url;
     }
     
-    console.log(`No image found for category: ${normalizedCategory}`);
+    console.warn(`No image found for category: ${normalizedCategory}`);
     return null;
   };
 
   const architectureImage = getImageUrl('transformer_architecture');
+  console.log("Architecture image URL:", architectureImage);
 
   return (
     <motion.div
