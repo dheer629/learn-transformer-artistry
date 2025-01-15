@@ -1,8 +1,18 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { MathJaxContext } from "better-react-mathjax";
 import TransformerOverview from "./learning/TransformerOverview";
 import LearningResources from "./learning/LearningResources";
 import ModuleGrid from "./learning/ModuleGrid";
+
+const mathJaxConfig = {
+  loader: { load: ["[tex]/html"] },
+  tex: {
+    packages: { "[+]": ["html"] },
+    inlineMath: [["$", "$"]],
+    displayMath: [["\\[", "\\]"]],
+  },
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,22 +39,24 @@ const itemVariants = {
 
 const LearningModule = () => {
   return (
-    <motion.div 
-      className="space-y-8"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      <motion.div variants={itemVariants}>
-        <TransformerOverview />
-      </motion.div>
+    <MathJaxContext config={mathJaxConfig}>
+      <motion.div 
+        className="space-y-8"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.div variants={itemVariants}>
+          <TransformerOverview />
+        </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <LearningResources />
-      </motion.div>
+        <motion.div variants={itemVariants}>
+          <LearningResources />
+        </motion.div>
 
-      <ModuleGrid />
-    </motion.div>
+        <ModuleGrid />
+      </motion.div>
+    </MathJaxContext>
   );
 };
 
