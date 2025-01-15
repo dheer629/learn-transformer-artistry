@@ -21,11 +21,17 @@ const TransformerVisualization = () => {
   const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
-  const [waitForUser, setWaitForUser] = useState(false);
+  const totalSteps = encoderSteps.length + decoderSteps.length;
 
-  const handleContinue = () => {
-    setWaitForUser(false);
-    setCurrentStep(prev => prev + 1);
+  const handleNextStep = () => {
+    if (currentStep < totalSteps - 1) {
+      const output = generateLayerOutput(embeddings, currentStep + 1);
+      setLayerOutputs(prev => [...prev, output]);
+      setCurrentStep(prev => prev + 1);
+    } else if (currentStep === totalSteps - 1) {
+      setOutputText("¡Hola! (Example translation)");
+      setIsProcessing(false);
+    }
   };
 
   const handleProcess = () => {
@@ -34,7 +40,7 @@ const TransformerVisualization = () => {
     setIsProcessing(true);
     setCurrentStep(0);
     setOutputText("");
-    setWaitForUser(true);
+    setLayerOutputs([]);
     
     const newEmbeddings = generateEmbeddings(inputText);
     setEmbeddings(newEmbeddings);
@@ -46,49 +52,9 @@ const TransformerVisualization = () => {
     );
     setAttentionWeights(weights);
 
-    const outputs: LayerOutput[] = [];
-    const totalSteps = encoderSteps.length + decoderSteps.length;
-    
-    const processSteps = async () => {
-      for (let i = 0; i < totalSteps; i++) {
-        if (isPaused) {
-          await new Promise(resolve => {
-            const checkPause = () => {
-              if (!isPaused) {
-                resolve(true);
-              } else {
-                setTimeout(checkPause, 100);
-              }
-            };
-            checkPause();
-          });
-        }
-
-        const output = generateLayerOutput(newEmbeddings, i);
-        outputs.push(output);
-        setLayerOutputs([...outputs]);
-        
-        if (waitForUser) {
-          await new Promise(resolve => {
-            const checkContinue = () => {
-              if (!waitForUser) {
-                resolve(true);
-              } else {
-                setTimeout(checkContinue, 100);
-              }
-            };
-            checkContinue();
-          });
-        }
-
-        setCurrentStep(i);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      }
-      setOutputText("¡Hola! (Example translation)");
-      setIsProcessing(false);
-    };
-
-    processSteps();
+    // Generate first layer output
+    const initialOutput = generateLayerOutput(newEmbeddings, 0);
+    setLayerOutputs([initialOutput]);
   };
 
   const flowAnimation = {
@@ -130,9 +96,9 @@ const TransformerVisualization = () => {
       <ControlsSection
         isPaused={isPaused}
         setIsPaused={setIsPaused}
-        handleContinue={handleContinue}
+        handleNextStep={handleNextStep}
         isProcessing={isProcessing}
-        waitForUser={waitForUser}
+        canProgress={currentStep < totalSteps - 1}
       />
 
       <LayersVisualization

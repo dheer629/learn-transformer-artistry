@@ -5,17 +5,17 @@ import { motion } from "framer-motion";
 interface ControlsSectionProps {
   isPaused: boolean;
   setIsPaused: (paused: boolean) => void;
-  handleContinue: () => void;
+  handleNextStep: () => void;
   isProcessing: boolean;
-  waitForUser: boolean;
+  canProgress: boolean;
 }
 
 const ControlsSection: React.FC<ControlsSectionProps> = ({
   isPaused,
   setIsPaused,
-  handleContinue,
+  handleNextStep,
   isProcessing,
-  waitForUser,
+  canProgress,
 }) => {
   const flowAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -45,11 +45,11 @@ const ControlsSection: React.FC<ControlsSectionProps> = ({
         {isPaused ? "Resume" : "Pause"}
       </Button>
       <Button
-        onClick={handleContinue}
-        disabled={!waitForUser || !isProcessing}
+        onClick={handleNextStep}
+        disabled={!isProcessing || !canProgress}
         className="transition-all duration-300 hover:scale-105"
       >
-        Continue to Next Step
+        Next Step
       </Button>
     </motion.div>
   );
