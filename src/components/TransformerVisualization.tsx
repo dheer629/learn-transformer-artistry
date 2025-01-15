@@ -62,9 +62,9 @@ const TransformerVisualization = () => {
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.7,
         ease: "easeOut",
-        staggerChildren: 0.15
+        staggerChildren: 0.2
       }
     }
   };
@@ -75,7 +75,7 @@ const TransformerVisualization = () => {
       opacity: 1, 
       x: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.5,
         ease: "easeOut"
       }
     }
@@ -87,7 +87,7 @@ const TransformerVisualization = () => {
       scale: 1, 
       opacity: 1,
       transition: {
-        duration: 0.6,
+        duration: 0.8,
         ease: "easeOut"
       }
     },
@@ -95,7 +95,7 @@ const TransformerVisualization = () => {
       scale: 0.95,
       opacity: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.5,
         ease: "easeIn"
       }
     }
@@ -108,7 +108,7 @@ const TransformerVisualization = () => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.6,
         ease: "easeOut"
       }
     },
@@ -117,7 +117,7 @@ const TransformerVisualization = () => {
       opacity: 0,
       y: -20,
       transition: {
-        duration: 0.3,
+        duration: 0.4,
         ease: "easeIn"
       }
     }
