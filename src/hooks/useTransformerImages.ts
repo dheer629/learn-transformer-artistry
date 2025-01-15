@@ -17,6 +17,7 @@ export const useTransformerImages = () => {
         throw error;
       }
 
+      console.log("Fetched images:", images);
       return images;
     }
   });

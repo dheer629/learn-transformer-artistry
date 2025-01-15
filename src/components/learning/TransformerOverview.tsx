@@ -67,12 +67,10 @@ const transformerSteps = [
 const TransformerOverview = () => {
   const { data: images, isLoading } = useTransformerImages();
 
-  const getImageUrl = (category: string, index: number) => {
-    if (!images) return null;
-    const categoryImages = images.filter(img => img.category === category);
-    if (categoryImages.length === 0) return null;
-    const selectedImage = categoryImages[index % categoryImages.length];
-    return selectedImage?.image_url || null;
+  const getImageUrl = (category: string) => {
+    if (!images || images.length === 0) return null;
+    const categoryImage = images.find(img => img.category === category);
+    return categoryImage?.image_url || null;
   };
 
   const mainImage = images?.find(img => img.category === 'architecture');
@@ -120,7 +118,7 @@ const TransformerOverview = () => {
                 >
                   <TransformerStep
                     {...step}
-                    imageUrl={getImageUrl(step.category, index)}
+                    imageUrl={getImageUrl(step.category)}
                     isLoading={isLoading}
                   />
                 </motion.li>
