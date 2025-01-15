@@ -69,11 +69,15 @@ const TransformerOverview = () => {
 
   const getImageUrl = (category: string) => {
     if (!images || images.length === 0) return null;
-    const categoryImage = images.find(img => img.category === category);
+    console.log("Looking for category:", category);
+    console.log("Available images:", images);
+    const categoryImage = images.find(img => img.category.toLowerCase() === category.toLowerCase());
+    console.log("Found image:", categoryImage);
     return categoryImage?.image_url || null;
   };
 
-  const mainImage = images?.find(img => img.category === 'architecture');
+  const architectureImage = getImageUrl('architecture');
+  console.log("Architecture image:", architectureImage);
 
   return (
     <motion.div
@@ -92,7 +96,7 @@ const TransformerOverview = () => {
         
         <div className="grid grid-cols-1 gap-8">
           <TransformerArchitecture 
-            mainImageUrl={mainImage?.image_url || null}
+            mainImageUrl={architectureImage}
             isLoading={isLoading}
           />
           
