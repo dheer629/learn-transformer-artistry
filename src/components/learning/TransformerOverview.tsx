@@ -1,81 +1,76 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import TransformerStepsList from "./sections/TransformerStepsList";
-import KeyFeatures from "./sections/KeyFeatures";
 import { cn } from "@/lib/utils";
-
-const fadeInUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut"
-    }
-  }
-};
-
-const transformerSteps = [
-  {
-    title: "Input Embedding & Positional Encoding",
-    description: "Converting input tokens into vector representations",
-    detailedExplanation: "The embedding layer transforms discrete tokens into continuous vector spaces, while positional encoding adds sequence order information. This enables the model to understand both the meaning and position of each token.",
-    formula: "\\[ E(x) = W_e x + PE_{pos} \\]",
-    formulaDescription: "Combines token embeddings with positional encodings using sinusoidal functions.",
-    category: "embedding"
-  },
-  {
-    title: "Self-Attention Mechanism",
-    description: "Computing token relationships",
-    detailedExplanation: "Self-attention calculates importance scores between all token pairs, allowing the model to weigh relevant context when processing each token. This mechanism is key to capturing long-range dependencies.",
-    formula: "\\[ Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V \\]",
-    formulaDescription: "Attention computation using queries (Q), keys (K), and values (V).",
-    category: "attention"
-  },
-  {
-    title: "Multi-Head Attention",
-    description: "Parallel attention computation",
-    detailedExplanation: "Multiple attention heads process input differently, capturing various types of relationships. This parallel processing enables the model to learn diverse representation patterns.",
-    formula: "\\[ MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O \\]",
-    formulaDescription: "Combines outputs from multiple attention heads.",
-    category: "multi_head"
-  },
-  {
-    title: "Feed-Forward Networks",
-    description: "Non-linear transformations",
-    detailedExplanation: "Position-wise feed-forward networks apply non-linear transformations to attention outputs. This component allows the model to process complex patterns independently for each position.",
-    formula: "\\[ FFN(x) = max(0, xW_1 + b_1)W_2 + b_2 \\]",
-    formulaDescription: "Two-layer neural network with ReLU activation.",
-    category: "ffn"
-  }
-];
+import KeyFeatures from "./sections/KeyFeatures";
+import TransformerStepsList from "./sections/TransformerStepsList";
 
 const TransformerOverview = () => {
+  const containerAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
+
   return (
     <motion.div
+      variants={containerAnimation}
       initial="hidden"
       animate="visible"
-      variants={fadeInUpVariants}
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      className="space-y-8"
     >
-      <Card className="p-6 sm:p-8 hover:shadow-lg transition-shadow animate-fade-in bg-gradient-to-br from-white to-gray-50">
-        <motion.h2 
-          className="text-2xl sm:text-3xl font-bold text-primary mb-8 text-center"
-          variants={fadeInUpVariants}
+      <motion.div variants={itemAnimation}>
+        <h2 className="text-3xl font-bold text-primary mb-4">
+          Understanding Transformers
+        </h2>
+        <p className="text-lg text-gray-600 mb-6">
+          Transformers have revolutionized natural language processing and machine learning
+          through their innovative attention mechanism and parallel processing capabilities.
+        </p>
+      </motion.div>
+
+      <motion.div 
+        variants={itemAnimation}
+        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+      >
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold text-primary mb-3">
+              Core Architecture
+            </h3>
+            <p className="text-gray-600">
+              The Transformer architecture consists of an encoder and decoder, each containing
+              self-attention layers and feed-forward neural networks. This design enables
+              efficient processing of sequential data while capturing long-range dependencies.
+            </p>
+          </div>
+
+          <KeyFeatures />
+        </div>
+
+        <motion.div 
+          variants={itemAnimation}
+          className="space-y-6"
         >
-          Understanding Transformer Architecture
-        </motion.h2>
-        
-        <div className="grid grid-cols-1 gap-8">
-          <motion.div 
-            className="space-y-8"
-            variants={fadeInUpVariants}
-          >
             {/* Architecture Diagram */}
             <div className="flex flex-col items-center space-y-4">
-              <div className="max-w-md mx-auto"> {/* Added container with max-w-md */}
+              <div className="max-w-sm mx-auto"> {/* Changed from max-w-md to max-w-sm */}
                 <img
                   src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
                   alt="Transformer Architecture Diagram"
@@ -90,15 +85,12 @@ const TransformerOverview = () => {
                 Detailed architecture of the Transformer model showing encoder and decoder components
               </p>
             </div>
+        </motion.div>
+      </motion.div>
 
-            <KeyFeatures />
-            <TransformerStepsList 
-              steps={transformerSteps}
-              isLoading={false}
-            />
-          </motion.div>
-        </div>
-      </Card>
+      <motion.div variants={itemAnimation}>
+        <TransformerStepsList />
+      </motion.div>
     </motion.div>
   );
 };
