@@ -43,18 +43,19 @@ const TransformerOverview = () => {
         </motion.h2>
         <div className="grid grid-cols-12 gap-6">
           <motion.div 
-            className="col-span-3"
+            className="col-span-12 lg:col-span-4"
             variants={fadeInUpVariants}
           >
             <img 
-              src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
-              alt="Transformer Architecture Diagram" 
-              className="w-full max-w-xs h-auto rounded-lg shadow-lg mb-8"
+              src="https://images.datacamp.com/image/upload/v1676302499/image3_d7c7d9ef4c.png" 
+              alt="Complete Transformer Architecture" 
+              className="w-full rounded-lg shadow-lg mb-8 hover:shadow-xl transition-shadow"
             />
+            <p className="text-sm text-gray-600 text-center mt-2">Complete Transformer Architecture</p>
           </motion.div>
           
           <motion.div 
-            className="col-span-9 space-y-6 text-gray-600"
+            className="col-span-12 lg:col-span-8 space-y-6 text-gray-600"
             variants={fadeInUpVariants}
           >
             <motion.h3 
@@ -73,48 +74,52 @@ const TransformerOverview = () => {
                   description: "Converts input tokens into vectors and adds positional information.",
                   formula: "\\[ E(x) = W_e x + PE_{pos} \\]",
                   formulaDescription: "Where PE_{pos} is positional encoding using sine and cosine functions.",
-                  diagramUrl: "https://miro.medium.com/max/1400/1*sXNXYfAqfLUeiDXPCo130w.png"
+                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image4_c6f69c5f5c.png"
                 },
                 {
                   title: "Self-Attention Mechanism",
                   description: "Computes relationships between all words simultaneously.",
                   formula: "\\[ Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V \\]",
                   formulaDescription: "Q, K, V are query, key, and value matrices; d_k is key dimension.",
-                  diagramUrl: "https://production-media.paperswithcode.com/methods/Screen_Shot_2020-07-08_at_12.21.14_AM_st5S0XK.png"
+                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image5_d7c7d9ef4c.png"
                 },
                 {
                   title: "Multi-Head Attention",
                   description: "Multiple attention heads working in parallel.",
                   formula: "\\[ MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O \\]",
                   formulaDescription: "Where each head_i is a separate attention mechanism.",
-                  diagramUrl: "https://production-media.paperswithcode.com/methods/multi-head-attention_l1A3G7a.png"
+                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image6_c6f69c5f5c.png"
                 },
                 {
                   title: "Feed-Forward Networks",
                   description: "Processes attention outputs through neural networks.",
                   formula: "\\[ FFN(x) = max(0, xW_1 + b_1)W_2 + b_2 \\]",
                   formulaDescription: "Two-layer neural network with ReLU activation.",
-                  diagramUrl: "https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1.png"
+                  imageUrl: "https://images.datacamp.com/image/upload/v1676302499/image7_d7c7d9ef4c.png"
                 }
               ].map((item, index) => (
                 <motion.li
                   key={index}
-                  className="font-medium text-lg bg-white rounded-lg p-6 shadow-sm"
+                  className="font-medium text-lg bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
                   variants={listItemVariants}
                   custom={index}
                 >
                   <h4 className="text-xl font-bold text-primary mb-3">{item.title}</h4>
                   <p className="mb-4 text-gray-600">{item.description}</p>
-                  <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                    <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
-                    <MathJax className="text-center">{item.formula}</MathJax>
-                    <p className="text-sm text-gray-600 mt-2">{item.formulaDescription}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
+                      <MathJax className="text-center">{item.formula}</MathJax>
+                      <p className="text-sm text-gray-600 mt-2">{item.formulaDescription}</p>
+                    </div>
+                    <div className="flex flex-col items-center justify-center">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={`${item.title} Visualization`}
+                        className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                      />
+                    </div>
                   </div>
-                  <img 
-                    src={item.diagramUrl} 
-                    alt={`${item.title} Diagram`}
-                    className="w-full h-auto rounded-lg shadow-sm mt-4"
-                  />
                 </motion.li>
               ))}
             </motion.ol>
