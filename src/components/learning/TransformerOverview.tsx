@@ -33,39 +33,42 @@ const TransformerOverview = () => {
       initial="hidden"
       animate="visible"
       variants={fadeInUpVariants}
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
     >
-      <Card className="p-8 hover:shadow-lg transition-shadow animate-fade-in bg-gradient-to-br from-white to-gray-50">
+      <Card className="p-6 sm:p-8 hover:shadow-lg transition-shadow animate-fade-in bg-gradient-to-br from-white to-gray-50">
         <motion.h2 
-          className="text-3xl font-bold text-primary mb-6"
+          className="text-2xl sm:text-3xl font-bold text-primary mb-8 text-center"
           variants={fadeInUpVariants}
         >
           Understanding Transformer Architecture
         </motion.h2>
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <motion.div 
-            className="col-span-12 lg:col-span-4"
+            className="lg:col-span-4 space-y-6"
             variants={fadeInUpVariants}
           >
-            <img 
-              src="https://images.datacamp.com/image/upload/v1676302499/image3_d7c7d9ef4c.png" 
-              alt="Complete Transformer Architecture" 
-              className="w-full rounded-lg shadow-lg mb-8 hover:shadow-xl transition-shadow"
-            />
-            <p className="text-sm text-gray-600 text-center mt-2">Complete Transformer Architecture</p>
+            <div className="relative">
+              <img 
+                src="https://images.datacamp.com/image/upload/v1676302499/image3_d7c7d9ef4c.png" 
+                alt="Complete Transformer Architecture" 
+                className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+              />
+              <p className="text-sm text-gray-600 text-center mt-4 font-medium">Complete Transformer Architecture</p>
+            </div>
           </motion.div>
           
           <motion.div 
-            className="col-span-12 lg:col-span-8 space-y-6 text-gray-600"
+            className="lg:col-span-8 space-y-8"
             variants={fadeInUpVariants}
           >
             <motion.h3 
-              className="text-2xl font-semibold text-primary"
+              className="text-xl sm:text-2xl font-semibold text-primary"
               variants={fadeInUpVariants}
             >
               Step-by-Step Transformer Process:
             </motion.h3>
             <motion.ol 
-              className="list-decimal list-inside space-y-8 pl-4"
+              className="space-y-8"
               variants={fadeInUpVariants}
             >
               {[
@@ -100,19 +103,21 @@ const TransformerOverview = () => {
               ].map((item, index) => (
                 <motion.li
                   key={index}
-                  className="font-medium text-lg bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
                   variants={listItemVariants}
                   custom={index}
                 >
-                  <h4 className="text-xl font-bold text-primary mb-3">{item.title}</h4>
-                  <p className="mb-4 text-gray-600">{item.description}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
-                      <MathJax className="text-center">{item.formula}</MathJax>
-                      <p className="text-sm text-gray-600 mt-2">{item.formulaDescription}</p>
+                    <div className="space-y-4">
+                      <h4 className="text-lg sm:text-xl font-bold text-primary">{item.title}</h4>
+                      <p className="text-gray-600">{item.description}</p>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
+                        <MathJax className="text-center">{item.formula}</MathJax>
+                        <p className="text-sm text-gray-600 mt-2">{item.formulaDescription}</p>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex items-center justify-center">
                       <img 
                         src={item.imageUrl} 
                         alt={`${item.title} Visualization`}
