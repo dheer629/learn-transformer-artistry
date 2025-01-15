@@ -75,15 +75,17 @@ const TransformerOverview = () => {
           >
             {/* Architecture Diagram */}
             <div className="flex flex-col items-center space-y-4">
-              <img
-                src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
-                alt="Transformer Architecture Diagram"
-                className={cn(
-                  "rounded-lg shadow-md max-w-full h-auto",
-                  "hover:shadow-lg transition-shadow duration-300",
-                  "border border-gray-100"
-                )}
-              />
+              <div className="max-w-md mx-auto"> {/* Added container with max-w-md */}
+                <img
+                  src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
+                  alt="Transformer Architecture Diagram"
+                  className={cn(
+                    "rounded-lg shadow-md w-full h-auto",
+                    "hover:shadow-lg transition-shadow duration-300",
+                    "border border-gray-100"
+                  )}
+                />
+              </div>
               <p className="text-sm text-gray-600 text-center italic">
                 Detailed architecture of the Transformer model showing encoder and decoder components
               </p>
