@@ -2,8 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { useTransformerImages } from "@/hooks/useTransformerImages";
-import TransformerStep from "./TransformerStep";
 import TransformerArchitecture from "./TransformerArchitecture";
+import TransformerStepsList from "./sections/TransformerStepsList";
+import KeyFeatures from "./sections/KeyFeatures";
 
 const fadeInUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -12,18 +13,6 @@ const fadeInUpVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut"
-    }
-  }
-};
-
-const listItemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.5,
       ease: "easeOut"
     }
   }
@@ -88,7 +77,6 @@ const TransformerOverview = () => {
     return categoryImage?.image_url || null;
   };
 
-  // Get architecture image
   const architectureImage = getImageUrl('transformer_architecture');
   console.log("Architecture image URL:", architectureImage);
 
@@ -117,30 +105,12 @@ const TransformerOverview = () => {
             className="space-y-8"
             variants={fadeInUpVariants}
           >
-            <motion.h3 
-              className="text-xl sm:text-2xl font-semibold text-primary"
-              variants={fadeInUpVariants}
-            >
-              Step-by-Step Transformer Process:
-            </motion.h3>
-            <motion.ol 
-              className="space-y-8"
-              variants={fadeInUpVariants}
-            >
-              {transformerSteps.map((step, index) => (
-                <motion.li
-                  key={index}
-                  variants={listItemVariants}
-                  custom={index}
-                >
-                  <TransformerStep
-                    {...step}
-                    imageUrl={getImageUrl(step.category)}
-                    isLoading={isLoading}
-                  />
-                </motion.li>
-              ))}
-            </motion.ol>
+            <KeyFeatures />
+            <TransformerStepsList 
+              steps={transformerSteps}
+              getImageUrl={getImageUrl}
+              isLoading={isLoading}
+            />
           </motion.div>
         </div>
       </Card>
