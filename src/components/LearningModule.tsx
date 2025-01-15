@@ -189,3 +189,5 @@ const LearningModule = () => {
     </motion.div>
   );
 };
+
+export default LearningModule;
