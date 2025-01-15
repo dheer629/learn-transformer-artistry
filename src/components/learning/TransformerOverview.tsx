@@ -33,7 +33,7 @@ const TransformerOverview = () => {
       title: "Input Embedding",
       description: "Convert words into number patterns that computers understand",
       detailedExplanation: "Think of this like turning each word into a special code that helps the computer understand its meaning. Just like how '🐱' means 'cat', we turn words into number patterns!",
-      formula: "\\[\\color{#0EA5E9}{Word} \\xrightarrow{\\color{#F97316}{Magic Box}} \\color{#D946EF}{Special\\ Numbers}\\]",
+      formula: "\\[\\text{\\color{#0EA5E9}{Word}} \\to \\text{\\color{#F97316}{Magic Box}} \\to \\text{\\color{#D946EF}{Special Numbers}}\\]",
       formulaDescription: "Words (blue) go through a magic box (orange) to become special numbers (purple)!",
       category: "embedding"
     },
@@ -41,7 +41,7 @@ const TransformerOverview = () => {
       title: "Positional Encoding",
       description: "Add special numbers to remember word order",
       detailedExplanation: "Just like how the order of words matters in a sentence ('dog chases cat' is different from 'cat chases dog'), we add special numbers to remember where each word goes!",
-      formula: "\\[\\color{#0EA5E9}{Position} + \\color{#F97316}{Word\\ Code} = \\color{#D946EF}{Magic\\ Pattern}\\]",
+      formula: "\\[\\text{\\color{#0EA5E9}{Position}} + \\text{\\color{#F97316}{Word Code}} = \\text{\\color{#D946EF}{Magic Pattern}}\\]",
       formulaDescription: "We combine the position (blue) with the word code (orange) to make a magic pattern (purple)!",
       category: "encoding"
     },
@@ -49,7 +49,7 @@ const TransformerOverview = () => {
       title: "Self-Attention",
       description: "Help words understand each other",
       detailedExplanation: "Imagine each word is looking at all other words to understand the whole story better. Like in 'The cat saw the mouse', 'cat' pays attention to 'saw' and 'mouse' to understand what's happening!",
-      formula: "\\[\\color{#0EA5E9}{Word} \\xrightarrow{\\color{#F97316}{Looks\\ At}} \\color{#D946EF}{All\\ Other\\ Words}\\]",
+      formula: "\\[\\text{\\color{#0EA5E9}{Word}} \\xrightarrow{\\text{\\color{#F97316}{Looks At}}} \\text{\\color{#D946EF}{Other Words}}\\]",
       formulaDescription: "Each word (blue) looks at (orange) all other words (purple) to understand the whole story better!",
       category: "attention"
     }
