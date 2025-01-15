@@ -11,7 +11,7 @@ const Author = () => {
         <Card className="max-w-3xl mx-auto p-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">About the Author</h1>
-            <div className="w-20 h-1 bg-primary mx-auto"></div>
+            <div className="w-20 h-1 bg-primary mx-auto" />
           </div>
 
           <div className="space-y-6">
@@ -32,15 +32,12 @@ const Author = () => {
               <p className="mb-4">
                 Experienced Senior Architect leading the charge to revolutionize the telecommunications landscape with the cutting-edge capabilities of AI and ML.
               </p>
-              
               <p className="mb-4">
                 I specialize in enhancing OSS/BSS solutions by infusing advanced AI and ML technologies into key systems such as Ericsson Charging System, Single View Billing System, Oracle Billing and Revenue Management (OBRM), Ericsson Mediation System (EMM), Nokia Flexi CMD (Mediation Zone), and Nokia Eventlink Data Refinery (Comptel Mediation) for VAS and IN Services.
               </p>
-
               <p className="mb-4">
                 My primary focus involves using AI and ML to boost network performance, optimize resource allocation, and utilize predictive analytics for fault management and customer insights.
               </p>
-
               <p className="mb-4">
                 My goal is to transform the telecom industry, ensuring it remains at the forefront of innovation by leveraging the potential of AI and ML advancements.
               </p>
