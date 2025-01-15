@@ -2,123 +2,106 @@ import { LayerStep } from "../types";
 
 export const encoderSteps: LayerStep[] = [
   {
-    title: "Input Embedding",
-    description: "Converting words into numerical vectors",
-    formula: "E(x) = WᵉX + PE",
+    title: "Token Embeddings",
+    description: "Converting tokens into learnable vector representations",
+    formula: "E(x) = WᵉX",
     details: [
-      "1. Each word is converted into a numerical vector",
-      "2. Positional encoding is added to maintain word order",
-      "3. Resulting embeddings capture word meaning and position"
+      "1. Each token is mapped to a unique vector",
+      "2. These vectors are learned during training",
+      "3. Similar tokens have similar embeddings"
     ],
     explanation: {
-      title: "Word to Numbers Conversion",
-      simpleExplanation: "Just like you might assign numbers to letters (A=1, B=2), we convert words into special number patterns that help the computer understand their meaning.",
-      vectorExplanation: "The numbers you see represent different aspects of the word - like if it's a noun or verb, if it's positive or negative, etc.",
-      example: "For example, the word 'happy' might get numbers that show it's positive and emotional."
+      title: "Token to Vector Conversion",
+      simpleExplanation: "Each word or subword is converted into a vector of numbers that captures its meaning.",
+      vectorExplanation: "The embedding vectors are learned parameters that encode semantic relationships between tokens.",
+      example: "For example, 'king' and 'queen' would have similar but distinct vector representations."
     }
   },
   {
-    title: "Self-Attention",
-    description: "Computing relationships between words",
-    formula: "Attention(Q,K,V) = softmax(QKᵀ/√d)V",
+    title: "Positional Encoding",
+    description: "Adding position information to token embeddings",
+    formula: "PE(pos,2i) = sin(pos/10000^{2i/d})",
     details: [
-      "1. Create Query (Q), Key (K), and Value (V) vectors",
-      "2. Calculate attention scores between all words",
-      "3. Apply softmax to get attention weights",
-      "4. Combine values based on attention weights"
+      "1. Generate unique patterns for each position",
+      "2. Use sine and cosine functions",
+      "3. Add to token embeddings"
     ],
     explanation: {
-      title: "Finding Word Connections",
-      simpleExplanation: "This is like when you read a sentence and figure out which words are related to each other.",
-      vectorExplanation: "Each word asks questions (Query) about other words (Keys) to find out how important they are to its meaning (Values).",
-      example: "In 'The cat sat on the mat', 'cat' is strongly connected to 'sat' because cats do the sitting."
+      title: "Position Information",
+      simpleExplanation: "Since transformers process all tokens at once, we need to tell them about token order.",
+      vectorExplanation: "We use sine and cosine waves of different frequencies to encode positions.",
+      example: "This helps the model understand that 'bark' means different things in 'tree bark' vs 'dogs bark'."
     }
   },
   {
-    title: "Feed-Forward Network",
-    description: "Processing through neural network layers",
-    formula: "FFN(x) = max(0, xW₁ + b₁)W₂ + b₂",
+    title: "Multi-Head Attention",
+    description: "Parallel attention computation across different representation subspaces",
+    formula: "Attention(Q,K,V) = softmax(QK^T/√d)V",
     details: [
-      "1. Transform through first linear layer",
-      "2. Apply ReLU activation",
-      "3. Transform through second linear layer",
-      "4. Add residual connection and normalize"
+      "1. Project input into Query, Key, Value vectors",
+      "2. Compute scaled dot-product attention",
+      "3. Combine multiple attention heads",
+      "4. Project to output space"
     ],
     explanation: {
-      title: "Processing Information",
-      simpleExplanation: "This is like your brain processing information through multiple steps to understand something better.",
-      vectorExplanation: "The numbers go through mathematical operations that help the computer learn patterns and make decisions.",
-      example: "Just like how you might solve a math problem in steps, the computer processes the word information in stages."
+      title: "Parallel Attention Mechanism",
+      simpleExplanation: "The model looks at the input sequence from multiple perspectives simultaneously.",
+      vectorExplanation: "Each attention head can focus on different aspects of the relationships between tokens.",
+      example: "One head might focus on syntax while another focuses on semantics."
     }
   }
 ];
 
 export const decoderSteps: LayerStep[] = [
   {
-    title: "Output Embedding",
-    description: "Embedding the partial output sequence",
-    formula: "E(y) = WᵈY + PE",
-    details: [
-      "1. Convert partial output to embeddings",
-      "2. Add positional encoding",
-      "3. Prepare for masked attention"
-    ],
-    explanation: {
-      title: "Preparing to Generate Output",
-      simpleExplanation: "Now we start working on creating the answer, one word at a time.",
-      vectorExplanation: "Just like we did with the input, we convert our partial answer into numbers the computer can work with.",
-      example: "If we're translating 'Hello' to Spanish, we start preparing to generate '¡Hola!'"
-    }
-  },
-  {
     title: "Masked Self-Attention",
-    description: "Processing output sequence with masking",
-    formula: "MaskedAttn(Q,K,V) = softmax(mask(QKᵀ)/√d)V",
+    description: "Preventing attention to future tokens during generation",
+    formula: "MaskedAttn(Q,K,V) = softmax(mask(QK^T)/√d)V",
     details: [
-      "1. Create Q, K, V vectors for output",
-      "2. Apply future masking",
-      "3. Calculate masked attention scores",
-      "4. Combine values using masked attention"
+      "1. Create attention mask matrix",
+      "2. Apply mask before softmax",
+      "3. Ensure causal attention pattern",
+      "4. Process masked attention output"
     ],
     explanation: {
-      title: "Understanding Output Connections",
-      simpleExplanation: "We need to make sure the model only looks at the words it has generated so far.",
-      vectorExplanation: "This is like covering up future words in a sentence so the model can only focus on what it has already said.",
-      example: "If we are generating '¡Hola!', we can't look ahead to see what comes next."
+      title: "Causal Attention",
+      simpleExplanation: "When generating text, we can only look at what we've generated so far.",
+      vectorExplanation: "The mask ensures each position can only attend to previous positions.",
+      example: "When predicting the next word, we can't 'peek' at future words."
     }
   },
   {
     title: "Cross-Attention",
     description: "Attending to encoder outputs",
-    formula: "CrossAttn(Q,K,V) = softmax(QKᵀ/√d)V",
+    formula: "CrossAttn(Q,K,V) = softmax(QK^T/√d)V",
     details: [
-      "1. Use decoder Q with encoder K, V",
-      "2. Calculate cross-attention scores",
-      "3. Combine encoder values based on scores",
-      "4. Connect encoder and decoder information"
+      "1. Use decoder hidden states as queries",
+      "2. Use encoder outputs as keys and values",
+      "3. Compute cross-attention scores",
+      "4. Combine information from both sequences"
     ],
     explanation: {
-      title: "Connecting Encoder and Decoder",
-      simpleExplanation: "This step helps the model understand how the input words relate to the output words.",
-      vectorExplanation: "The decoder looks at the encoder's outputs to find relevant information for generating the next word.",
-      example: "If the input was 'Hello', the model uses that to help decide what the next word should be."
+      title: "Encoder-Decoder Connection",
+      simpleExplanation: "This layer allows the decoder to focus on relevant parts of the input sequence.",
+      vectorExplanation: "The decoder learns which input tokens are most important for generating each output token.",
+      example: "In translation, this helps align output words with relevant input words."
     }
   },
   {
-    title: "Feed-Forward & Output",
-    description: "Final processing and generation",
-    formula: "Output = softmax(FFN(CrossAttn(x)))",
+    title: "Feed-Forward Network",
+    description: "Token-wise transformations with non-linearity",
+    formula: "FFN(x) = max(0, xW₁ + b₁)W₂ + b₂",
     details: [
-      "1. Process through feed-forward network",
-      "2. Apply final linear transformation",
-      "3. Generate output probabilities",
-      "4. Select most likely output token"
+      "1. Project to larger dimension",
+      "2. Apply ReLU activation",
+      "3. Project back to model dimension",
+      "4. Add residual connection"
     ],
     explanation: {
-      title: "Generating the Final Output",
-      simpleExplanation: "This is where the model decides what the final answer will be.",
-      vectorExplanation: "The processed numbers are turned into probabilities to see which word is most likely to come next.",
-      example: "After processing, the model might decide that '¡Hola!' is the best translation for 'Hello'."
+      title: "Non-linear Processing",
+      simpleExplanation: "Each token's representation is processed through a small neural network.",
+      vectorExplanation: "This allows the model to learn complex token-wise transformations.",
+      example: "The network can learn to combine or modify features extracted by attention layers."
     }
   }
 ];

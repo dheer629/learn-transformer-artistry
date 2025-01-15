@@ -1,29 +1,65 @@
 import { EmbeddingVector, LayerOutput } from "../types";
 
+// Softmax implementation similar to minGPT
+const softmax = (logits: number[]): number[] => {
+  const maxLogit = Math.max(...logits);
+  const scaled = logits.map(l => Math.exp(l - maxLogit));
+  const sum = scaled.reduce((a, b) => a + b, 0);
+  return scaled.map(s => s / sum);
+};
+
+// Matrix multiplication helper
+const matmul = (a: number[][], b: number[][]): number[][] => {
+  const result: number[][] = [];
+  for (let i = 0; i < a.length; i++) {
+    result[i] = [];
+    for (let j = 0; j < b[0].length; j++) {
+      let sum = 0;
+      for (let k = 0; k < b.length; k++) {
+        sum += a[i][k] * b[k][j];
+      }
+      result[i][j] = sum;
+    }
+  }
+  return result;
+};
+
 export const generatePositionalEncoding = (position: number, dim: number): number[] => {
-  return Array.from({ length: dim }, (_, i) => {
-    const angle = position / Math.pow(10000, (2 * Math.floor(i / 2)) / dim);
-    return i % 2 === 0 ? Math.sin(angle) : Math.cos(angle);
-  });
+  const pe: number[] = [];
+  for (let i = 0; i < dim; i += 2) {
+    const freq = 1.0 / Math.pow(10000, (i / dim));
+    pe[i] = Math.sin(position * freq);
+    pe[i + 1] = Math.cos(position * freq);
+  }
+  return pe;
 };
 
 export const generateEmbeddings = (text: string): EmbeddingVector[] => {
+  const vocabSize = 1000; // Simplified vocabulary size
+  const embeddingDim = 8; // Using 8D embeddings for visualization
+  
   return text.split(" ").map((word, position) => {
-    const baseVector = Array.from(
-      { length: 4 }, 
-      () => Number((Math.random() * 2 - 1).toFixed(3))
-    );
-    const positionalVector = generatePositionalEncoding(position, 4);
+    // Generate pseudo-random but consistent embeddings for each word
+    const hash = word.split("").reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
     
+    const baseVector = Array.from(
+      { length: embeddingDim }, 
+      (_, i) => Math.sin((hash + i) / vocabSize) * 2 - 1
+    );
+    
+    const positionalVector = generatePositionalEncoding(position, embeddingDim);
     const contextualVector = baseVector.map(
       (v, i) => Number((v + positionalVector[i]).toFixed(3))
     );
     
     return {
       word,
-      vector: baseVector,
-      positionalVector,
-      contextualVector
+      vector: baseVector.map(v => Number(v.toFixed(3))),
+      positionalVector: positionalVector.map(v => Number(v.toFixed(3))),
+      contextualVector: contextualVector.map(v => Number(v.toFixed(3)))
     };
   });
 };
@@ -32,39 +68,51 @@ export const generateLayerOutput = (
   inputEmbeddings: EmbeddingVector[],
   step: number
 ): LayerOutput => {
-  const dim = inputEmbeddings.length;
-  const vectorDim = 4;
+  const dim = inputEmbeddings[0].vector.length;
+  const seqLen = inputEmbeddings.length;
+  
+  // Generate attention patterns similar to minGPT
+  const generateAttentionWeights = () => {
+    const weights: number[][] = [];
+    for (let i = 0; i < seqLen; i++) {
+      weights[i] = [];
+      const logits = Array(seqLen).fill(0).map(() => Math.random() * 2 - 1);
+      weights[i] = softmax(logits);
+    }
+    return weights;
+  };
 
-  const generateRandomVectors = () => 
+  // Generate Q, K, V matrices
+  const generateProjectionMatrix = () => 
     Array(dim).fill(0).map(() => 
-      Array(vectorDim).fill(0).map(() => 
+      Array(dim).fill(0).map(() => 
         Number((Math.random() * 2 - 1).toFixed(3))
       )
     );
 
-  const queryVectors = generateRandomVectors();
-  const keyVectors = generateRandomVectors();
-  const valueVectors = generateRandomVectors();
+  const Wq = generateProjectionMatrix();
+  const Wk = generateProjectionMatrix();
+  const Wv = generateProjectionMatrix();
 
-  const weights = Array(dim).fill(0).map(() => 
-    Array(dim).fill(0).map(() => 
-      Number((Math.random()).toFixed(2))
-    )
-  );
+  // Project input embeddings to get Q, K, V
+  const inputMatrix = inputEmbeddings.map(e => e.contextualVector);
+  const queryVectors = matmul(inputMatrix, Wq);
+  const keyVectors = matmul(inputMatrix, Wk);
+  const valueVectors = matmul(inputMatrix, Wv);
 
-  const weightedSum = queryVectors.map(vec => 
-    vec.map(v => Number((v * Math.random()).toFixed(3)))
-  );
-
-  const outputEmbeddings = inputEmbeddings.map(embed => ({
-    ...embed,
-    contextualVector: weightedSum[0]
-  }));
+  // Calculate attention weights
+  const attentionWeights = generateAttentionWeights();
+  
+  // Calculate weighted sum (attention output)
+  const weightedSum = matmul(attentionWeights, valueVectors);
 
   return {
     inputEmbeddings,
-    outputEmbeddings,
-    attentionWeights: weights,
+    outputEmbeddings: inputEmbeddings.map((embed, i) => ({
+      ...embed,
+      contextualVector: weightedSum[i].map(v => Number(v.toFixed(3)))
+    })),
+    attentionWeights,
     intermediateOutputs: {
       queryVectors,
       keyVectors,

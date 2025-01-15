@@ -5,11 +5,16 @@ export interface EmbeddingVector {
   contextualVector?: number[];
 }
 
-export interface StepExplanation {
-  title: string;
-  simpleExplanation: string;
-  vectorExplanation: string;
-  example: string;
+export interface LayerOutput {
+  inputEmbeddings: EmbeddingVector[];
+  outputEmbeddings: EmbeddingVector[];
+  attentionWeights: number[][];
+  intermediateOutputs?: {
+    queryVectors: number[][];
+    keyVectors: number[][];
+    valueVectors: number[][];
+    weightedSum: number[][];
+  };
 }
 
 export interface LayerStep {
@@ -17,19 +22,10 @@ export interface LayerStep {
   description: string;
   formula: string;
   details: string[];
-  explanation: StepExplanation;
-  outputVector?: number[];
-  attentionWeights?: number[][];
-}
-
-export interface LayerOutput {
-  inputEmbeddings: EmbeddingVector[];
-  outputEmbeddings: EmbeddingVector[];
-  attentionWeights: number[][];
-  intermediateOutputs?: {
-    queryVectors?: number[][];
-    keyVectors?: number[][];
-    valueVectors?: number[][];
-    weightedSum?: number[][];
+  explanation: {
+    title: string;
+    simpleExplanation: string;
+    vectorExplanation: string;
+    example: string;
   };
 }
