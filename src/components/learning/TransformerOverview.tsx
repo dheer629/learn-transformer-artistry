@@ -72,7 +72,7 @@ const TransformerOverview = () => {
     const categoryImages = images.filter(img => img.category === category);
     if (categoryImages.length === 0) return null;
     const selectedImage = categoryImages[index % categoryImages.length];
-    return selectedImage?.url || null;
+    return selectedImage?.image_url || null;
   };
 
   const mainImage = images?.find(img => img.category === 'architecture');
@@ -94,7 +94,7 @@ const TransformerOverview = () => {
         
         <div className="grid grid-cols-1 gap-8">
           <TransformerArchitecture 
-            mainImageUrl={mainImage?.url || null}
+            mainImageUrl={mainImage?.image_url || null}
             isLoading={isLoading}
           />
           
