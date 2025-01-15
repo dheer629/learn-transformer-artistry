@@ -48,7 +48,7 @@ const TransformerOverview = () => {
             <img 
               src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
               alt="Transformer Architecture Diagram" 
-              className="w-full max-w-4xl h-auto rounded-lg shadow-lg mb-8"
+              className="w-full max-w-2xl h-auto rounded-lg shadow-lg mb-8"
             />
           </motion.div>
           <motion.div 
