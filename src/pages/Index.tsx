@@ -17,108 +17,148 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-primary text-white py-12 mb-8">
-        <div className="container flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold mb-4 animate-fade-in">
-              Understanding Transformers
-            </h1>
-            <p className="text-xl opacity-90 animate-slide-in">
-              An interactive guide to modern AI's most powerful architecture
-            </p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <header className="bg-primary py-8 mb-6 shadow-lg">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-white animate-fade-in">
+                Learn Transformers 🤖
+              </h1>
+              <p className="text-lg text-white/90 animate-slide-in max-w-xl">
+                A step-by-step guide to understanding AI's most powerful architecture, 
+                designed for high school students
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="text-white border-white hover:bg-white/20"
+            >
+              Sign Out
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-            className="text-white border-white hover:bg-white/20"
-          >
-            Sign Out
-          </Button>
         </div>
       </header>
       
-      <main className="container pb-12">
+      <main className="container max-w-7xl mx-auto px-4 pb-12">
         <TooltipProvider>
-          <Tabs defaultValue="learn" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4 gap-4">
-              <TabsTrigger value="learn">Learn</TabsTrigger>
-              <TabsTrigger value="visualize">Visualize</TabsTrigger>
-              <TabsTrigger value="practice">Practice</TabsTrigger>
-              <TabsTrigger value="applications">Applications</TabsTrigger>
+          <Tabs defaultValue="learn" className="space-y-6">
+            <TabsList className="w-full grid grid-cols-4 gap-4 p-1 bg-muted rounded-lg">
+              <TabsTrigger 
+                value="learn" 
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
+              >
+                📚 Learn
+              </TabsTrigger>
+              <TabsTrigger 
+                value="visualize"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
+              >
+                🔍 Visualize
+              </TabsTrigger>
+              <TabsTrigger 
+                value="practice"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
+              >
+                ✏️ Practice
+              </TabsTrigger>
+              <TabsTrigger 
+                value="applications"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
+              >
+                🌟 Real World
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="learn" className="space-y-8">
-              <LearningModule />
-            </TabsContent>
+            <div className="mt-8">
+              <TabsContent value="learn" className="space-y-8">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <LearningModule />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="visualize" className="space-y-8">
-              <TransformerVisualization />
-            </TabsContent>
+              <TabsContent value="visualize" className="space-y-8">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <TransformerVisualization />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="practice" className="space-y-8">
-              <Quiz />
-            </TabsContent>
+              <TabsContent value="practice" className="space-y-8">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <Quiz />
+                </div>
+              </TabsContent>
 
-            <TabsContent value="applications" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-white rounded-lg shadow-lg">
-                <h3 className="text-2xl font-bold text-primary mb-4">Real-World Applications</h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">🌐</span>
-                    <div>
-                      <h4 className="font-semibold">Language Translation</h4>
-                      <p className="text-gray-600">Powers Google Translate to convert text between languages accurately.</p>
+              <TabsContent value="applications" className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <h3 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                      <span className="text-3xl">🌐</span>
+                      Real-World Examples
+                    </h3>
+                    <ul className="space-y-4">
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl bg-blue-100 p-2 rounded-lg">💬</span>
+                        <div>
+                          <h4 className="font-semibold text-lg">ChatGPT & Language Models</h4>
+                          <p className="text-gray-600">Powers AI assistants to understand and respond to questions naturally.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl bg-green-100 p-2 rounded-lg">🎮</span>
+                        <div>
+                          <h4 className="font-semibold text-lg">Gaming AI</h4>
+                          <p className="text-gray-600">Creates smart characters that can have realistic conversations with players.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-xl bg-purple-100 p-2 rounded-lg">🎨</span>
+                        <div>
+                          <h4 className="font-semibold text-lg">Creative Tools</h4>
+                          <p className="text-gray-600">Helps generate art, music, and stories based on descriptions.</p>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <h3 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                      <span className="text-3xl">🚀</span>
+                      Future Possibilities
+                    </h3>
+                    <div className="space-y-4">
+                      <p className="text-gray-600 text-lg">
+                        Imagine what you could create with Transformers:
+                      </p>
+                      <ul className="space-y-4">
+                        <li className="flex items-start gap-3">
+                          <span className="text-xl bg-yellow-100 p-2 rounded-lg">📚</span>
+                          <div>
+                            <h4 className="font-semibold text-lg">Personal Tutor</h4>
+                            <p className="text-gray-600">AI that adapts to your learning style and helps you understand complex topics.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-xl bg-red-100 p-2 rounded-lg">🔬</span>
+                          <div>
+                            <h4 className="font-semibold text-lg">Science Assistant</h4>
+                            <p className="text-gray-600">Help analyze data and suggest experiments in your science projects.</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-xl bg-orange-100 p-2 rounded-lg">🎯</span>
+                          <div>
+                            <h4 className="font-semibold text-lg">Study Helper</h4>
+                            <p className="text-gray-600">Create flashcards and practice questions from your notes automatically.</p>
+                          </div>
+                        </li>
+                      </ul>
                     </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">💬</span>
-                    <div>
-                      <h4 className="font-semibold">Chatbots</h4>
-                      <p className="text-gray-600">Enables AI assistants like ChatGPT to understand and respond to questions.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">📝</span>
-                    <div>
-                      <h4 className="font-semibold">Text Summarization</h4>
-                      <p className="text-gray-600">Creates concise summaries of long documents automatically.</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div className="p-6 bg-white rounded-lg shadow-lg">
-                <h3 className="text-2xl font-bold text-primary mb-4">Future Possibilities</h3>
-                <p className="text-gray-600 mb-4">
-                  Think about how you could use Transformers in your own projects:
-                </p>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">🎮</span>
-                    <div>
-                      <h4 className="font-semibold">Gaming</h4>
-                      <p className="text-gray-600">Create NPCs that can have natural conversations with players.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">📚</span>
-                    <div>
-                      <h4 className="font-semibold">Education</h4>
-                      <p className="text-gray-600">Build personalized tutoring systems that adapt to each student.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl">🎨</span>
-                    <div>
-                      <h4 className="font-semibold">Creative Writing</h4>
-                      <p className="text-gray-600">Develop tools that help with story ideas and character development.</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+                  </div>
+                </div>
+              </TabsContent>
             </div>
-            </TabsContent>
           </Tabs>
         </TooltipProvider>
       </main>
