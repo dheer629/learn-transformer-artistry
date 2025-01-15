@@ -6,6 +6,7 @@ import LayersVisualization from "./transformer/sections/LayersVisualization";
 import VisualizationHeader from "./transformer/sections/VisualizationHeader";
 import InputOutputSection from "./transformer/sections/InputOutputSection";
 import VisualizationContent from "./transformer/sections/VisualizationContent";
+import TokenVisualization from "./transformer/TokenVisualization";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
@@ -174,17 +175,19 @@ const TransformerVisualization = () => {
       const initialOutput = generateLayerOutput(newEmbeddings, 0);
       setLayerOutputs([initialOutput]);
       
-      // Show initial token values
+      // Show initial token values with detailed breakdown
       toast({
-        title: "Initial Token Embeddings",
+        title: "Token Processing Started",
         description: (
           <div className="space-y-2">
-            {newEmbeddings.map((embed, i) => (
-              <div key={i} className="font-mono text-sm">
-                <p className="font-medium">{embed.word}:</p>
-                <p className="text-xs">[{embed.vector.map(v => v.toFixed(3)).join(", ")}]</p>
-              </div>
-            ))}
+            <p className="font-medium">Input text tokenized into {newEmbeddings.length} tokens</p>
+            <div className="text-sm text-muted-foreground">
+              {newEmbeddings.map((embed, i) => (
+                <div key={i} className="mt-1">
+                  <span className="font-semibold">Token {i + 1}:</span> {embed.word}
+                </div>
+              ))}
+            </div>
           </div>
         ),
         duration: 5000,
@@ -231,6 +234,18 @@ const TransformerVisualization = () => {
           handleProcess={handleProcess}
           isProcessing={isProcessing}
         />
+
+        {embeddings.length > 0 && (
+          <motion.div
+            variants={containerAnimation}
+            className="mb-6"
+          >
+            <TokenVisualization
+              tokens={embeddings}
+              currentStep={currentStep}
+            />
+          </motion.div>
+        )}
 
         <motion.div variants={containerAnimation}>
           <ControlsSection
