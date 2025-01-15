@@ -8,6 +8,8 @@ interface TransformerArchitectureProps {
   isLoading: boolean;
 }
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475";
+
 const TransformerArchitecture: React.FC<TransformerArchitectureProps> = ({
   mainImageUrl,
   isLoading,
@@ -21,17 +23,18 @@ const TransformerArchitecture: React.FC<TransformerArchitectureProps> = ({
     console.error("Error loading image:", mainImageUrl);
     setImageError(true);
     
-    if (retryCount < maxRetries) {
-      // Attempt to reload the image
+    if (retryCount < maxRetries && mainImageUrl) {
+      console.log(`Retrying image load (${retryCount + 1}/${maxRetries})`);
       setRetryCount(prev => prev + 1);
-      e.currentTarget.src = mainImageUrl || '/placeholder.svg';
+      e.currentTarget.src = mainImageUrl;
     } else {
+      console.log("Using fallback image from Unsplash");
       toast({
         variant: "destructive",
         title: "Image Loading Error",
         description: "Failed to load the transformer architecture image. Using fallback image.",
       });
-      e.currentTarget.src = '/placeholder.svg';
+      e.currentTarget.src = FALLBACK_IMAGE;
     }
   };
 
