@@ -89,26 +89,28 @@ const TransformerOverview = () => {
         >
           Understanding Transformer Architecture
         </motion.h2>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <motion.div 
-            className="lg:col-span-4 space-y-6"
+            className="space-y-6"
             variants={fadeInUpVariants}
           >
-            <div className="relative">
+            <div className="flex justify-center">
               {isLoading ? (
-                <Skeleton className="w-full h-64 rounded-lg" />
+                <Skeleton className="w-full max-w-3xl h-96 rounded-lg" />
               ) : mainImage ? (
-                <img 
-                  src={mainImage.url} 
-                  alt="Complete Transformer Architecture"
-                  className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                />
+                <div className="relative max-w-3xl mx-auto">
+                  <img 
+                    src={mainImage.url} 
+                    alt="Complete Transformer Architecture"
+                    className="rounded-lg shadow-lg hover:shadow-xl transition-shadow object-contain w-full"
+                  />
+                  <p className="text-sm text-gray-600 text-center mt-4 font-medium">
+                    Complete Transformer Architecture Overview
+                  </p>
+                </div>
               ) : null}
-              <p className="text-sm text-gray-600 text-center mt-4 font-medium">
-                Complete Transformer Architecture Overview
-              </p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="bg-blue-50 p-4 rounded-lg max-w-3xl mx-auto">
               <h3 className="font-semibold text-lg text-blue-800 mb-2">Key Features</h3>
               <ul className="space-y-2 text-blue-700">
                 <li>• Parallel processing of input sequences</li>
@@ -120,7 +122,7 @@ const TransformerOverview = () => {
           </motion.div>
           
           <motion.div 
-            className="lg:col-span-8 space-y-8"
+            className="space-y-8"
             variants={fadeInUpVariants}
           >
             <motion.h3 
@@ -140,7 +142,7 @@ const TransformerOverview = () => {
                   variants={listItemVariants}
                   custom={index}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h4 className="text-lg sm:text-xl font-bold text-primary">{step.title}</h4>
                       <p className="text-gray-600">{step.description}</p>
@@ -153,12 +155,12 @@ const TransformerOverview = () => {
                     </div>
                     <div className="flex items-center justify-center">
                       {isLoading ? (
-                        <Skeleton className="w-full h-48 rounded-lg" />
+                        <Skeleton className="w-full h-64 rounded-lg" />
                       ) : (
                         <img 
                           src={getImageUrl(step.category, index)} 
                           alt={`${step.title} Visualization`}
-                          className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                          className="rounded-lg shadow-sm hover:shadow-md transition-shadow object-contain w-full"
                         />
                       )}
                     </div>
