@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
 export interface TransformerImage {
   id: string;
@@ -8,6 +9,7 @@ export interface TransformerImage {
   image_path: string;
   category: string;
   created_at: string;
+  url?: string;
 }
 
 export const useTransformerImages = () => {
@@ -17,12 +19,12 @@ export const useTransformerImages = () => {
       const { data, error } = await supabase
         .from("transformer_images")
         .select("*")
-        .order("created_at", { ascending: true });
+        .returns<TransformerImage[]>();
 
       if (error) throw error;
 
       const imagesWithUrls = await Promise.all(
-        (data as TransformerImage[]).map(async (image) => {
+        data.map(async (image) => {
           const { data: { publicUrl } } = supabase.storage
             .from("transformer_images")
             .getPublicUrl(image.image_path);

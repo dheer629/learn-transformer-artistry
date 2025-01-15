@@ -105,6 +105,33 @@ export type Database = {
         }
         Relationships: []
       }
+      transformer_images: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_path: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_path: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_path?: string
+          title?: string
+        }
+        Relationships: []
+      }
       transformer_questions: {
         Row: {
           category: string
