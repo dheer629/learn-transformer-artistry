@@ -66,7 +66,7 @@ const LearningModule = () => {
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
-        <TransformerOverview />
+        <TransformerOverview key={Date.now()} />
       </motion.div>
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
