@@ -16,18 +16,24 @@ const Author = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-semibold text-gray-800">Dheeraj Vishwakarma</h2>
-              <p className="text-gray-600 mt-2">AI/ML Engineer & Educator</p>
+              <p className="text-gray-600 mt-2">Senior AI/ML Architect</p>
             </div>
 
             <div className="prose max-w-none text-gray-600">
               <p className="mb-4">
-                Dheeraj is a passionate AI/ML engineer with extensive experience in developing and implementing machine learning solutions. 
-                He specializes in transformer architectures and deep learning applications.
+                Experienced Senior Architect leading the charge to revolutionize the telecommunications landscape with the cutting-edge capabilities of AI and ML.
               </p>
               
               <p className="mb-4">
-                Through this learning platform, he aims to make complex AI concepts accessible to everyone, 
-                breaking down advanced topics into understandable components.
+                I specialize in enhancing OSS/BSS solutions by infusing advanced AI and ML technologies into key systems such as Ericsson Charging System, Single View Billing System, Oracle Billing and Revenue Management (OBRM), Ericsson Mediation System (EMM), Nokia Flexi CMD (Mediation Zone), and Nokia Eventlink Data Refinery (Comptel Mediation) for VAS and IN Services.
+              </p>
+
+              <p className="mb-4">
+                My primary focus involves using AI and ML to boost network performance, optimize resource allocation, and utilize predictive analytics for fault management and customer insights.
+              </p>
+
+              <p className="mb-4">
+                My goal is to transform the telecom industry, ensuring it remains at the forefront of innovation by leveraging the potential of AI and ML advancements.
               </p>
             </div>
 
