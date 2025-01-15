@@ -40,38 +40,44 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const config = {
-    loader: { load: ["[tex]/html"] },
+    loader: { 
+      load: ["input/asciimath", "[tex]/html"] 
+    },
     tex: {
       packages: { "[+]": ["html"] },
       inlineMath: [["$", "$"]],
       displayMath: [["$$", "$$"]]
+    },
+    startup: {
+      typeset: true
+    },
+    options: {
+      enableMenu: false
     }
   };
 
   return (
-    <React.StrictMode>
-      <MathJaxContext config={config}>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </MathJaxContext>
-    </React.StrictMode>
+    <MathJaxContext version={3} config={config}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </MathJaxContext>
   );
 };
 
