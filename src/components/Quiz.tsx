@@ -1,67 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Question {
   id: number;
-  text: string;
+  title: string;
+  description: string;
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
+  category: string;
+  question: string;
   options: string[];
-  correctAnswer: number;
+  correct_answer: number;
   explanation: string;
+  visualization_data?: Record<string, any>;
 }
 
-const questions: Question[] = [
-  {
-    id: 1,
-    text: "What is the primary purpose of self-attention in Transformers?",
-    options: [
-      "To reduce computational complexity",
-      "To capture relationships between different positions in the sequence",
-      "To compress the input sequence",
-      "To generate random weights",
-    ],
-    correctAnswer: 1,
-    explanation: "Self-attention helps Transformers understand how different words or elements in a sequence relate to each other, similar to how we understand the relationship between words in a sentence.",
-  },
-  {
-    id: 2,
-    text: "Which analogy best describes the encoder-decoder structure?",
-    options: [
-      "A calculator performing math operations",
-      "A translator reading one language and writing in another",
-      "A computer storing files",
-      "A phone making calls",
-    ],
-    correctAnswer: 1,
-    explanation: "The encoder-decoder structure is like a translator who first understands the meaning (encoder) and then expresses it in another form (decoder).",
-  },
-  {
-    id: 3,
-    text: "How do Transformers process input data?",
-    options: [
-      "One word at a time, sequentially",
-      "All words simultaneously, in parallel",
-      "Only the first and last words",
-      "Random words only",
-    ],
-    correctAnswer: 1,
-    explanation: "Transformers process all input elements (like words) simultaneously, which makes them very efficient compared to sequential processing.",
-  },
-];
-
 const Quiz = () => {
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [answered, setAnswered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transformer_questions')
+        .select('*')
+        .order('id');
+
+      if (error) {
+        throw error;
+      }
+
+      setQuestions(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      toast.error('Failed to load questions. Please try again.');
+      setIsLoading(false);
+    }
+  };
 
   const handleAnswer = (selectedOption: number) => {
     if (answered) return;
     
     setAnswered(true);
-    if (selectedOption === questions[currentQuestion].correctAnswer) {
+    if (selectedOption === questions[currentQuestion].correct_answer) {
       setScore(score + 1);
       toast.success("Correct answer! 🎉");
     } else {
@@ -78,27 +72,62 @@ const Quiz = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <Card className="p-6 max-w-2xl mx-auto">
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <div className="space-y-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!questions.length) {
+    return (
+      <Card className="p-6 max-w-2xl mx-auto">
+        <p className="text-center text-gray-600">No questions available. Please try again later.</p>
+      </Card>
+    );
+  }
+
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
     <Card className="p-6 max-w-2xl mx-auto animate-slide-in">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-4">Test Your Knowledge</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-primary">
+            {questions[currentQuestion].title}
+          </h2>
+          <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+            {questions[currentQuestion].difficulty_level}
+          </span>
+        </div>
         <Progress value={progress} className="mb-4" />
-        <p className="text-sm text-gray-600 mb-8">
+        <p className="text-sm text-gray-600 mb-2">
           Question {currentQuestion + 1} of {questions.length}
+        </p>
+        <p className="text-sm text-gray-600 mb-8">
+          Category: {questions[currentQuestion].category}
         </p>
       </div>
       
       <div className="mb-6">
-        <p className="text-lg mb-4">{questions[currentQuestion].text}</p>
+        <p className="text-lg mb-2">{questions[currentQuestion].description}</p>
+        <p className="text-lg mb-4 font-medium">{questions[currentQuestion].question}</p>
         <div className="space-y-4">
           {questions[currentQuestion].options.map((option, index) => (
             <Button
               key={index}
-              variant={answered ? (index === questions[currentQuestion].correctAnswer ? "default" : "outline") : "outline"}
+              variant={answered ? (index === questions[currentQuestion].correct_answer ? "default" : "outline") : "outline"}
               className={`w-full text-left justify-start ${
-                answered && index === questions[currentQuestion].correctAnswer ? "bg-green-500 hover:bg-green-600" : ""
+                answered && index === questions[currentQuestion].correct_answer ? "bg-green-500 hover:bg-green-600" : ""
               }`}
               onClick={() => handleAnswer(index)}
               disabled={answered}
