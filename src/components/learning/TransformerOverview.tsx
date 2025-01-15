@@ -28,6 +28,33 @@ const TransformerOverview = () => {
     }
   };
 
+  const transformerSteps = [
+    {
+      title: "Input Embedding",
+      description: "Convert input tokens into continuous vector representations",
+      detailedExplanation: "The embedding layer transforms each input token into a dense vector of fixed size, capturing semantic relationships between words.",
+      formula: "\\[E = WX\\]",
+      formulaDescription: "Where W is the embedding matrix and X is the one-hot encoded input",
+      category: "embedding"
+    },
+    {
+      title: "Positional Encoding",
+      description: "Add position information to the embeddings",
+      detailedExplanation: "Since transformers process all tokens simultaneously, positional encoding adds information about token positions in the sequence.",
+      formula: "\\[PE_{(pos,2i)} = sin(pos/10000^{2i/d_{model}})\\]",
+      formulaDescription: "Sinusoidal position encoding for even dimensions",
+      category: "encoding"
+    },
+    {
+      title: "Self-Attention",
+      description: "Compute attention scores between all tokens",
+      detailedExplanation: "Self-attention allows each token to attend to all other tokens in the sequence, capturing contextual relationships.",
+      formula: "\\[Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\\]",
+      formulaDescription: "Scaled dot-product attention mechanism",
+      category: "attention"
+    }
+  ];
+
   return (
     <motion.div
       variants={containerAnimation}
@@ -68,9 +95,8 @@ const TransformerOverview = () => {
           variants={itemAnimation}
           className="space-y-6"
         >
-            {/* Architecture Diagram */}
             <div className="flex flex-col items-center space-y-4">
-              <div className="max-w-sm mx-auto"> {/* Changed from max-w-md to max-w-sm */}
+              <div className="max-w-sm mx-auto">
                 <img
                   src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
                   alt="Transformer Architecture Diagram"
@@ -89,7 +115,10 @@ const TransformerOverview = () => {
       </motion.div>
 
       <motion.div variants={itemAnimation}>
-        <TransformerStepsList />
+        <TransformerStepsList 
+          steps={transformerSteps}
+          isLoading={false}
+        />
       </motion.div>
     </motion.div>
   );
