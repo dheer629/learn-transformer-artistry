@@ -36,8 +36,8 @@ const TransformerStep: React.FC<TransformerStepProps> = ({
           <p className="text-sm text-gray-700 mb-4">{detailedExplanation}</p>
           <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg">
             <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
-            <div className="my-4 overflow-x-auto">
-              <MathJax>{formula}</MathJax>
+            <div className="my-4 overflow-x-auto mathjax">
+              <MathJax inline={false}>{formula}</MathJax>
             </div>
             <p className="text-sm text-gray-600 mt-2 italic">{formulaDescription}</p>
           </div>

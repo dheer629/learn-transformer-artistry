@@ -45,14 +45,21 @@ const App = () => {
     },
     tex: {
       packages: { "[+]": ["html"] },
-      inlineMath: [["$", "$"]],
-      displayMath: [["$$", "$$"]]
+      inlineMath: [
+        ["$", "$"],
+        ["\\(", "\\)"]
+      ],
+      displayMath: [
+        ["$$", "$$"],
+        ["\\[", "\\]"]
+      ]
     },
     startup: {
-      typeset: true
+      typeset: false
     },
     options: {
-      enableMenu: false
+      enableMenu: false,
+      processHtmlClass: "mathjax"
     }
   };
 
