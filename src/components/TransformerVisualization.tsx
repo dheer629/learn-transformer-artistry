@@ -1,54 +1,15 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider"; 
-import { AnimatePresence, motion } from "framer-motion";
-import EncoderLayer from "./transformer/EncoderLayer";
-import DecoderLayer from "./transformer/DecoderLayer";
+import { motion, AnimatePresence } from "framer-motion";
+import InputSection from "./transformer/sections/InputSection";
+import OutputSection from "./transformer/sections/OutputSection";
+import ControlsSection from "./transformer/sections/ControlsSection";
+import LayersVisualization from "./transformer/sections/LayersVisualization";
 import EmbeddingsVisualization from "./transformer/EmbeddingsVisualization";
 import AttentionVisualization from "./transformer/AttentionVisualization";
-import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
+import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
-
-const flowAnimation = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.3
-    }
-  }
-};
-
-const dataFlowAnimation = {
-  initial: { scale: 0.8, opacity: 0 },
-  animate: { 
-    scale: 1, 
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  },
-  exit: {
-    scale: 0.8,
-    opacity: 0,
-    transition: {
-      duration: 0.3
-    }
-  }
-};
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -130,6 +91,18 @@ const TransformerVisualization = () => {
     processSteps();
   };
 
+  const flowAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <Card className="p-6 space-y-6">
       <motion.h2 
@@ -141,132 +114,31 @@ const TransformerVisualization = () => {
         Transformer Architecture Visualization
       </motion.h2>
       
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        variants={dataFlowAnimation}
-        initial="initial"
-        animate="animate"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Input Text</label>
-            <div className="flex gap-2">
-              <Input
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Enter text (e.g., 'Hello')"
-                disabled={isProcessing}
-                className="transition-all duration-300 hover:border-primary"
-              />
-              <Button 
-                onClick={handleProcess} 
-                disabled={!inputText || isProcessing}
-                className="transition-all duration-300 hover:scale-105"
-              >
-                Process
-              </Button>
-            </div>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <label className="block text-sm font-medium mb-2">Learning Rate</label>
-            <Slider
-              value={[learningRate]}
-              onValueChange={(value) => setLearningRate(value[0])}
-              min={0.01}
-              max={1}
-              step={0.01}
-              disabled={isProcessing}
-              className="transition-all duration-300"
-            />
-            <div className="text-sm text-muted-foreground mt-1 animate-fade-in">
-              Current: {learningRate}
-            </div>
-          </motion.div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputSection
+          inputText={inputText}
+          setInputText={setInputText}
+          learningRate={learningRate}
+          setLearningRate={setLearningRate}
+          handleProcess={handleProcess}
+          isProcessing={isProcessing}
+        />
         
-        <motion.div
-          variants={dataFlowAnimation}
-          initial="initial"
-          animate="animate"
-        >
-          <label className="block text-sm font-medium mb-2">Output</label>
-          <div className="h-10 flex items-center border rounded-md px-3 bg-muted animate-fade-in">
-            {outputText || "Translation will appear here"}
-          </div>
-        </motion.div>
-      </motion.div>
+        <OutputSection outputText={outputText} />
+      </div>
 
-      <motion.div 
-        className="flex justify-center gap-4 my-4"
-        variants={flowAnimation}
-        initial="hidden"
-        animate="visible"
-      >
-        <Button
-          variant="outline"
-          onClick={() => setIsPaused(!isPaused)}
-          disabled={!isProcessing}
-          className="transition-all duration-300 hover:scale-105"
-        >
-          {isPaused ? "Resume" : "Pause"}
-        </Button>
-        <Button
-          onClick={handleContinue}
-          disabled={!waitForUser || !isProcessing}
-          className="transition-all duration-300 hover:scale-105"
-        >
-          Continue to Next Step
-        </Button>
-      </motion.div>
+      <ControlsSection
+        isPaused={isPaused}
+        setIsPaused={setIsPaused}
+        handleContinue={handleContinue}
+        isProcessing={isProcessing}
+        waitForUser={waitForUser}
+      />
 
-      <motion.div 
-        className="space-y-8"
-        variants={dataFlowAnimation}
-        initial="initial"
-        animate="animate"
-      >
-        <motion.div 
-          className="bg-blue-50 p-4 rounded-lg"
-          variants={flowAnimation}
-        >
-          <h3 className="text-lg font-semibold mb-4">Encoder Layers</h3>
-          <div className="space-y-4">
-            {encoderSteps.map((step, index) => (
-              <EncoderLayer
-                key={`encoder-${index}`}
-                step={step}
-                index={index}
-                currentStep={currentStep}
-                layerOutput={layerOutputs[index]}
-              />
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div 
-          className="bg-green-50 p-4 rounded-lg"
-          variants={flowAnimation}
-        >
-          <h3 className="text-lg font-semibold mb-4">Decoder Layers</h3>
-          <div className="space-y-4">
-            {decoderSteps.map((step, index) => (
-              <DecoderLayer
-                key={`decoder-${index}`}
-                step={step}
-                index={index}
-                currentStep={currentStep}
-                encoderStepsLength={encoderSteps.length}
-                layerOutput={layerOutputs[index + encoderSteps.length]}
-              />
-            ))}
-          </div>
-        </motion.div>
-      </motion.div>
+      <LayersVisualization
+        currentStep={currentStep}
+        layerOutputs={layerOutputs}
+      />
 
       <AnimatePresence>
         <EmbeddingsVisualization 
