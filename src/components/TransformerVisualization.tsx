@@ -10,6 +10,7 @@ import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/tra
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 import { useToast } from "@/components/ui/use-toast";
+import { MathJax } from "better-react-mathjax";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -31,15 +32,34 @@ const TransformerVisualization = () => {
         setLayerOutputs(prev => [...prev, output]);
         setCurrentStep(prev => prev + 1);
         
-        // Show formula and calculation for current step
+        // Show detailed formula and calculation for current step
         const stepInfo = currentStep < encoderSteps.length 
           ? encoderSteps[currentStep]
           : decoderSteps[currentStep - encoderSteps.length];
         
+        const formulaExplanation = `
+          ${stepInfo.explanation.vectorExplanation}
+          
+          Example calculation:
+          ${output.intermediateOutputs?.queryVectors ? 
+            `Query vectors: [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+          ${output.intermediateOutputs?.keyVectors ? 
+            `Key vectors: [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+        `;
+        
         toast({
           title: `Step ${currentStep + 1}: ${stepInfo.title}`,
-          description: `Formula: ${stepInfo.formula}\nCalculation example shown in the visualization.`,
-          duration: 3000,
+          description: (
+            <div className="space-y-2">
+              <MathJax>
+                <p className="font-medium">Formula: {stepInfo.formula}</p>
+              </MathJax>
+              <p className="text-sm text-muted-foreground">{formulaExplanation}</p>
+            </div>
+          ),
+          duration: 5000,
         });
       } catch (error) {
         console.error("Error in processing step:", error);
@@ -50,23 +70,43 @@ const TransformerVisualization = () => {
         });
       }
     } else if (currentStep === totalSteps - 1) {
-      // Generate final output using attention mechanism
+      // Generate final output using attention mechanism with detailed explanation
       const finalOutput = embeddings.map(embed => {
         const contextVector = embed.contextualVector || embed.vector;
-        return contextVector.reduce((sum, val) => sum + val, 0) / contextVector.length;
+        const weightedSum = contextVector.reduce((sum, val) => sum + val, 0);
+        const average = weightedSum / contextVector.length;
+        
+        // Log detailed calculation for debugging
+        console.log(`Final calculation for word "${embed.word}":`, {
+          contextVector,
+          weightedSum,
+          average
+        });
+        
+        return average;
       });
       
-      // Convert numerical output to text (simplified example)
-      const outputWords = finalOutput.map(val => 
-        val > 0 ? "positive" : "negative"
-      ).join(" ");
+      // Convert numerical output to text with explanation
+      const outputWords = finalOutput.map((val, idx) => {
+        const word = embeddings[idx].word;
+        const sentiment = val > 0 ? "positive" : "negative";
+        return `${word} (${sentiment}: ${val.toFixed(3)})`;
+      }).join(" ");
       
       setOutputText(outputWords);
       setIsProcessing(false);
       
       toast({
         title: "Processing Complete",
-        description: "Transformation sequence finished successfully.",
+        description: (
+          <div className="space-y-2">
+            <p>Transformation sequence finished successfully.</p>
+            <p className="text-sm text-muted-foreground">
+              Final vector values have been converted to sentiment scores.
+              Positive values indicate positive sentiment, negative values indicate negative sentiment.
+            </p>
+          </div>
+        ),
       });
     }
   };
