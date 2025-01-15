@@ -31,26 +31,26 @@ const TransformerOverview = () => {
   const transformerSteps = [
     {
       title: "Input Embedding",
-      description: "Convert input tokens into continuous vector representations",
-      detailedExplanation: "The embedding layer transforms each input token into a dense vector of fixed size, capturing semantic relationships between words.",
-      formula: "\\[E = WX\\]",
-      formulaDescription: "Where W is the embedding matrix and X is the one-hot encoded input",
+      description: "Convert words into number patterns that computers understand",
+      detailedExplanation: "Think of this like turning each word into a special code that helps the computer understand its meaning. Just like how '🐱' means 'cat', we turn words into number patterns!",
+      formula: "\\[\\color{#0EA5E9}{Word} \\xrightarrow{\\color{#F97316}{Magic Box}} \\color{#D946EF}{Special\\ Numbers}\\]",
+      formulaDescription: "Words (blue) go through a magic box (orange) to become special numbers (purple)!",
       category: "embedding"
     },
     {
       title: "Positional Encoding",
-      description: "Add position information to the embeddings",
-      detailedExplanation: "Since transformers process all tokens simultaneously, positional encoding adds information about token positions in the sequence.",
-      formula: "\\[PE_{(pos,2i)} = sin(pos/10000^{2i/d_{model}})\\]",
-      formulaDescription: "Sinusoidal position encoding for even dimensions",
+      description: "Add special numbers to remember word order",
+      detailedExplanation: "Just like how the order of words matters in a sentence ('dog chases cat' is different from 'cat chases dog'), we add special numbers to remember where each word goes!",
+      formula: "\\[\\color{#0EA5E9}{Position} + \\color{#F97316}{Word\\ Code} = \\color{#D946EF}{Magic\\ Pattern}\\]",
+      formulaDescription: "We combine the position (blue) with the word code (orange) to make a magic pattern (purple)!",
       category: "encoding"
     },
     {
       title: "Self-Attention",
-      description: "Compute attention scores between all tokens",
-      detailedExplanation: "Self-attention allows each token to attend to all other tokens in the sequence, capturing contextual relationships.",
-      formula: "\\[Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\\]",
-      formulaDescription: "Scaled dot-product attention mechanism",
+      description: "Help words understand each other",
+      detailedExplanation: "Imagine each word is looking at all other words to understand the whole story better. Like in 'The cat saw the mouse', 'cat' pays attention to 'saw' and 'mouse' to understand what's happening!",
+      formula: "\\[\\color{#0EA5E9}{Word} \\xrightarrow{\\color{#F97316}{Looks\\ At}} \\color{#D946EF}{All\\ Other\\ Words}\\]",
+      formulaDescription: "Each word (blue) looks at (orange) all other words (purple) to understand the whole story better!",
       category: "attention"
     }
   ];
