@@ -6,12 +6,12 @@ import LayersVisualization from "./transformer/sections/LayersVisualization";
 import VisualizationHeader from "./transformer/sections/VisualizationHeader";
 import InputOutputSection from "./transformer/sections/InputOutputSection";
 import VisualizationContent from "./transformer/sections/VisualizationContent";
-import TokenVisualization from "./transformer/TokenVisualization";
+import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
+import PredictionsSection from "./transformer/sections/PredictionsSection";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 import { useToast } from "@/components/ui/use-toast";
-import { MathJax } from "better-react-mathjax";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -240,7 +240,7 @@ const TransformerVisualization = () => {
             variants={containerAnimation}
             className="mb-6"
           >
-            <TokenVisualization
+            <TokenProcessingSection
               tokens={embeddings}
               currentStep={currentStep}
             />
@@ -275,6 +275,10 @@ const TransformerVisualization = () => {
           attentionWeights={attentionWeights}
           nextWordProbabilities={nextWordProbabilities}
         />
+
+        {nextWordProbabilities.length > 0 && (
+          <PredictionsSection predictions={nextWordProbabilities} />
+        )}
       </Card>
     </motion.div>
   );
