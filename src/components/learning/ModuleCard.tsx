@@ -1,11 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 interface ModuleCardProps {
   title: string;
@@ -15,6 +10,30 @@ interface ModuleCardProps {
   analogy: string;
 }
 
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  }
+};
+
+const contentVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
+
 const ModuleCard: React.FC<ModuleCardProps> = ({
   title,
   description,
@@ -23,28 +42,48 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
   analogy,
 }) => {
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow animate-fade-in bg-white">
-      <div className="text-4xl mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-primary mb-2">{title}</h3>
-      <p className="text-gray-600 mb-4">{description}</p>
-      <Accordion type="single" collapsible>
-        <AccordionItem value="item-1">
-          <AccordionTrigger>Learn More</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Detailed Explanation:</h4>
-                <p className="text-gray-600 leading-relaxed">{content}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Practical Analogy:</h4>
-                <p className="text-gray-600 leading-relaxed">{analogy}</p>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </Card>
+    <motion.div variants={cardVariants}>
+      <Card className="p-6 h-full bg-white hover:shadow-lg transition-shadow">
+        <motion.div 
+          className="flex items-start gap-4"
+          variants={contentVariants}
+        >
+          <span className="text-4xl">{icon}</span>
+          <div className="space-y-2">
+            <motion.h3 
+              className="text-xl font-semibold text-primary"
+              variants={contentVariants}
+            >
+              {title}
+            </motion.h3>
+            <motion.p 
+              className="text-muted-foreground"
+              variants={contentVariants}
+            >
+              {description}
+            </motion.p>
+          </div>
+        </motion.div>
+        
+        <motion.div 
+          className="mt-4 space-y-4"
+          variants={contentVariants}
+        >
+          <motion.p 
+            className="text-gray-600"
+            variants={contentVariants}
+          >
+            {content}
+          </motion.p>
+          <motion.div 
+            className="bg-muted p-4 rounded-lg"
+            variants={contentVariants}
+          >
+            <p className="italic text-muted-foreground">{analogy}</p>
+          </motion.div>
+        </motion.div>
+      </Card>
+    </motion.div>
   );
 };
 

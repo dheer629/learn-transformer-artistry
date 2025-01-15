@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import TransformerOverview from "./learning/TransformerOverview";
 import ModuleCard from "./learning/ModuleCard";
 
@@ -33,16 +34,58 @@ const modules = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.3
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  }
+};
+
 const LearningModule = () => {
   return (
-    <div className="space-y-8">
-      <TransformerOverview />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <motion.div 
+      className="space-y-8"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div variants={itemVariants}>
+        <TransformerOverview />
+      </motion.div>
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={containerVariants}
+      >
         {modules.map((module, index) => (
-          <ModuleCard key={index} {...module} />
+          <motion.div 
+            key={index}
+            variants={itemVariants}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
+            <ModuleCard {...module} />
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
