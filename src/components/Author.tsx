@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LinkedInLogoIcon } from "@radix-ui/react-icons";
+import { LinkedInLogoIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Author = () => {
@@ -43,7 +43,7 @@ const Author = () => {
               </p>
             </div>
 
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center gap-4 mt-8">
               <Button
                 className="flex items-center gap-2"
                 variant="outline"
@@ -51,6 +51,14 @@ const Author = () => {
               >
                 <LinkedInLogoIcon className="w-5 h-5" />
                 Connect on LinkedIn
+              </Button>
+              <Button
+                className="flex items-center gap-2"
+                variant="outline"
+                onClick={() => window.open("mailto:dheeraj.vishwakarma@gmail.com")}
+              >
+                <EnvelopeClosedIcon className="w-5 h-5" />
+                Send Email
               </Button>
             </div>
           </div>
