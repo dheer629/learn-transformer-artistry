@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
-import InputSection from "./transformer/sections/InputSection";
-import OutputSection from "./transformer/sections/OutputSection";
+import { motion } from "framer-motion";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
-import EmbeddingsVisualization from "./transformer/EmbeddingsVisualization";
-import AttentionVisualization from "./transformer/AttentionVisualization";
+import VisualizationHeader from "./transformer/sections/VisualizationHeader";
+import InputOutputSection from "./transformer/sections/InputOutputSection";
+import VisualizationContent from "./transformer/sections/VisualizationContent";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
@@ -57,93 +56,13 @@ const TransformerVisualization = () => {
   };
 
   const containerAnimation = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0 },
     visible: { 
-      opacity: 1, 
-      y: 0,
+      opacity: 1,
       transition: {
         duration: 0.7,
         ease: "easeOut",
         staggerChildren: 0.2
-      }
-    }
-  };
-
-  const itemAnimation = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
-      x: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const flowAnimation = {
-    initial: { scale: 0.95, opacity: 0 },
-    animate: { 
-      scale: 1, 
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      scale: 0.95,
-      opacity: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeIn"
-      }
-    }
-  };
-
-  const dataFlowAnimation = {
-    initial: { scale: 0.9, opacity: 0, y: 20 },
-    animate: { 
-      scale: 1, 
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      scale: 0.9,
-      opacity: 0,
-      y: -20,
-      transition: {
-        duration: 0.4,
-        ease: "easeIn"
-      }
-    }
-  };
-
-  const architectureAnimation = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const layerAnimation = {
-    hidden: { opacity: 0, x: -30 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
       }
     }
   };
@@ -156,37 +75,19 @@ const TransformerVisualization = () => {
       className="space-y-8"
     >
       <Card className="p-6 space-y-6 overflow-hidden bg-gradient-to-br from-white to-gray-50">
-        <motion.h2 
-          className="text-2xl font-bold text-primary mb-4"
-          variants={itemAnimation}
-        >
-          Transformer Architecture Visualization
-        </motion.h2>
+        <VisualizationHeader title="Transformer Architecture Visualization" />
         
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          variants={architectureAnimation}
-        >
-          <motion.div variants={layerAnimation}>
-            <InputSection
-              inputText={inputText}
-              setInputText={setInputText}
-              learningRate={learningRate}
-              setLearningRate={setLearningRate}
-              handleProcess={handleProcess}
-              isProcessing={isProcessing}
-            />
-          </motion.div>
-          
-          <motion.div variants={layerAnimation}>
-            <OutputSection outputText={outputText} />
-          </motion.div>
-        </motion.div>
+        <InputOutputSection
+          inputText={inputText}
+          setInputText={setInputText}
+          outputText={outputText}
+          learningRate={learningRate}
+          setLearningRate={setLearningRate}
+          handleProcess={handleProcess}
+          isProcessing={isProcessing}
+        />
 
-        <motion.div 
-          variants={layerAnimation}
-          className="relative"
-        >
+        <motion.div variants={containerAnimation}>
           <ControlsSection
             isPaused={isPaused}
             setIsPaused={setIsPaused}
@@ -197,8 +98,7 @@ const TransformerVisualization = () => {
         </motion.div>
 
         <motion.div 
-          variants={architectureAnimation}
-          className="relative"
+          variants={containerAnimation}
           whileHover={{ scale: 1.02 }}
           transition={{ duration: 0.2 }}
         >
@@ -208,37 +108,11 @@ const TransformerVisualization = () => {
           />
         </motion.div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            variants={dataFlowAnimation}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="space-y-6"
-          >
-            <motion.div
-              variants={flowAnimation}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <EmbeddingsVisualization 
-                embeddings={embeddings}
-                currentStep={currentStep}
-              />
-            </motion.div>
-            <motion.div
-              variants={flowAnimation}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <AttentionVisualization 
-                attentionWeights={attentionWeights}
-                currentStep={currentStep}
-              />
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
+        <VisualizationContent
+          currentStep={currentStep}
+          embeddings={embeddings}
+          attentionWeights={attentionWeights}
+        />
       </Card>
     </motion.div>
   );
