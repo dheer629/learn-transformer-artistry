@@ -2,6 +2,41 @@ import React from "react";
 import { motion } from "framer-motion";
 import TransformerOverview from "./learning/TransformerOverview";
 import ModuleCard from "./learning/ModuleCard";
+import { Card } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
+
+const learningResources = [
+  {
+    title: "Machine Learning Introduction",
+    description: "Great introduction with important terminology. Watch until 6:47.",
+    url: "https://www.youtube.com/watch?v=ukzFI9rgwfU",
+    category: "fundamentals"
+  },
+  {
+    title: "What is Machine Learning?",
+    description: "Explains supervised learning, unsupervised learning, and reinforcement learning.",
+    url: "https://www.youtube.com/watch?v=f_uwKZIAeM0",
+    category: "fundamentals"
+  },
+  {
+    title: "A Friendly Intro to Machine Learning",
+    description: "Cool illustrations and concepts. Watch until 5:54.",
+    url: "https://www.youtube.com/watch?v=IpGxLWOIZy4",
+    category: "fundamentals"
+  },
+  {
+    title: "Basic ML Algorithms Overview",
+    description: "Overview of different algorithms and their use cases.",
+    url: "https://www.youtube.com/watch?v=U4IYsLWIEx8",
+    category: "algorithms"
+  },
+  {
+    title: "Machine Learning from Zero to Hero",
+    description: "Motivational overview for software developers.",
+    url: "https://www.youtube.com/watch?v=VwVg9jCtqaU",
+    category: "motivation"
+  }
+];
 
 const modules = [
   {
@@ -68,6 +103,35 @@ const LearningModule = () => {
       <motion.div variants={itemVariants}>
         <TransformerOverview />
       </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <Card className="p-6">
+          <h3 className="text-2xl font-bold mb-4">Essential Learning Resources</h3>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-4">
+              {learningResources.map((resource, index) => (
+                <motion.div
+                  key={index}
+                  className="p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                  variants={itemVariants}
+                >
+                  <h4 className="font-semibold text-lg text-primary">{resource.title}</h4>
+                  <p className="text-gray-600 mt-1">{resource.description}</p>
+                  <a 
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 mt-2 inline-block"
+                  >
+                    Watch Video →
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+          </ScrollArea>
+        </Card>
+      </motion.div>
+
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
         variants={containerVariants}
