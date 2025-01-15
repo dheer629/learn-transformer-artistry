@@ -77,26 +77,33 @@ const modules = [
     analogy: "Consider a Transformer as an advanced information processing system that can simultaneously analyze multiple aspects of data while maintaining contextual relationships.",
   },
   {
-    title: "Architectural Components",
-    description: "Understanding the key building blocks",
-    icon: "🔧",
-    content: "The architecture consists of encoder and decoder stacks, each containing self-attention layers and feed-forward neural networks. This design enables parallel processing and efficient handling of long-range dependencies in sequential data.",
-    analogy: "The components work together like a sophisticated assembly line where each station can communicate with all others to ensure optimal processing.",
+    title: "Text Processing Pipeline",
+    description: "From raw text to embeddings",
+    icon: "🔤",
+    content: "Understanding how transformers process text involves several key steps: tokenization (breaking down text), embedding creation, and attention computation. This process enables the model to understand and generate human-like text.",
+    analogy: "Think of tokenization like breaking a sentence into meaningful pieces, similar to how we learn to read by recognizing individual words and their combinations.",
   },
   {
-    title: "Self-Attention Mechanism",
-    description: "Deep dive into attention computation",
-    icon: "🔍",
-    content: "Self-attention allows the model to weigh the importance of different elements in a sequence when processing each element. It computes attention scores between all pairs of positions, enabling the model to capture complex relationships and dependencies.",
-    analogy: "Similar to how a researcher cross-references multiple sources while writing a paper, self-attention helps the model consider all relevant information when processing each input.",
+    title: "Practical Applications",
+    description: "Real-world implementations and use cases",
+    icon: "💡",
+    content: "Transformers power various applications including semantic search, RAG (Retrieval-Augmented Generation), conversation memory management, and multimodal processing. They can be fine-tuned for specific tasks like named-entity recognition and few-shot classification.",
+    analogy: "Like a versatile tool that can be adapted for different tasks, transformers can be specialized for various language processing needs.",
   },
   {
-    title: "Applications & Impact",
-    description: "Real-world implementations",
-    icon: "🌐",
-    content: "Transformers power state-of-the-art models in machine translation, text generation, and even computer vision. Their impact extends beyond NLP to areas like protein structure prediction and music generation.",
-    analogy: "Just as the printing press revolutionized information dissemination, Transformers have fundamentally changed how machines process and generate human-like content.",
+    title: "Advanced Concepts",
+    description: "Specialized techniques and optimizations",
+    icon: "🚀",
+    content: "Advanced transformer implementations include techniques like key-value caching for faster generation, dense retrieval for semantic search, and specialized architectures for multimodal processing. Understanding these concepts helps in building more efficient and capable systems.",
+    analogy: "These optimizations are like fine-tuning a high-performance engine - small adjustments that lead to significant improvements in speed and efficiency.",
   },
+  {
+    title: "Model Training & Evaluation",
+    description: "Fine-tuning and benchmarking",
+    icon: "📊",
+    content: "The process of adapting transformers for specific tasks involves fine-tuning pretrained models, freezing layers for efficiency, and rigorous evaluation using benchmarks. This ensures the model performs well on targeted applications while maintaining computational efficiency.",
+    analogy: "Similar to how an athlete trains for specific events while maintaining overall fitness, models can be specialized while preserving their general capabilities.",
+  }
 ];
 
 const containerVariants = {
@@ -182,5 +189,3 @@ const LearningModule = () => {
     </motion.div>
   );
 };
-
-export default LearningModule;
