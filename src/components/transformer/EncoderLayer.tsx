@@ -10,11 +10,24 @@ interface EncoderLayerProps {
 }
 
 const EncoderLayer: React.FC<EncoderLayerProps> = ({ 
-  step, 
-  index, 
-  currentStep,
+  step = {
+    title: "",
+    description: "",
+    formula: "",
+    details: [],
+    explanation: {
+      title: "",
+      simpleExplanation: "",
+      vectorExplanation: "",
+      example: ""
+    }
+  }, 
+  index = 0, 
+  currentStep = 0,
   layerOutput 
 }) => {
+  if (!step) return null;
+
   return (
     <motion.div
       className={`p-4 rounded-lg ${

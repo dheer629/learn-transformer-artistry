@@ -6,6 +6,7 @@ import TransformerVisualization from "@/components/TransformerVisualization";
 import LearningModule from "@/components/LearningModule";
 import Quiz from "@/components/Quiz";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -38,27 +39,28 @@ const Index = () => {
       </header>
       
       <main className="container pb-12">
-        <Tabs defaultValue="learn" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 gap-4">
-            <TabsTrigger value="learn">Learn</TabsTrigger>
-            <TabsTrigger value="visualize">Visualize</TabsTrigger>
-            <TabsTrigger value="practice">Practice</TabsTrigger>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-          </TabsList>
+        <TooltipProvider>
+          <Tabs defaultValue="learn" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-4 gap-4">
+              <TabsTrigger value="learn">Learn</TabsTrigger>
+              <TabsTrigger value="visualize">Visualize</TabsTrigger>
+              <TabsTrigger value="practice">Practice</TabsTrigger>
+              <TabsTrigger value="applications">Applications</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="learn" className="space-y-8">
-            <LearningModule />
-          </TabsContent>
+            <TabsContent value="learn" className="space-y-8">
+              <LearningModule />
+            </TabsContent>
 
-          <TabsContent value="visualize" className="space-y-8">
-            <TransformerVisualization />
-          </TabsContent>
+            <TabsContent value="visualize" className="space-y-8">
+              <TransformerVisualization />
+            </TabsContent>
 
-          <TabsContent value="practice" className="space-y-8">
-            <Quiz />
-          </TabsContent>
+            <TabsContent value="practice" className="space-y-8">
+              <Quiz />
+            </TabsContent>
 
-          <TabsContent value="applications" className="space-y-8">
+            <TabsContent value="applications" className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 bg-white rounded-lg shadow-lg">
                 <h3 className="text-2xl font-bold text-primary mb-4">Real-World Applications</h3>
@@ -116,8 +118,9 @@ const Index = () => {
                 </ul>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </TooltipProvider>
       </main>
     </div>
   );
