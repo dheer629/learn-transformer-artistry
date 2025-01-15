@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import TransformerStepsList from "./sections/TransformerStepsList";
 import KeyFeatures from "./sections/KeyFeatures";
+import { cn } from "@/lib/utils";
 
 const fadeInUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -72,6 +73,22 @@ const TransformerOverview = () => {
             className="space-y-8"
             variants={fadeInUpVariants}
           >
+            {/* Architecture Diagram */}
+            <div className="flex flex-col items-center space-y-4">
+              <img
+                src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
+                alt="Transformer Architecture Diagram"
+                className={cn(
+                  "rounded-lg shadow-md max-w-full h-auto",
+                  "hover:shadow-lg transition-shadow duration-300",
+                  "border border-gray-100"
+                )}
+              />
+              <p className="text-sm text-gray-600 text-center italic">
+                Detailed architecture of the Transformer model showing encoder and decoder components
+              </p>
+            </div>
+
             <KeyFeatures />
             <TransformerStepsList 
               steps={transformerSteps}
