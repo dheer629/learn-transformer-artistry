@@ -8,6 +8,7 @@ import InputOutputSection from "./transformer/sections/InputOutputSection";
 import VisualizationContent from "./transformer/sections/VisualizationContent";
 import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
 import PredictionsSection from "./transformer/sections/PredictionsSection";
+import TokenizerPlayground from "./transformer/sections/TokenizerPlayground";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
@@ -24,8 +25,13 @@ const TransformerVisualization = () => {
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
   const [nextWordProbabilities, setNextWordProbabilities] = useState<{ word: string; probability: number }[]>([]);
+  const [tokenizedOutput, setTokenizedOutput] = useState<{ text: string; id: number }[]>([]);
   const { toast } = useToast();
   const totalSteps = encoderSteps.length + decoderSteps.length;
+
+  const handleTokenize = (tokens: { text: string; id: number }[]) => {
+    setTokenizedOutput(tokens);
+  };
 
   const handleNextStep = () => {
     if (currentStep < totalSteps - 1) {
@@ -235,6 +241,11 @@ const TransformerVisualization = () => {
           isProcessing={isProcessing}
         />
 
+        <TokenizerPlayground
+          inputText={inputText}
+          onTokenize={handleTokenize}
+        />
+
         {embeddings.length > 0 && (
           <motion.div
             variants={containerAnimation}
@@ -243,6 +254,7 @@ const TransformerVisualization = () => {
             <TokenProcessingSection
               tokens={embeddings}
               currentStep={currentStep}
+              tokenizedOutput={tokenizedOutput}
             />
           </motion.div>
         )}
