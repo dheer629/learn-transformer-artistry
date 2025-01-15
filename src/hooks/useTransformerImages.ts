@@ -18,10 +18,9 @@ export const useTransformerImages = () => {
 
       const imagesWithUrls = await Promise.all(
         (data as TransformerImage[]).map(async (image) => {
-          // Get the public URL for the image from the transformer_images bucket
           const { data: { publicUrl } } = supabase.storage
             .from("transformer_images")
-            .getPublicUrl(`${image.image_path}`);
+            .getPublicUrl(image.image_path);
 
           console.log('Image path:', image.image_path);
           console.log('Public URL:', publicUrl);
