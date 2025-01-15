@@ -31,26 +31,26 @@ const TransformerOverview = () => {
   const transformerSteps = [
     {
       title: "Input Embedding",
-      description: "Converting text into numerical vectors",
-      detailedExplanation: "In this step, we transform each word or token into a vector of numbers that represents its meaning in a high-dimensional space. Similar words will have similar vector representations.",
-      formula: "\\[\\text{Word} \\xrightarrow{\\text{Embedding Matrix}} \\mathbf{x} \\in \\mathbb{R}^d\\]",
-      formulaDescription: "Words are transformed into d-dimensional vectors through an embedding matrix",
+      description: "Converting words into numerical vectors",
+      detailedExplanation: "Each word is transformed into a vector (list of numbers) that captures its meaning. Similar words will have similar vector representations.",
+      formula: "\\[\\textcolor{#0EA5E9}{\\text{Word}} \\xrightarrow{\\textcolor{#F97316}{\\text{Embedding}}} \\textcolor{#D946EF}{\\mathbf{x} \\in \\mathbb{R}^d}\\]",
+      formulaDescription: "Words (blue) are transformed through embedding (orange) into d-dimensional vectors (purple)",
       category: "embedding"
     },
     {
       title: "Positional Encoding",
-      description: "Adding position information to embeddings",
-      detailedExplanation: "Since transformers process all tokens simultaneously, we need to add information about the position of each token in the sequence. This is done using sinusoidal functions of different frequencies.",
-      formula: "\\[PE_{(pos,2i)} = \\sin\\left(\\frac{pos}{10000^{2i/d}}\\right)\\]",
-      formulaDescription: "Position encoding uses sine waves of different frequencies",
+      description: "Adding position information",
+      detailedExplanation: "Since transformers process all words at once, we need to add information about where each word appears in the sentence. We use special mathematical functions to do this.",
+      formula: "\\[\\textcolor{#0EA5E9}{PE_{(pos,2i)}} = \\textcolor{#F97316}{\\sin\\left(\\frac{pos}{10000^{2i/d}}\\right)}\\]",
+      formulaDescription: "Position encoding (blue) uses sine waves (orange) to encode word positions",
       category: "encoding"
     },
     {
       title: "Self-Attention",
-      description: "Computing relationships between tokens",
-      detailedExplanation: "Each token learns to pay attention to other relevant tokens in the sequence. This is done by computing Query (Q), Key (K), and Value (V) vectors for each token and using them to calculate attention scores.",
-      formula: "\\[\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V\\]",
-      formulaDescription: "Attention mechanism computes weighted relationships between tokens",
+      description: "Finding relationships between words",
+      detailedExplanation: "The transformer looks at how each word relates to every other word in the sentence. It's like understanding how words work together to create meaning.",
+      formula: "\\[\\textcolor{#0EA5E9}{\\text{Attention}(Q,K,V)} = \\textcolor{#F97316}{\\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)}\\textcolor{#D946EF}{V}\\]",
+      formulaDescription: "Attention mechanism (blue) uses scaled dot-product (orange) to weight the values (purple)",
       category: "attention"
     }
   ];
@@ -67,8 +67,7 @@ const TransformerOverview = () => {
           Understanding Transformers
         </h2>
         <p className="text-lg text-gray-600 mb-6">
-          Transformers are advanced neural networks that have revolutionized natural language processing
-          through their innovative attention mechanism and parallel processing capabilities.
+          Transformers are powerful neural networks that can understand and process language by looking at how words relate to each other in a sentence.
         </p>
       </motion.div>
 
@@ -79,12 +78,12 @@ const TransformerOverview = () => {
         <div className="space-y-6">
           <div>
             <h3 className="text-xl font-semibold text-primary mb-3">
-              Core Architecture
+              How Transformers Work
             </h3>
             <p className="text-gray-600">
-              The Transformer architecture consists of an encoder and decoder, each containing
-              self-attention layers and feed-forward neural networks. This design enables
-              efficient processing of sequential data while capturing long-range dependencies.
+              A transformer processes text in three main steps: first, it converts words into numbers (embedding), 
+              then adds position information, and finally looks at how words relate to each other (attention).
+              This helps it understand the meaning of sentences just like we do!
             </p>
           </div>
 
@@ -108,7 +107,7 @@ const TransformerOverview = () => {
               />
             </div>
             <p className="text-sm text-gray-600 text-center italic">
-              Detailed architecture of the Transformer model showing encoder and decoder components
+              The transformer architecture showing how information flows through the model
             </p>
           </div>
         </motion.div>
