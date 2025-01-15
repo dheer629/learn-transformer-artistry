@@ -133,7 +133,7 @@ const TransformerVisualization = () => {
   return (
     <Card className="p-6 space-y-6">
       <motion.h2 
-        className="text-2xl font-bold text-primary mb-4"
+        className="text-2xl font-bold text-primary mb-4 animate-fade-in"
         initial="hidden"
         animate="visible"
         variants={flowAnimation}
@@ -156,12 +156,12 @@ const TransformerVisualization = () => {
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Enter text (e.g., 'Hello')"
                 disabled={isProcessing}
-                className="transition-all duration-300"
+                className="transition-all duration-300 hover:border-primary"
               />
               <Button 
                 onClick={handleProcess} 
                 disabled={!inputText || isProcessing}
-                className="transition-all duration-300"
+                className="transition-all duration-300 hover:scale-105"
               >
                 Process
               </Button>
@@ -183,7 +183,7 @@ const TransformerVisualization = () => {
               disabled={isProcessing}
               className="transition-all duration-300"
             />
-            <div className="text-sm text-muted-foreground mt-1">
+            <div className="text-sm text-muted-foreground mt-1 animate-fade-in">
               Current: {learningRate}
             </div>
           </motion.div>
@@ -195,7 +195,7 @@ const TransformerVisualization = () => {
           animate="animate"
         >
           <label className="block text-sm font-medium mb-2">Output</label>
-          <div className="h-10 flex items-center border rounded-md px-3 bg-muted">
+          <div className="h-10 flex items-center border rounded-md px-3 bg-muted animate-fade-in">
             {outputText || "Translation will appear here"}
           </div>
         </motion.div>
@@ -211,14 +211,14 @@ const TransformerVisualization = () => {
           variant="outline"
           onClick={() => setIsPaused(!isPaused)}
           disabled={!isProcessing}
-          className="transition-all duration-300"
+          className="transition-all duration-300 hover:scale-105"
         >
           {isPaused ? "Resume" : "Pause"}
         </Button>
         <Button
           onClick={handleContinue}
           disabled={!waitForUser || !isProcessing}
-          className="transition-all duration-300"
+          className="transition-all duration-300 hover:scale-105"
         >
           Continue to Next Step
         </Button>
