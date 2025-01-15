@@ -42,13 +42,13 @@ const TransformerOverview = () => {
         </motion.h2>
         <div className="flex flex-col space-y-6">
           <motion.div 
-            className="flex justify-center"
+            className="flex justify-start"
             variants={fadeInUpVariants}
           >
             <img 
               src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
               alt="Transformer Architecture Diagram" 
-              className="w-full max-w-2xl h-auto rounded-lg shadow-lg mb-8"
+              className="w-full max-w-xl h-auto rounded-lg shadow-lg mb-8"
             />
           </motion.div>
           <motion.div 
