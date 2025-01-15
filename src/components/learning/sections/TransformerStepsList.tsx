@@ -11,7 +11,6 @@ interface TransformerStepsListProps {
     formulaDescription: string;
     category: string;
   }>;
-  getImageUrl: (category: string) => string | null;
   isLoading: boolean;
 }
 
@@ -29,16 +28,15 @@ const listItemVariants = {
 
 const TransformerStepsList: React.FC<TransformerStepsListProps> = ({ 
   steps, 
-  getImageUrl, 
   isLoading 
 }) => {
   return (
     <motion.div variants={listItemVariants}>
       <motion.h3 
-        className="text-xl sm:text-2xl font-semibold text-primary"
+        className="text-xl sm:text-2xl font-semibold text-primary mb-6"
         variants={listItemVariants}
       >
-        Step-by-Step Transformer Process:
+        Core Components & Mechanisms:
       </motion.h3>
       <motion.ol className="space-y-8">
         {steps.map((step, index) => (
@@ -49,7 +47,6 @@ const TransformerStepsList: React.FC<TransformerStepsListProps> = ({
           >
             <TransformerStep
               {...step}
-              imageUrl={getImageUrl(step.category)}
               isLoading={isLoading}
             />
           </motion.li>

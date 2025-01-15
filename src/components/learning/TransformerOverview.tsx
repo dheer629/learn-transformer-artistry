@@ -1,11 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { useTransformerImages } from "@/hooks/useTransformerImages";
-import TransformerArchitecture from "./TransformerArchitecture";
 import TransformerStepsList from "./sections/TransformerStepsList";
 import KeyFeatures from "./sections/KeyFeatures";
-import { useToast } from "@/components/ui/use-toast";
 
 const fadeInUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -22,78 +19,39 @@ const fadeInUpVariants = {
 const transformerSteps = [
   {
     title: "Input Embedding & Positional Encoding",
-    description: "Converts input tokens into continuous vector representations and adds positional information to maintain sequence order.",
-    detailedExplanation: "The embedding layer transforms each input token into a dense vector of fixed size. Positional encoding adds information about the position of each token in the sequence, allowing the model to understand word order.",
+    description: "Converting input tokens into vector representations",
+    detailedExplanation: "The embedding layer transforms discrete tokens into continuous vector spaces, while positional encoding adds sequence order information. This enables the model to understand both the meaning and position of each token.",
     formula: "\\[ E(x) = W_e x + PE_{pos} \\]",
-    formulaDescription: "Where PE_{pos} is positional encoding using sine and cosine functions of different frequencies.",
+    formulaDescription: "Combines token embeddings with positional encodings using sinusoidal functions.",
     category: "embedding"
   },
   {
     title: "Self-Attention Mechanism",
-    description: "Allows the model to weigh the importance of different words in relation to each other when processing a specific word.",
-    detailedExplanation: "Self-attention calculates attention scores between all pairs of words in the input sequence. This helps the model understand relationships and dependencies between words, regardless of their distance in the sequence.",
+    description: "Computing token relationships",
+    detailedExplanation: "Self-attention calculates importance scores between all token pairs, allowing the model to weigh relevant context when processing each token. This mechanism is key to capturing long-range dependencies.",
     formula: "\\[ Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V \\]",
-    formulaDescription: "Q, K, V are query, key, and value matrices derived from the input; d_k is the dimension of the key vectors.",
+    formulaDescription: "Attention computation using queries (Q), keys (K), and values (V).",
     category: "attention"
   },
   {
     title: "Multi-Head Attention",
-    description: "Allows the model to focus on different aspects of the input sequence simultaneously.",
-    detailedExplanation: "Multiple attention heads process the input in parallel, each potentially focusing on different aspects of the relationships between words. This allows the model to capture various types of dependencies in the data.",
+    description: "Parallel attention computation",
+    detailedExplanation: "Multiple attention heads process input differently, capturing various types of relationships. This parallel processing enables the model to learn diverse representation patterns.",
     formula: "\\[ MultiHead(Q,K,V) = Concat(head_1,...,head_h)W^O \\]",
-    formulaDescription: "Each head independently computes attention, and results are concatenated and projected.",
+    formulaDescription: "Combines outputs from multiple attention heads.",
     category: "multi_head"
   },
   {
     title: "Feed-Forward Networks",
-    description: "Processes the attention outputs through neural networks to capture complex patterns.",
-    detailedExplanation: "The feed-forward network applies two linear transformations with a ReLU activation in between. This component allows the model to process the attention mechanism's output and introduce non-linearity.",
+    description: "Non-linear transformations",
+    detailedExplanation: "Position-wise feed-forward networks apply non-linear transformations to attention outputs. This component allows the model to process complex patterns independently for each position.",
     formula: "\\[ FFN(x) = max(0, xW_1 + b_1)W_2 + b_2 \\]",
-    formulaDescription: "Two-layer neural network with ReLU activation, processing each position independently.",
+    formulaDescription: "Two-layer neural network with ReLU activation.",
     category: "ffn"
   }
 ];
 
 const TransformerOverview = () => {
-  const { data: images, isLoading, error } = useTransformerImages();
-  const { toast } = useToast();
-
-  const getImageUrl = (category: string) => {
-    if (error) {
-      console.error("Error fetching images:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch images. Please try again later.",
-      });
-      return null;
-    }
-
-    if (!images || images.length === 0) {
-      console.warn("No images available");
-      return null;
-    }
-    
-    const normalizedCategory = category.toLowerCase().trim();
-    console.log(`Looking for image with category: ${normalizedCategory}`);
-    console.log("Available categories:", images.map(img => img.category.toLowerCase().trim()));
-    
-    const image = images.find(img => 
-      img.category.toLowerCase().trim() === normalizedCategory
-    );
-    
-    if (image) {
-      console.log(`Found image for category ${normalizedCategory}:`, image);
-      return image.image_url;
-    }
-    
-    console.warn(`No image found for category: ${normalizedCategory}`);
-    return null;
-  };
-
-  const architectureImage = getImageUrl('transformer_architecture');
-  console.log("Architecture image URL:", architectureImage);
-
   return (
     <motion.div
       initial="hidden"
@@ -110,11 +68,6 @@ const TransformerOverview = () => {
         </motion.h2>
         
         <div className="grid grid-cols-1 gap-8">
-          <TransformerArchitecture 
-            mainImageUrl={architectureImage}
-            isLoading={isLoading}
-          />
-          
           <motion.div 
             className="space-y-8"
             variants={fadeInUpVariants}
@@ -122,8 +75,7 @@ const TransformerOverview = () => {
             <KeyFeatures />
             <TransformerStepsList 
               steps={transformerSteps}
-              getImageUrl={getImageUrl}
-              isLoading={isLoading}
+              isLoading={false}
             />
           </motion.div>
         </div>

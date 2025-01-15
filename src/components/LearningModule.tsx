@@ -5,32 +5,32 @@ import ModuleCard from "./learning/ModuleCard";
 
 const modules = [
   {
-    title: "What Are Transformers?",
-    description: "Understanding the foundation of modern AI language models.",
-    icon: "🤖",
-    content: "Transformers are neural networks designed to handle sequential data through self-attention mechanisms. First introduced in 2017 by Google in the 'Attention is All You Need' paper, they've revolutionized natural language processing and become the foundation for models like GPT and BERT.",
-    analogy: "Think of a Transformer like a highly efficient team of researchers, each capable of focusing on different aspects of a document simultaneously, while maintaining awareness of how all pieces connect together.",
+    title: "Introduction to Transformers",
+    description: "Core concepts and architectural overview",
+    icon: "📚",
+    content: "Transformers represent a breakthrough in neural network architecture, designed to process sequential data through self-attention mechanisms. Introduced in the seminal paper 'Attention is All You Need' (2017), they've become fundamental to modern natural language processing.",
+    analogy: "Consider a Transformer as an advanced information processing system that can simultaneously analyze multiple aspects of data while maintaining contextual relationships.",
   },
   {
-    title: "The Evolution from RNNs",
-    description: "Why Transformers replaced traditional RNN models.",
-    icon: "🔄",
-    content: "Unlike RNNs that process data sequentially, Transformers can process all input data in parallel, making them much faster and more efficient. They also excel at handling long-range dependencies in data through their attention mechanism, overcoming a key limitation of RNNs.",
-    analogy: "If RNNs are like reading a book one word at a time, Transformers are like being able to see and understand an entire page at once, while still grasping how each word relates to others.",
+    title: "Architectural Components",
+    description: "Understanding the key building blocks",
+    icon: "🔧",
+    content: "The architecture consists of encoder and decoder stacks, each containing self-attention layers and feed-forward neural networks. This design enables parallel processing and efficient handling of long-range dependencies in sequential data.",
+    analogy: "The components work together like a sophisticated assembly line where each station can communicate with all others to ensure optimal processing.",
   },
   {
     title: "Self-Attention Mechanism",
-    description: "The core innovation behind Transformer models.",
+    description: "Deep dive into attention computation",
     icon: "🔍",
-    content: "Self-attention allows the model to weigh the importance of different parts of the input when processing each element. It computes attention scores between all pairs of positions in the sequence, enabling the model to capture complex relationships and dependencies.",
-    analogy: "Imagine a room full of people having multiple conversations. Self-attention is like each person's ability to focus on relevant conversations while still maintaining awareness of other important discussions happening around them.",
+    content: "Self-attention allows the model to weigh the importance of different elements in a sequence when processing each element. It computes attention scores between all pairs of positions, enabling the model to capture complex relationships and dependencies.",
+    analogy: "Similar to how a researcher cross-references multiple sources while writing a paper, self-attention helps the model consider all relevant information when processing each input.",
   },
   {
-    title: "Real-World Applications",
-    description: "How Transformers are changing the AI landscape.",
-    icon: "🌍",
-    content: "Transformers power many modern AI applications, from language translation and text generation to code completion and image recognition. They're the technology behind ChatGPT, BERT, and other groundbreaking AI models that have transformed how we interact with computers.",
-    analogy: "Just as the printing press revolutionized information sharing, Transformers have revolutionized how machines understand and generate human-like content across various domains.",
+    title: "Applications & Impact",
+    description: "Real-world implementations",
+    icon: "🌐",
+    content: "Transformers power state-of-the-art models in machine translation, text generation, and even computer vision. Their impact extends beyond NLP to areas like protein structure prediction and music generation.",
+    analogy: "Just as the printing press revolutionized information dissemination, Transformers have fundamentally changed how machines process and generate human-like content.",
   },
 ];
 
@@ -66,7 +66,7 @@ const LearningModule = () => {
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
-        <TransformerOverview key={Date.now()} />
+        <TransformerOverview />
       </motion.div>
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
