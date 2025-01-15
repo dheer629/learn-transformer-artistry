@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import TransformerStep from "../TransformerStep";
+import { Card } from "@/components/ui/card";
 
 interface TransformerStepsListProps {
   steps: Array<{
@@ -34,25 +35,25 @@ const TransformerStepsList: React.FC<TransformerStepsListProps> = ({
     {
       title: "Input Embeddings",
       description: "Converting words into numerical vectors",
-      detailedExplanation: "Each word is transformed into a dense vector representation that captures semantic meaning. The embedding layer learns to map similar words to similar vector spaces, enabling the model to understand relationships between words.",
+      detailedExplanation: "Each word is transformed into a dense vector representation that captures semantic meaning. The embedding layer learns to map similar words to similar vector spaces, enabling the model to understand relationships between words. This process converts discrete word tokens into continuous vector spaces where semantic relationships can be measured.",
       formula: "\\[\\mathbf{x} = \\text{Embedding}(\\text{word})\\]",
-      formulaDescription: "Words are transformed into continuous vector representations",
+      formulaDescription: "Words are transformed into continuous vector representations in a high-dimensional space",
       category: "embedding"
     },
     {
       title: "Positional Encoding",
       description: "Adding position information to embeddings",
-      detailedExplanation: "Since transformers process all words simultaneously, positional encodings are added to provide information about word order. These use sine and cosine functions of different frequencies to create unique patterns for each position.",
+      detailedExplanation: "Since transformers process all words simultaneously, positional encodings are added to provide information about word order. These encodings use sine and cosine functions of different frequencies to create unique patterns for each position, allowing the model to understand the sequential nature of language while maintaining parallel processing capabilities.",
       formula: "\\[PE_{(pos,2i)} = \\sin\\left(\\frac{pos}{10000^{2i/d}}\\right)\\]",
-      formulaDescription: "Position information is encoded using sinusoidal functions",
+      formulaDescription: "Position information is encoded using sinusoidal functions with varying frequencies",
       category: "encoding"
     },
     {
       title: "Multi-Head Attention",
       description: "Parallel attention computation",
-      detailedExplanation: "Multiple attention heads process the input in parallel, each focusing on different aspects of the relationships between words. This allows the model to capture various types of dependencies and patterns simultaneously.",
-      formula: "\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1,\\ldots,\\text{head}_h)W^O\\]",
-      formulaDescription: "Multiple attention mechanisms operate in parallel",
+      detailedExplanation: "Multiple attention heads process the input in parallel, each focusing on different aspects of the relationships between words. This mechanism allows the model to capture various types of dependencies and patterns simultaneously. Each head can learn to attend to different aspects of the input, such as syntactic structure, semantic relationships, or long-range dependencies.",
+      formula: "\\[\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V\\]",
+      formulaDescription: "Multiple attention mechanisms operate in parallel to capture different relationship patterns",
       category: "attention"
     },
     {
@@ -74,18 +75,26 @@ const TransformerStepsList: React.FC<TransformerStepsListProps> = ({
   ];
 
   return (
-    <motion.div variants={listItemVariants}>
+    <motion.div 
+      className="w-full max-w-4xl mx-auto space-y-8 p-4"
+      initial="hidden"
+      animate="visible"
+      variants={listItemVariants}
+    >
       <motion.ol className="space-y-8">
         {transformerSteps.map((step, index) => (
           <motion.li
             key={index}
             variants={listItemVariants}
             custom={index}
+            className="list-none"
           >
-            <TransformerStep
-              {...step}
-              isLoading={isLoading}
-            />
+            <Card className="p-6 hover:shadow-lg transition-shadow duration-300">
+              <TransformerStep
+                {...step}
+                isLoading={isLoading}
+              />
+            </Card>
           </motion.li>
         ))}
       </motion.ol>
