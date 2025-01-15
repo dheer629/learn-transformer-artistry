@@ -81,13 +81,34 @@ const TransformerVisualization = () => {
     }
   };
 
+  const flowAnimation = {
+    initial: { scale: 0.95, opacity: 0 },
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      scale: 0.95,
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeIn"
+      }
+    }
+  };
+
   return (
     <motion.div
       initial="hidden"
       animate="visible"
       variants={containerAnimation}
+      className="space-y-8"
     >
-      <Card className="p-6 space-y-6">
+      <Card className="p-6 space-y-6 overflow-hidden">
         <motion.h2 
           className="text-2xl font-bold text-primary mb-4"
           variants={itemAnimation}
@@ -111,7 +132,10 @@ const TransformerVisualization = () => {
           <OutputSection outputText={outputText} />
         </motion.div>
 
-        <motion.div variants={itemAnimation}>
+        <motion.div 
+          variants={itemAnimation}
+          className="relative"
+        >
           <ControlsSection
             isPaused={isPaused}
             setIsPaused={setIsPaused}
@@ -121,7 +145,10 @@ const TransformerVisualization = () => {
           />
         </motion.div>
 
-        <motion.div variants={itemAnimation}>
+        <motion.div 
+          variants={itemAnimation}
+          className="relative"
+        >
           <LayersVisualization
             currentStep={currentStep}
             layerOutputs={layerOutputs}
@@ -131,10 +158,11 @@ const TransformerVisualization = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            variants={flowAnimation}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="space-y-6"
           >
             <EmbeddingsVisualization 
               embeddings={embeddings}
