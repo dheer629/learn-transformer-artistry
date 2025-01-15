@@ -32,12 +32,6 @@ const TransformerStepsList: React.FC<TransformerStepsListProps> = ({
 }) => {
   return (
     <motion.div variants={listItemVariants}>
-      <motion.h3 
-        className="text-xl sm:text-2xl font-semibold text-primary mb-6"
-        variants={listItemVariants}
-      >
-        Core Components & Mechanisms:
-      </motion.h3>
       <motion.ol className="space-y-8">
         {steps.map((step, index) => (
           <motion.li
