@@ -75,6 +75,20 @@ const LearningModule = () => {
           </Card>
         ))}
       </div>
+      <Card className="p-6 hover:shadow-lg transition-shadow animate-fade-in">
+        <h3 className="text-xl font-semibold text-primary mb-4">Transformer Architecture Diagram</h3>
+        <div className="flex justify-center">
+          <img 
+            src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
+            alt="Transformer Architecture Diagram" 
+            className="max-w-full h-auto rounded-lg shadow-lg"
+          />
+        </div>
+        <p className="mt-4 text-gray-600 text-center">
+          This diagram illustrates the complete architecture of a Transformer model, showing both encoder and decoder components,
+          including the multi-head attention mechanisms, feed-forward networks, and normalization layers.
+        </p>
+      </Card>
     </div>
   );
 };
