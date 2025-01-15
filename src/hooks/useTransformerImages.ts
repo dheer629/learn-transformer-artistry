@@ -11,18 +11,33 @@ export const useTransformerImages = () => {
     queryKey: ["transformer-images"],
     queryFn: async () => {
       // First, let's verify we can get the images from the database
-      const { data, error } = await supabase
+      const { data: storageData, error: storageError } = await supabase
+        .storage
+        .from('transformer_images')
+        .list();
+
+      if (storageError) {
+        console.error("Error listing storage:", storageError);
+        throw storageError;
+      }
+
+      console.log('Available files in storage:', storageData);
+
+      // Then get the image records from the database
+      const { data: dbData, error: dbError } = await supabase
         .from("transformer_images")
         .select("*");
 
-      if (error) {
-        console.error("Error fetching images:", error);
-        throw error;
+      if (dbError) {
+        console.error("Error fetching images:", dbError);
+        throw dbError;
       }
+
+      console.log('Database records:', dbData);
 
       // Now let's get the public URL for each image
       const imagesWithUrls = await Promise.all(
-        (data as TransformerImage[]).map(async (image) => {
+        (dbData as TransformerImage[]).map(async (image) => {
           // Get the public URL using the storage API
           const { data: publicUrlData } = await supabase.storage
             .from("transformer_images")
