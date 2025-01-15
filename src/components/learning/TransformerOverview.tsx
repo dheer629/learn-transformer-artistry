@@ -33,24 +33,24 @@ const TransformerOverview = () => {
       title: "Input Embedding",
       description: "Converting text into numerical vectors",
       detailedExplanation: "In this step, we transform each word or token into a vector of numbers that represents its meaning in a high-dimensional space. Similar words will have similar vector representations.",
-      formula: "\\[\\textcolor{#0EA5E9}{\\text{Token}} \\xrightarrow{\\textcolor{#F97316}{\\text{Embedding Matrix}}} \\textcolor{#D946EF}{\\text{Vector } \\mathbf{x} \\in \\mathbb{R}^d}\\]",
-      formulaDescription: "Each token (blue) is transformed by the embedding matrix (orange) into a d-dimensional vector (purple)",
+      formula: "\\[\\text{Word} \\xrightarrow{\\text{Embedding Matrix}} \\mathbf{x} \\in \\mathbb{R}^d\\]",
+      formulaDescription: "Words are transformed into d-dimensional vectors through an embedding matrix",
       category: "embedding"
     },
     {
       title: "Positional Encoding",
       description: "Adding position information to embeddings",
       detailedExplanation: "Since transformers process all tokens simultaneously, we need to add information about the position of each token in the sequence. This is done using sinusoidal functions of different frequencies.",
-      formula: "\\[\\textcolor{#0EA5E9}{PE_{(pos,2i)}} = \\textcolor{#F97316}{\\sin(\\frac{pos}{10000^{2i/d}})} + \\textcolor{#D946EF}{\\mathbf{x}}\\]",
-      formulaDescription: "Position encoding (blue) uses sine waves (orange) added to the embedding vector (purple)",
+      formula: "\\[PE_{(pos,2i)} = \\sin\\left(\\frac{pos}{10000^{2i/d}}\\right)\\]",
+      formulaDescription: "Position encoding uses sine waves of different frequencies",
       category: "encoding"
     },
     {
       title: "Self-Attention",
       description: "Computing relationships between tokens",
       detailedExplanation: "Each token learns to pay attention to other relevant tokens in the sequence. This is done by computing Query (Q), Key (K), and Value (V) vectors for each token and using them to calculate attention scores.",
-      formula: "\\[\\textcolor{#0EA5E9}{\\text{Attention}(Q,K,V)} = \\textcolor{#F97316}{\\text{softmax}(\\frac{QK^T}{\\sqrt{d_k}})}\\textcolor{#D946EF}{V}\\]",
-      formulaDescription: "Attention mechanism (blue) uses scaled dot-product (orange) to weight the values (purple)",
+      formula: "\\[\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V\\]",
+      formulaDescription: "Attention mechanism computes weighted relationships between tokens",
       category: "attention"
     }
   ];
