@@ -33,9 +33,11 @@ const TransformerOverview = () => {
   const { data: images, isLoading } = useTransformerImages();
 
   const getImageUrl = (category: string, index: number) => {
-    const categoryImages = images?.filter(img => img.category === category) || [];
+    if (!images) return "";
+    const categoryImages = images.filter(img => img.category === category);
+    if (categoryImages.length === 0) return "";
     const selectedImage = categoryImages[index % categoryImages.length];
-    return selectedImage?.url;
+    return selectedImage?.url || "";
   };
 
   const mainImage = images?.find(img => img.category === 'architecture');
@@ -97,7 +99,7 @@ const TransformerOverview = () => {
             <div className="flex justify-center">
               {isLoading ? (
                 <Skeleton className="w-full max-w-3xl h-96 rounded-lg" />
-              ) : mainImage ? (
+              ) : mainImage?.url ? (
                 <div className="relative max-w-3xl mx-auto">
                   <img 
                     src={mainImage.url} 
@@ -108,7 +110,9 @@ const TransformerOverview = () => {
                     Complete Transformer Architecture Overview
                   </p>
                 </div>
-              ) : null}
+              ) : (
+                <div className="text-gray-500 text-center">No architecture image available</div>
+              )}
             </div>
             <div className="bg-blue-50 p-4 rounded-lg max-w-3xl mx-auto">
               <h3 className="font-semibold text-lg text-blue-800 mb-2">Key Features</h3>
@@ -135,38 +139,43 @@ const TransformerOverview = () => {
               className="space-y-8"
               variants={fadeInUpVariants}
             >
-              {transformerSteps.map((step, index) => (
-                <motion.li
-                  key={index}
-                  className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-                  variants={listItemVariants}
-                  custom={index}
-                >
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="text-lg sm:text-xl font-bold text-primary">{step.title}</h4>
-                      <p className="text-gray-600">{step.description}</p>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-700 mb-4">{step.detailedExplanation}</p>
-                        <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
-                        <MathJax className="text-center">{step.formula}</MathJax>
-                        <p className="text-sm text-gray-600 mt-2">{step.formulaDescription}</p>
+              {transformerSteps.map((step, index) => {
+                const imageUrl = getImageUrl(step.category, index);
+                return (
+                  <motion.li
+                    key={index}
+                    className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                    variants={listItemVariants}
+                    custom={index}
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-lg sm:text-xl font-bold text-primary">{step.title}</h4>
+                        <p className="text-gray-600">{step.description}</p>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <p className="text-sm text-gray-700 mb-4">{step.detailedExplanation}</p>
+                          <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
+                          <MathJax className="text-center">{step.formula}</MathJax>
+                          <p className="text-sm text-gray-600 mt-2">{step.formulaDescription}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center">
+                        {isLoading ? (
+                          <Skeleton className="w-full h-64 rounded-lg" />
+                        ) : imageUrl ? (
+                          <img 
+                            src={imageUrl} 
+                            alt={`${step.title} Visualization`}
+                            className="rounded-lg shadow-sm hover:shadow-md transition-shadow object-contain w-full"
+                          />
+                        ) : (
+                          <div className="text-gray-500 text-center">No image available for this step</div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-center">
-                      {isLoading ? (
-                        <Skeleton className="w-full h-64 rounded-lg" />
-                      ) : (
-                        <img 
-                          src={getImageUrl(step.category, index)} 
-                          alt={`${step.title} Visualization`}
-                          className="rounded-lg shadow-sm hover:shadow-md transition-shadow object-contain w-full"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </motion.li>
-              ))}
+                  </motion.li>
+                );
+              })}
             </motion.ol>
           </motion.div>
         </div>
