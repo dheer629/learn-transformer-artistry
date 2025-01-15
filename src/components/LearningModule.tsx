@@ -7,34 +7,64 @@ import { ScrollArea } from "./ui/scroll-area";
 
 const learningResources = [
   {
-    title: "Machine Learning Introduction",
-    description: "Great introduction with important terminology. Watch until 6:47.",
-    url: "https://www.youtube.com/watch?v=ukzFI9rgwfU",
-    category: "fundamentals"
+    title: "Best Courses",
+    description: "Stanford CS231N (CNNs), CS224D (NLP), Andrew Ng's ML Course, and more top-rated courses.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#best-courses",
+    category: "courses"
   },
   {
-    title: "What is Machine Learning?",
-    description: "Explains supervised learning, unsupervised learning, and reinforcement learning.",
-    url: "https://www.youtube.com/watch?v=f_uwKZIAeM0",
-    category: "fundamentals"
+    title: "Important Deep Learning Papers",
+    description: "Collection of influential papers including AlexNet, GoogLeNet, ResNet, and GANs.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#most-important-deep-learning-papers",
+    category: "research"
   },
   {
-    title: "A Friendly Intro to Machine Learning",
-    description: "Cool illustrations and concepts. Watch until 5:54.",
-    url: "https://www.youtube.com/watch?v=IpGxLWOIZy4",
-    category: "fundamentals"
+    title: "ML Tech Talks",
+    description: "Curated talks from leading researchers and practitioners in ML/AI.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#ml-tech-talks",
+    category: "talks"
   },
   {
-    title: "Basic ML Algorithms Overview",
-    description: "Overview of different algorithms and their use cases.",
-    url: "https://www.youtube.com/watch?v=U4IYsLWIEx8",
-    category: "algorithms"
+    title: "Best ML/AI Blogs",
+    description: "Top blogs including Andrej Karpathy, Google Research, DeepMind, and more.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#best-blogs",
+    category: "blogs"
   },
   {
-    title: "Machine Learning from Zero to Hero",
-    description: "Motivational overview for software developers.",
-    url: "https://www.youtube.com/watch?v=VwVg9jCtqaU",
-    category: "motivation"
+    title: "Neural Networks Guide",
+    description: "Comprehensive resources for understanding neural networks, including 3Blue1Brown series.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#neural-networks",
+    category: "neural-networks"
+  },
+  {
+    title: "CNN Resources",
+    description: "In-depth materials about Convolutional Neural Networks and their applications.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#cnns",
+    category: "cnn"
+  },
+  {
+    title: "NLP Resources",
+    description: "Natural Language Processing resources and best practices.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#nlp",
+    category: "nlp"
+  },
+  {
+    title: "Deep Reinforcement Learning",
+    description: "Resources and articles about Deep RL implementation and theory.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#deep-reinforcement-learning",
+    category: "reinforcement-learning"
+  },
+  {
+    title: "ML Project Advice",
+    description: "Practical tips and best practices for ML projects.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#ml-project-advice",
+    category: "advice"
+  },
+  {
+    title: "Debugging ML Models",
+    description: "Comprehensive guide on debugging and improving ML models.",
+    url: "https://github.com/adeshpande3/Machine-Learning-Links-And-Lessons-Learned#debugging-ml-models",
+    category: "debugging"
   }
 ];
 
@@ -107,7 +137,7 @@ const LearningModule = () => {
       <motion.div variants={itemVariants}>
         <Card className="p-6">
           <h3 className="text-2xl font-bold mb-4">Essential Learning Resources</h3>
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="h-[500px] pr-4">
             <div className="space-y-4">
               {learningResources.map((resource, index) => (
                 <motion.div
@@ -123,7 +153,7 @@ const LearningModule = () => {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 mt-2 inline-block"
                   >
-                    Watch Video →
+                    View Resources →
                   </a>
                 </motion.div>
               ))}
