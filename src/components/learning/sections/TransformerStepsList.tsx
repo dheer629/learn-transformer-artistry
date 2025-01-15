@@ -57,18 +57,18 @@ const TransformerStepsList: React.FC<TransformerStepsListProps> = ({
     },
     {
       title: "Feed-Forward Networks",
-      description: "Non-linear transformations",
-      detailedExplanation: "Each position is processed independently through a two-layer neural network with ReLU activation. This allows the model to learn complex patterns and transformations specific to each position.",
-      formula: "\\[\\text{FFN}(x) = \\max(0, xW_1 + b_1)W_2 + b_2\\]",
-      formulaDescription: "Position-wise feed-forward networks apply non-linear transformations",
+      description: "Advanced Neural Processing",
+      detailedExplanation: "The Feed-Forward Network (FFN) in transformers consists of two linear transformations with a ReLU activation in between. Each position flows through this network independently, allowing the model to process and transform the attention outputs. The first linear layer typically expands the dimensionality (often by a factor of 4), while the second layer projects back to the model's hidden size. This expansion and contraction pattern helps the model learn complex relationships and feature interactions.",
+      formula: "\\[\\text{FFN}(x) = \\text{Linear}_2(\\text{ReLU}(\\text{Linear}_1(x)))\\]",
+      formulaDescription: "Two-layer neural network with ReLU activation enabling complex feature learning",
       category: "feedforward"
     },
     {
       title: "Layer Normalization",
-      description: "Stabilizing neural networks",
-      detailedExplanation: "Layer normalization helps stabilize the learning process by normalizing the activations across features. This ensures consistent scale of activations throughout the network.",
-      formula: "\\[\\text{LayerNorm}(x) = \\gamma \\odot \\frac{x - \\mu}{\\sqrt{\\sigma^2 + \\epsilon}} + \\beta\\]",
-      formulaDescription: "Normalization stabilizes training and improves convergence",
+      description: "Advanced Network Stabilization",
+      detailedExplanation: "Layer Normalization is crucial for transformer stability and training efficiency. It operates by normalizing the inputs across the feature dimension, computing mean and variance for each layer independently. The normalized values are then scaled and shifted using learnable parameters γ (scale) and β (shift). This normalization helps prevent internal covariate shift, enables faster training, and allows for deeper networks. Unlike batch normalization, it operates on each sample independently, making it particularly suitable for sequence processing tasks.",
+      formula: "\\[\\text{LayerNorm}(x) = \\gamma \\cdot \\frac{x - \\mu}{\\sqrt{\\sigma^2 + \\epsilon}} + \\beta\\]",
+      formulaDescription: "Feature-wise normalization with learnable scale and shift parameters",
       category: "normalization"
     }
   ];
