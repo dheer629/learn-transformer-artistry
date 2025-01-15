@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
-
-interface EmbeddingVector {
-  word: string;
-  vector: number[];
-}
-
-interface LayerStep {
-  title: string;
-  description: string;
-  formula: string;
-  details: string[];
-}
+import { AnimatePresence } from "framer-motion";
+import EncoderLayer from "./transformer/EncoderLayer";
+import DecoderLayer from "./transformer/DecoderLayer";
+import EmbeddingsVisualization from "./transformer/EmbeddingsVisualization";
+import AttentionVisualization from "./transformer/AttentionVisualization";
+import type { EmbeddingVector, LayerStep } from "./transformer/types";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -106,7 +99,6 @@ const TransformerVisualization = () => {
   ];
 
   const generateEmbeddings = (text: string): EmbeddingVector[] => {
-    // Simplified embedding generation for demonstration
     return text.split(" ").map(word => ({
       word,
       vector: Array.from({ length: 4 }, () => Number((Math.random() * 2 - 1).toFixed(3)))
@@ -119,7 +111,6 @@ const TransformerVisualization = () => {
       Array(dim).fill(0).map(() => Number((Math.random()).toFixed(2)))
     );
     
-    // Normalize weights using softmax
     for (let i = 0; i < dim; i++) {
       const sum = weights[i].reduce((a, b) => a + Math.exp(b), 0);
       weights[i] = weights[i].map(w => Number((Math.exp(w) / sum).toFixed(2)));
@@ -156,7 +147,9 @@ const TransformerVisualization = () => {
 
   return (
     <Card className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-primary mb-4">Transformer Architecture Visualization</h2>
+      <h2 className="text-2xl font-bold text-primary mb-4">
+        Transformer Architecture Visualization
+      </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -182,135 +175,43 @@ const TransformerVisualization = () => {
         </div>
       </div>
 
-      {/* Layer Processing Visualization */}
       <div className="space-y-8">
-        {/* Encoder Section */}
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Encoder Layers</h3>
           <div className="space-y-4">
             {encoderSteps.map((step, index) => (
-              <motion.div
+              <EncoderLayer
                 key={`encoder-${index}`}
-                className={`p-4 rounded-lg ${
-                  index === currentStep ? 'bg-blue-100 shadow-lg' : 'bg-white'
-                }`}
-                animate={{
-                  scale: index === currentStep ? 1.02 : 1,
-                  opacity: index <= currentStep ? 1 : 0.5
-                }}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-semibold">{step.title}</h4>
-                    <p className="text-sm text-gray-600">{step.description}</p>
-                  </div>
-                  <div className="bg-blue-200 px-3 py-1 rounded text-sm font-mono">
-                    {step.formula}
-                  </div>
-                </div>
-                <ul className="mt-2 space-y-1">
-                  {step.details.map((detail, i) => (
-                    <li key={i} className="text-sm text-gray-600">
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+                step={step}
+                index={index}
+                currentStep={currentStep}
+              />
             ))}
           </div>
         </div>
 
-        {/* Decoder Section */}
         <div className="bg-green-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Decoder Layers</h3>
           <div className="space-y-4">
             {decoderSteps.map((step, index) => (
-              <motion.div
+              <DecoderLayer
                 key={`decoder-${index}`}
-                className={`p-4 rounded-lg ${
-                  index + encoderSteps.length === currentStep ? 'bg-green-100 shadow-lg' : 'bg-white'
-                }`}
-                animate={{
-                  scale: index + encoderSteps.length === currentStep ? 1.02 : 1,
-                  opacity: index + encoderSteps.length <= currentStep ? 1 : 0.5
-                }}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-semibold">{step.title}</h4>
-                    <p className="text-sm text-gray-600">{step.description}</p>
-                  </div>
-                  <div className="bg-green-200 px-3 py-1 rounded text-sm font-mono">
-                    {step.formula}
-                  </div>
-                </div>
-                <ul className="mt-2 space-y-1">
-                  {step.details.map((detail, i) => (
-                    <li key={i} className="text-sm text-gray-600">
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+                step={step}
+                index={index}
+                currentStep={currentStep}
+                encoderStepsLength={encoderSteps.length}
+              />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Embeddings Visualization */}
       <AnimatePresence>
-        {embeddings.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="bg-muted p-4 rounded-lg"
-          >
-            <h3 className="font-semibold mb-2">Word Embeddings:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {embeddings.map((embed, i) => (
-                <div key={i} className="bg-white p-3 rounded shadow-sm">
-                  <span className="font-medium">{embed.word}:</span>
-                  <div className="text-sm text-muted-foreground">
-                    [{embed.vector.join(", ")}]
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Attention Weights Visualization */}
-      <AnimatePresence>
-        {attentionWeights.length > 0 && currentStep >= 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="bg-muted p-4 rounded-lg"
-          >
-            <h3 className="font-semibold mb-2">Attention Weights:</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {attentionWeights.map((row, i) => (
-                <div key={i} className="flex gap-2">
-                  {row.map((weight, j) => (
-                    <div
-                      key={j}
-                      className="w-12 h-12 flex items-center justify-center rounded"
-                      style={{
-                        backgroundColor: `rgba(59, 130, 246, ${weight})`,
-                        color: weight > 0.5 ? "white" : "black",
-                      }}
-                    >
-                      {weight}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        <EmbeddingsVisualization embeddings={embeddings} />
+        <AttentionVisualization 
+          attentionWeights={attentionWeights}
+          currentStep={currentStep}
+        />
       </AnimatePresence>
     </Card>
   );
