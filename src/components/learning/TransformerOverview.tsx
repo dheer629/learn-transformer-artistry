@@ -58,25 +58,35 @@ const TransformerOverview = () => {
 
   const getImageUrl = (category: string) => {
     if (!images || images.length === 0) {
-      console.log("No images available");
+      console.log("No images available in the database");
       return null;
     }
     
-    const normalizedCategory = category.toLowerCase().trim();
-    console.log("Looking for category:", normalizedCategory);
-    console.log("Available images:", images.map(img => ({ 
-      category: img.category.toLowerCase(),
-      url: img.image_url 
-    })));
+    // Normalize the search category
+    const searchCategory = category.toLowerCase().trim();
+    console.log("Looking for category:", searchCategory);
     
+    // Log all available categories for debugging
+    const availableCategories = images.map(img => img.category.toLowerCase().trim());
+    console.log("Available categories in database:", availableCategories);
+    
+    // Find the image with matching category (case-insensitive)
     const categoryImage = images.find(img => 
-      img.category.toLowerCase().trim() === normalizedCategory
+      img.category.toLowerCase().trim() === searchCategory ||
+      img.category.toLowerCase().trim().replace(/-/g, '_') === searchCategory ||
+      img.category.toLowerCase().trim().replace(/_/g, '-') === searchCategory
     );
     
-    console.log("Found image for category", normalizedCategory, ":", categoryImage);
-    return categoryImage?.image_url || null;
+    if (!categoryImage) {
+      console.log(`No image found for category: ${searchCategory}`);
+      return null;
+    }
+    
+    console.log(`Found image for category ${searchCategory}:`, categoryImage);
+    return categoryImage.image_url;
   };
 
+  // Get architecture image using the exact category name
   const architectureImage = getImageUrl('transformer_architecture');
   console.log("Architecture image URL:", architectureImage);
 

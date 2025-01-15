@@ -8,6 +8,8 @@ export const useTransformerImages = () => {
   return useQuery({
     queryKey: ["transformer-visualization-images"],
     queryFn: async () => {
+      console.log("Fetching transformer visualization images...");
+      
       const { data: images, error } = await supabase
         .from("transformer_visualization_images")
         .select("*");
@@ -17,7 +19,14 @@ export const useTransformerImages = () => {
         throw error;
       }
 
-      console.log("Fetched images:", images);
+      if (!images || images.length === 0) {
+        console.log("No images found in the database");
+        return [];
+      }
+
+      console.log("Successfully fetched images:", images);
+      console.log("Available categories:", images.map(img => img.category));
+      
       return images;
     }
   });
