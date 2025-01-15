@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { MathJax } from "better-react-mathjax";
+import { cn } from "@/lib/utils";
 
 interface TransformerStepProps {
   title: string;
@@ -20,18 +21,27 @@ const TransformerStep: React.FC<TransformerStepProps> = ({
   isLoading,
 }) => {
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+    <motion.div 
+      className={cn(
+        "bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow",
+        "border border-gray-100"
+      )}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="space-y-4">
         <h4 className="text-lg sm:text-xl font-bold text-primary">{title}</h4>
         <p className="text-gray-600">{description}</p>
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
           <p className="text-sm text-gray-700 mb-4">{detailedExplanation}</p>
-          <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
-          <MathJax className="text-center">{formula}</MathJax>
-          <p className="text-sm text-gray-600 mt-2">{formulaDescription}</p>
+          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg">
+            <h5 className="text-sm font-semibold text-gray-700 mb-2">Mathematical Formula:</h5>
+            <MathJax className="text-center text-lg">{formula}</MathJax>
+            <p className="text-sm text-gray-600 mt-2 italic">{formulaDescription}</p>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

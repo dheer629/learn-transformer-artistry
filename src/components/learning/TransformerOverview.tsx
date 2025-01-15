@@ -22,7 +22,7 @@ const TransformerOverview = () => {
     {
       title: "Input Embedding",
       description: "Converting words into numerical vectors",
-      detailedExplanation: "Each word is transformed into a vector (list of numbers) that captures its meaning. Similar words will have similar vector representations.",
+      detailedExplanation: "Each word is transformed into a vector (list of numbers) that captures its meaning. Similar words will have similar vector representations, helping the model understand relationships between words.",
       formula: "\\[\\mathbf{x} = \\text{Embedding}(\\text{word})\\]",
       formulaDescription: "Words are transformed into vectors through embedding",
       category: "embedding"
@@ -30,7 +30,7 @@ const TransformerOverview = () => {
     {
       title: "Positional Encoding",
       description: "Adding position information",
-      detailedExplanation: "Since transformers process all words at once, we need to add information about where each word appears in the sentence. We use special mathematical functions to do this.",
+      detailedExplanation: "Since transformers process all words at once, we need to add information about where each word appears in the sentence. We use special mathematical functions (sine and cosine waves) to create unique patterns for each position.",
       formula: "\\[PE_{(pos,2i)} = \\sin\\left(\\frac{pos}{10000^{2i/d}}\\right)\\]",
       formulaDescription: "Position encoding uses sine waves to encode word positions",
       category: "encoding"
@@ -38,7 +38,7 @@ const TransformerOverview = () => {
     {
       title: "Self-Attention",
       description: "Finding relationships between words",
-      detailedExplanation: "The transformer looks at how each word relates to every other word in the sentence. It's like understanding how words work together to create meaning.",
+      detailedExplanation: "The transformer looks at how each word relates to every other word in the sentence. This is like understanding context - how the meaning of a word can change based on the words around it.",
       formula: "\\[\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V\\]",
       formulaDescription: "Attention mechanism uses scaled dot-product to weight the values",
       category: "attention"
@@ -50,7 +50,7 @@ const TransformerOverview = () => {
       variants={containerAnimation}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
     >
       <TransformerIntro />
 
