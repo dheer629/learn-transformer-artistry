@@ -17,71 +17,85 @@ interface Module {
 
 const modules: Module[] = [
   {
-    title: "Introduction to Transformers",
-    description: "Learn what Transformers are and why they're important in AI.",
+    title: "What Are Transformers?",
+    description: "Understanding the foundation of modern AI language models.",
     icon: "🤖",
-    content: "Transformers are a type of AI model that's really good at understanding and working with sequences of data, like sentences or music. They're the technology behind many modern AI applications like ChatGPT and Google Translate.",
-    analogy: "Think of a Transformer like a team of students working together on a group project. Each student pays attention to different parts of the assignment, but they all share their findings to create the final result. Just like how students work together to understand a complex topic, Transformers work together to understand and process information.",
+    content: "Transformers are neural networks designed to handle sequential data through self-attention mechanisms. First introduced in 2017 by Google in the 'Attention is All You Need' paper, they've revolutionized natural language processing and become the foundation for models like GPT and BERT.",
+    analogy: "Think of a Transformer like a highly efficient team of researchers, each capable of focusing on different aspects of a document simultaneously, while maintaining awareness of how all pieces connect together.",
   },
   {
-    title: "How Transformers Work",
-    description: "Understand the basic components and process of Transformer models.",
-    icon: "⚙️",
-    content: "Transformers work by breaking down input (like a sentence) into pieces, then processing these pieces in parallel while considering how they relate to each other. This is done through special mechanisms called 'attention' that help the model focus on important relationships in the data.",
-    analogy: "Imagine reading a mystery novel. When you try to solve the mystery, you pay special attention to important clues while keeping the whole story in mind. Similarly, Transformers use 'attention' to focus on the most relevant parts of the input while considering the overall context.",
-  },
-  {
-    title: "Attention Mechanism",
-    description: "Learn how Transformers focus on important information.",
-    icon: "🔍",
-    content: "The attention mechanism is like a spotlight that helps Transformers focus on the most important parts of the input. For each word or piece of input, the model calculates how much attention it should pay to every other piece, allowing it to understand complex relationships and context.",
-    analogy: "Think about being in a crowded cafeteria. When your friend starts talking, you focus your attention on their voice while still being aware of the background noise. This is similar to how Transformers use attention to focus on relevant information while maintaining awareness of the broader context.",
-  },
-  {
-    title: "Encoder-Decoder Structure",
-    description: "Explore how Transformers process and generate information.",
+    title: "The Evolution from RNNs",
+    description: "Why Transformers replaced traditional RNN models.",
     icon: "🔄",
-    content: "Transformers use an encoder to understand input and a decoder to generate output. The encoder processes the input and creates a deep understanding of it, while the decoder uses this understanding to generate appropriate outputs.",
-    analogy: "Imagine a translator at work. First, they read and understand a sentence in one language (encoding), then they think about how to express the same meaning in another language (decoding). Transformers work similarly, with the encoder understanding the input and the decoder expressing it in the desired form.",
+    content: "Unlike RNNs that process data sequentially, Transformers can process all input data in parallel, making them much faster and more efficient. They also excel at handling long-range dependencies in data through their attention mechanism, overcoming a key limitation of RNNs.",
+    analogy: "If RNNs are like reading a book one word at a time, Transformers are like being able to see and understand an entire page at once, while still grasping how each word relates to others.",
+  },
+  {
+    title: "Self-Attention Mechanism",
+    description: "The core innovation behind Transformer models.",
+    icon: "🔍",
+    content: "Self-attention allows the model to weigh the importance of different parts of the input when processing each element. It computes attention scores between all pairs of positions in the sequence, enabling the model to capture complex relationships and dependencies.",
+    analogy: "Imagine a room full of people having multiple conversations. Self-attention is like each person's ability to focus on relevant conversations while still maintaining awareness of other important discussions happening around them.",
+  },
+  {
+    title: "Real-World Applications",
+    description: "How Transformers are changing the AI landscape.",
+    icon: "🌍",
+    content: "Transformers power many modern AI applications, from language translation and text generation to code completion and image recognition. They're the technology behind ChatGPT, BERT, and other groundbreaking AI models that have transformed how we interact with computers.",
+    analogy: "Just as the printing press revolutionized information sharing, Transformers have revolutionized how machines understand and generate human-like content across various domains.",
   },
 ];
 
 const LearningModule = () => {
   return (
     <div className="space-y-8">
-      <Card className="p-8 hover:shadow-lg transition-shadow animate-fade-in">
-        <h2 className="text-2xl font-bold text-primary mb-6">Understanding Transformer Architecture</h2>
+      <Card className="p-8 hover:shadow-lg transition-shadow animate-fade-in bg-gradient-to-br from-white to-gray-50">
+        <h2 className="text-3xl font-bold text-primary mb-6">Understanding Transformer Architecture</h2>
         <div className="flex flex-col space-y-6">
           <div className="flex justify-center">
             <img 
               src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
               alt="Transformer Architecture Diagram" 
-              className="w-full max-w-4xl h-auto rounded-lg shadow-lg"
+              className="w-full max-w-5xl h-auto rounded-lg shadow-lg"
             />
           </div>
-          <div className="space-y-4 text-gray-600">
-            <h3 className="text-xl font-semibold text-primary">Step-by-Step Transformer Process:</h3>
-            <ol className="list-decimal list-inside space-y-3 pl-4">
-              <li className="font-medium">Input Embedding & Positional Encoding
-                <p className="ml-6 mt-1 text-sm">Converts input tokens into vectors and adds position information to maintain sequence order.</p>
+          <div className="space-y-6 text-gray-600">
+            <h3 className="text-2xl font-semibold text-primary">Step-by-Step Transformer Process:</h3>
+            <ol className="list-decimal list-inside space-y-4 pl-4">
+              <li className="font-medium text-lg">Input Embedding & Positional Encoding
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Converts input tokens (words/subwords) into vectors and adds positional information using sine and cosine functions. This maintains the sequence order since Transformers process all inputs simultaneously.
+                </p>
               </li>
-              <li className="font-medium">Encoder Stack
-                <p className="ml-6 mt-1 text-sm">Multiple identical layers process input through self-attention and feed-forward networks, creating rich contextual representations.</p>
+              <li className="font-medium text-lg">Encoder Stack
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Multiple identical layers process input through self-attention and feed-forward networks. Each layer enriches the representation by capturing different aspects of the relationships between words.
+                </p>
               </li>
-              <li className="font-medium">Multi-Head Attention
-                <p className="ml-6 mt-1 text-sm">Parallel attention mechanisms capture different aspects of relationships between words.</p>
+              <li className="font-medium text-lg">Multi-Head Attention
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Parallel attention mechanisms compute relationships between all words simultaneously. Each head can focus on different aspects of the relationships, enabling rich contextual understanding.
+                </p>
               </li>
-              <li className="font-medium">Add & Normalize
-                <p className="ml-6 mt-1 text-sm">Residual connections and layer normalization maintain stable learning throughout the network.</p>
+              <li className="font-medium text-lg">Add & Normalize
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Residual connections and layer normalization ensure stable training and help the model maintain access to lower-level features while learning higher-level abstractions.
+                </p>
               </li>
-              <li className="font-medium">Feed-Forward Networks
-                <p className="ml-6 mt-1 text-sm">Process attention outputs through neural networks to capture complex patterns.</p>
+              <li className="font-medium text-lg">Feed-Forward Networks
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Each position is processed through identical feed-forward networks, allowing the model to transform the attention outputs into richer representations independently.
+                </p>
               </li>
-              <li className="font-medium">Decoder Stack
-                <p className="ml-6 mt-1 text-sm">Similar to encoder but includes masked attention to prevent looking at future tokens during generation.</p>
+              <li className="font-medium text-lg">Decoder Stack
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  Similar to the encoder but includes masked attention to prevent looking ahead during generation. This ensures the model only uses previously generated tokens when producing output.
+                </p>
               </li>
-              <li className="font-medium">Output Generation
-                <p className="ml-6 mt-1 text-sm">Final linear and softmax layers convert processed information into output probabilities.</p>
+              <li className="font-medium text-lg">Output Generation
+                <p className="ml-6 mt-2 text-base leading-relaxed">
+                  The final linear and softmax layers convert the processed information into probabilities over the vocabulary, enabling the model to generate coherent and contextually appropriate outputs.
+                </p>
               </li>
             </ol>
           </div>
@@ -90,7 +104,7 @@ const LearningModule = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {modules.map((module, index) => (
-          <Card key={index} className="p-6 hover:shadow-lg transition-shadow animate-fade-in">
+          <Card key={index} className="p-6 hover:shadow-lg transition-shadow animate-fade-in bg-white">
             <div className="text-4xl mb-4">{module.icon}</div>
             <h3 className="text-xl font-semibold text-primary mb-2">{module.title}</h3>
             <p className="text-gray-600 mb-4">{module.description}</p>
@@ -100,12 +114,12 @@ const LearningModule = () => {
                 <AccordionContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">Explanation:</h4>
-                      <p className="text-gray-600">{module.content}</p>
+                      <h4 className="font-semibold mb-2">Detailed Explanation:</h4>
+                      <p className="text-gray-600 leading-relaxed">{module.content}</p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Simple Analogy:</h4>
-                      <p className="text-gray-600">{module.analogy}</p>
+                      <h4 className="font-semibold mb-2">Practical Analogy:</h4>
+                      <p className="text-gray-600 leading-relaxed">{module.analogy}</p>
                     </div>
                   </div>
                 </AccordionContent>
