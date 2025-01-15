@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Author = () => {
   return (
@@ -15,6 +16,14 @@ const Author = () => {
 
           <div className="space-y-6">
             <div className="text-center mb-8">
+              <Avatar className="w-32 h-32 mx-auto mb-4">
+                <AvatarImage 
+                  src="/lovable-uploads/12197fca-c864-4e0a-80bf-7c6137659f47.png" 
+                  alt="Dheeraj Vishwakarma"
+                  className="object-cover"
+                />
+                <AvatarFallback>DV</AvatarFallback>
+              </Avatar>
               <h2 className="text-2xl font-semibold text-gray-800">Dheeraj Vishwakarma</h2>
               <p className="text-gray-600 mt-2">Senior AI/ML Architect</p>
             </div>
