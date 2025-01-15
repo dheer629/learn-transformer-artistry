@@ -121,3 +121,30 @@ export const generateLayerOutput = (
     }
   };
 };
+
+export const generateNextWordPredictions = (output: LayerOutput) => {
+  // Simplified next word prediction using the last token's output
+  const lastTokenVector = output.outputEmbeddings[output.outputEmbeddings.length - 1].contextualVector;
+  if (!lastTokenVector) return [];
+
+  // Generate mock vocabulary with probabilities
+  const mockVocabulary = [
+    "the", "is", "are", "was", "were", "will", "would", "could", "should", "may",
+    "might", "must", "can", "shall", "have", "has", "had", "been", "being", "do"
+  ];
+
+  // Calculate softmax scores for each word based on vector similarity
+  const scores = mockVocabulary.map(word => {
+    const hash = word.split("").reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    // Generate a probability based on hash and last token vector
+    const probability = Math.abs(Math.sin(hash + lastTokenVector.reduce((a, b) => a + b, 0)));
+    return { word, probability };
+  });
+
+  // Sort by probability
+  return scores.sort((a, b) => b.probability - a.probability);
+};
