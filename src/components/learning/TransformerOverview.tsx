@@ -68,16 +68,29 @@ const TransformerOverview = () => {
   const { data: images, isLoading } = useTransformerImages();
 
   const getImageUrl = (category: string) => {
-    if (!images || images.length === 0) return null;
-    console.log("Looking for category:", category);
-    console.log("Available images:", images);
-    const categoryImage = images.find(img => img.category.toLowerCase() === category.toLowerCase());
-    console.log("Found image:", categoryImage);
+    if (!images || images.length === 0) {
+      console.log("No images available");
+      return null;
+    }
+    
+    const normalizedCategory = category.toLowerCase().trim();
+    console.log("Looking for category:", normalizedCategory);
+    console.log("Available images:", images.map(img => ({ 
+      category: img.category.toLowerCase(),
+      url: img.image_url 
+    })));
+    
+    const categoryImage = images.find(img => 
+      img.category.toLowerCase().trim() === normalizedCategory
+    );
+    
+    console.log("Found image for category", normalizedCategory, ":", categoryImage);
     return categoryImage?.image_url || null;
   };
 
-  const architectureImage = getImageUrl('architecture');
-  console.log("Architecture image:", architectureImage);
+  // Get architecture image
+  const architectureImage = getImageUrl('transformer_architecture');
+  console.log("Architecture image URL:", architectureImage);
 
   return (
     <motion.div
