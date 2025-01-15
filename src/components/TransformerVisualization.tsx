@@ -52,71 +52,102 @@ const TransformerVisualization = () => {
     );
     setAttentionWeights(weights);
 
-    // Generate first layer output
     const initialOutput = generateLayerOutput(newEmbeddings, 0);
     setLayerOutputs([initialOutput]);
   };
 
-  const flowAnimation = {
+  const containerAnimation = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
         duration: 0.5,
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemAnimation = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: {
+        duration: 0.3,
         ease: "easeOut"
       }
     }
   };
 
   return (
-    <Card className="p-6 space-y-6">
-      <motion.h2 
-        className="text-2xl font-bold text-primary mb-4 animate-fade-in"
-        initial="hidden"
-        animate="visible"
-        variants={flowAnimation}
-      >
-        Transformer Architecture Visualization
-      </motion.h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <InputSection
-          inputText={inputText}
-          setInputText={setInputText}
-          learningRate={learningRate}
-          setLearningRate={setLearningRate}
-          handleProcess={handleProcess}
-          isProcessing={isProcessing}
-        />
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerAnimation}
+    >
+      <Card className="p-6 space-y-6">
+        <motion.h2 
+          className="text-2xl font-bold text-primary mb-4"
+          variants={itemAnimation}
+        >
+          Transformer Architecture Visualization
+        </motion.h2>
         
-        <OutputSection outputText={outputText} />
-      </div>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          variants={itemAnimation}
+        >
+          <InputSection
+            inputText={inputText}
+            setInputText={setInputText}
+            learningRate={learningRate}
+            setLearningRate={setLearningRate}
+            handleProcess={handleProcess}
+            isProcessing={isProcessing}
+          />
+          
+          <OutputSection outputText={outputText} />
+        </motion.div>
 
-      <ControlsSection
-        isPaused={isPaused}
-        setIsPaused={setIsPaused}
-        handleNextStep={handleNextStep}
-        isProcessing={isProcessing}
-        canProgress={currentStep < totalSteps - 1}
-      />
+        <motion.div variants={itemAnimation}>
+          <ControlsSection
+            isPaused={isPaused}
+            setIsPaused={setIsPaused}
+            handleNextStep={handleNextStep}
+            isProcessing={isProcessing}
+            canProgress={currentStep < totalSteps - 1}
+          />
+        </motion.div>
 
-      <LayersVisualization
-        currentStep={currentStep}
-        layerOutputs={layerOutputs}
-      />
+        <motion.div variants={itemAnimation}>
+          <LayersVisualization
+            currentStep={currentStep}
+            layerOutputs={layerOutputs}
+          />
+        </motion.div>
 
-      <AnimatePresence>
-        <EmbeddingsVisualization 
-          embeddings={embeddings}
-          currentStep={currentStep}
-        />
-        <AttentionVisualization 
-          attentionWeights={attentionWeights}
-          currentStep={currentStep}
-        />
-      </AnimatePresence>
-    </Card>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <EmbeddingsVisualization 
+              embeddings={embeddings}
+              currentStep={currentStep}
+            />
+            <AttentionVisualization 
+              attentionWeights={attentionWeights}
+              currentStep={currentStep}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </Card>
+    </motion.div>
   );
 };
 
