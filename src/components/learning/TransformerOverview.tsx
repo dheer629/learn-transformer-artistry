@@ -31,26 +31,26 @@ const TransformerOverview = () => {
   const transformerSteps = [
     {
       title: "Input Embedding",
-      description: "Convert words into number patterns that computers understand",
-      detailedExplanation: "Think of this like turning each word into a special code that helps the computer understand its meaning. Just like how '🐱' means 'cat', we turn words into number patterns!",
-      formula: "\\[\\textcolor{#0EA5E9}{\\text{Word}} \\rightarrow \\textcolor{#F97316}{\\text{Magic Box}} \\rightarrow \\textcolor{#D946EF}{\\text{Special Numbers}}\\]",
-      formulaDescription: "Words (blue) go through a magic box (orange) to become special numbers (purple)!",
+      description: "Converting text into numerical vectors",
+      detailedExplanation: "In this step, we transform each word or token into a vector of numbers that represents its meaning in a high-dimensional space. Similar words will have similar vector representations.",
+      formula: "\\[\\textcolor{#0EA5E9}{\\text{Token}} \\xrightarrow{\\textcolor{#F97316}{\\text{Embedding Matrix}}} \\textcolor{#D946EF}{\\text{Vector } \\mathbf{x} \\in \\mathbb{R}^d}\\]",
+      formulaDescription: "Each token (blue) is transformed by the embedding matrix (orange) into a d-dimensional vector (purple)",
       category: "embedding"
     },
     {
       title: "Positional Encoding",
-      description: "Add special numbers to remember word order",
-      detailedExplanation: "Just like how the order of words matters in a sentence ('dog chases cat' is different from 'cat chases dog'), we add special numbers to remember where each word goes!",
-      formula: "\\[\\textcolor{#0EA5E9}{\\text{Position}} + \\textcolor{#F97316}{\\text{Word Code}} = \\textcolor{#D946EF}{\\text{Magic Pattern}}\\]",
-      formulaDescription: "We combine the position (blue) with the word code (orange) to make a magic pattern (purple)!",
+      description: "Adding position information to embeddings",
+      detailedExplanation: "Since transformers process all tokens simultaneously, we need to add information about the position of each token in the sequence. This is done using sinusoidal functions of different frequencies.",
+      formula: "\\[\\textcolor{#0EA5E9}{PE_{(pos,2i)}} = \\textcolor{#F97316}{\\sin(\\frac{pos}{10000^{2i/d}})} + \\textcolor{#D946EF}{\\mathbf{x}}\\]",
+      formulaDescription: "Position encoding (blue) uses sine waves (orange) added to the embedding vector (purple)",
       category: "encoding"
     },
     {
       title: "Self-Attention",
-      description: "Help words understand each other",
-      detailedExplanation: "Imagine each word is looking at all other words to understand the whole story better. Like in 'The cat saw the mouse', 'cat' pays attention to 'saw' and 'mouse' to understand what's happening!",
-      formula: "\\[\\textcolor{#0EA5E9}{\\text{Word}} \\xrightarrow{\\textcolor{#F97316}{\\text{Looks At}}} \\textcolor{#D946EF}{\\text{Other Words}}\\]",
-      formulaDescription: "Each word (blue) looks at (orange) all other words (purple) to understand the whole story better!",
+      description: "Computing relationships between tokens",
+      detailedExplanation: "Each token learns to pay attention to other relevant tokens in the sequence. This is done by computing Query (Q), Key (K), and Value (V) vectors for each token and using them to calculate attention scores.",
+      formula: "\\[\\textcolor{#0EA5E9}{\\text{Attention}(Q,K,V)} = \\textcolor{#F97316}{\\text{softmax}(\\frac{QK^T}{\\sqrt{d_k}})}\\textcolor{#D946EF}{V}\\]",
+      formulaDescription: "Attention mechanism (blue) uses scaled dot-product (orange) to weight the values (purple)",
       category: "attention"
     }
   ];
@@ -67,7 +67,7 @@ const TransformerOverview = () => {
           Understanding Transformers
         </h2>
         <p className="text-lg text-gray-600 mb-6">
-          Transformers have revolutionized natural language processing and machine learning
+          Transformers are advanced neural networks that have revolutionized natural language processing
           through their innovative attention mechanism and parallel processing capabilities.
         </p>
       </motion.div>
@@ -95,22 +95,22 @@ const TransformerOverview = () => {
           variants={itemAnimation}
           className="space-y-6"
         >
-            <div className="flex flex-col items-center space-y-4">
-              <div className="max-w-sm mx-auto">
-                <img
-                  src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
-                  alt="Transformer Architecture Diagram"
-                  className={cn(
-                    "rounded-lg shadow-md w-full h-auto",
-                    "hover:shadow-lg transition-shadow duration-300",
-                    "border border-gray-100"
-                  )}
-                />
-              </div>
-              <p className="text-sm text-gray-600 text-center italic">
-                Detailed architecture of the Transformer model showing encoder and decoder components
-              </p>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="max-w-sm mx-auto">
+              <img
+                src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
+                alt="Transformer Architecture Diagram"
+                className={cn(
+                  "rounded-lg shadow-md w-full h-auto",
+                  "hover:shadow-lg transition-shadow duration-300",
+                  "border border-gray-100"
+                )}
+              />
             </div>
+            <p className="text-sm text-gray-600 text-center italic">
+              Detailed architecture of the Transformer model showing encoder and decoder components
+            </p>
+          </div>
         </motion.div>
       </motion.div>
 
