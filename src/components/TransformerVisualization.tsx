@@ -9,6 +9,7 @@ import VisualizationContent from "./transformer/sections/VisualizationContent";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
+import { useToast } from "@/components/ui/use-toast";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -20,39 +21,99 @@ const TransformerVisualization = () => {
   const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
+  const { toast } = useToast();
   const totalSteps = encoderSteps.length + decoderSteps.length;
 
   const handleNextStep = () => {
     if (currentStep < totalSteps - 1) {
-      const output = generateLayerOutput(embeddings, currentStep + 1);
-      setLayerOutputs(prev => [...prev, output]);
-      setCurrentStep(prev => prev + 1);
+      try {
+        const output = generateLayerOutput(embeddings, currentStep + 1);
+        setLayerOutputs(prev => [...prev, output]);
+        setCurrentStep(prev => prev + 1);
+        
+        // Show formula and calculation for current step
+        const stepInfo = currentStep < encoderSteps.length 
+          ? encoderSteps[currentStep]
+          : decoderSteps[currentStep - encoderSteps.length];
+        
+        toast({
+          title: `Step ${currentStep + 1}: ${stepInfo.title}`,
+          description: `Formula: ${stepInfo.formula}\nCalculation example shown in the visualization.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        console.error("Error in processing step:", error);
+        toast({
+          title: "Error Processing Step",
+          description: "There was an error processing this transformation step.",
+          variant: "destructive",
+        });
+      }
     } else if (currentStep === totalSteps - 1) {
-      setOutputText("¡Hola! (Example translation)");
+      // Generate final output using attention mechanism
+      const finalOutput = embeddings.map(embed => {
+        const contextVector = embed.contextualVector || embed.vector;
+        return contextVector.reduce((sum, val) => sum + val, 0) / contextVector.length;
+      });
+      
+      // Convert numerical output to text (simplified example)
+      const outputWords = finalOutput.map(val => 
+        val > 0 ? "positive" : "negative"
+      ).join(" ");
+      
+      setOutputText(outputWords);
       setIsProcessing(false);
+      
+      toast({
+        title: "Processing Complete",
+        description: "Transformation sequence finished successfully.",
+      });
     }
   };
 
   const handleProcess = () => {
-    if (!inputText) return;
+    if (!inputText) {
+      toast({
+        title: "Input Required",
+        description: "Please enter some text to process.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsProcessing(true);
     setCurrentStep(0);
     setOutputText("");
     setLayerOutputs([]);
     
-    const newEmbeddings = generateEmbeddings(inputText);
-    setEmbeddings(newEmbeddings);
-    
-    const weights = Array(newEmbeddings.length).fill(0).map(() => 
-      Array(newEmbeddings.length).fill(0).map(() => 
-        Number((Math.random()).toFixed(2))
-      )
-    );
-    setAttentionWeights(weights);
+    try {
+      const newEmbeddings = generateEmbeddings(inputText);
+      setEmbeddings(newEmbeddings);
+      
+      // Generate initial attention weights matrix
+      const weights = Array(newEmbeddings.length).fill(0).map(() => 
+        Array(newEmbeddings.length).fill(0).map(() => 
+          Number((Math.random()).toFixed(2))
+        )
+      );
+      setAttentionWeights(weights);
 
-    const initialOutput = generateLayerOutput(newEmbeddings, 0);
-    setLayerOutputs([initialOutput]);
+      const initialOutput = generateLayerOutput(newEmbeddings, 0);
+      setLayerOutputs([initialOutput]);
+      
+      toast({
+        title: "Processing Started",
+        description: "Input text has been embedded and initial weights generated.",
+      });
+    } catch (error) {
+      console.error("Error in initial processing:", error);
+      setIsProcessing(false);
+      toast({
+        title: "Processing Error",
+        description: "Failed to process input text. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const containerAnimation = {
