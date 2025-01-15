@@ -12,21 +12,50 @@ const Auth = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth event:", event);
+      
       if (session) {
         navigate("/");
       }
-      if (event === 'USER_UPDATED') {
-        const checkSession = async () => {
+
+      switch (event) {
+        case 'USER_UPDATED':
           const { error } = await supabase.auth.getSession();
           if (error) {
             setErrorMessage(getErrorMessage(error));
           }
-        };
-        checkSession();
+          break;
+        case 'SIGNED_OUT':
+          setErrorMessage("");
+          break;
+        case 'SIGNED_IN':
+          setErrorMessage("");
+          break;
+        case 'USER_DELETED':
+          setErrorMessage("Account has been deleted");
+          break;
+        case 'PASSWORD_RECOVERY':
+          setErrorMessage("Check your email for password reset instructions");
+          break;
+        case 'TOKEN_REFRESHED':
+          console.log("Token refreshed");
+          break;
+        default:
+          if (event.includes('ERROR')) {
+            console.error("Auth error event:", event);
+            setErrorMessage("An authentication error occurred. Please try again.");
+          }
       }
-      if (event === 'SIGNED_OUT') {
-        setErrorMessage(""); // Clear errors on sign out
+    });
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Session error:", error);
+        setErrorMessage(getErrorMessage(error));
+      } else if (session) {
+        navigate("/");
       }
     });
 
@@ -34,6 +63,8 @@ const Auth = () => {
   }, [navigate]);
 
   const getErrorMessage = (error: AuthError) => {
+    console.error("Auth error:", error);
+    
     if (error instanceof AuthApiError) {
       switch (error.code) {
         case 'invalid_credentials':
@@ -44,8 +75,10 @@ const Auth = () => {
           return 'No user found with these credentials.';
         case 'invalid_grant':
           return 'Invalid login credentials.';
+        case 'invalid_claim':
+          return 'Session expired. Please sign in again.';
         default:
-          return error.message;
+          return `Authentication error: ${error.message}`;
       }
     }
     return error.message;
