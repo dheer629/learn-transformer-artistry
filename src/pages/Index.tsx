@@ -6,6 +6,7 @@ import TransformerVisualization from "@/components/TransformerVisualization";
 import LearningModule from "@/components/LearningModule";
 import Quiz from "@/components/Quiz";
 import MLResources from "@/components/learning/MLResources";
+import Author from "@/components/Author";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -44,7 +45,7 @@ const Index = () => {
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <TooltipProvider>
           <Tabs defaultValue="learn" className="space-y-8">
-            <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-4 gap-2 p-1 bg-muted rounded-lg">
+            <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-5 gap-2 p-1 bg-muted rounded-lg">
               <TabsTrigger 
                 value="learn" 
                 className="data-[state=active]:bg-primary data-[state=active]:text-white px-3 py-2"
@@ -69,6 +70,12 @@ const Index = () => {
               >
                 📚 Resources
               </TabsTrigger>
+              <TabsTrigger 
+                value="author"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white px-3 py-2"
+              >
+                👤 Author
+              </TabsTrigger>
             </TabsList>
 
             <div className="mt-8 space-y-8">
@@ -92,6 +99,10 @@ const Index = () => {
 
               <TabsContent value="resources">
                 <MLResources />
+              </TabsContent>
+
+              <TabsContent value="author">
+                <Author />
               </TabsContent>
             </div>
           </Tabs>
