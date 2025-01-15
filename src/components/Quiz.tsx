@@ -5,19 +5,9 @@ import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Database } from "@/integrations/supabase/types";
 
-interface Question {
-  id: number;
-  title: string;
-  description: string;
-  difficulty_level: 'beginner' | 'intermediate' | 'advanced';
-  category: string;
-  question: string;
-  options: string[];
-  correct_answer: number;
-  explanation: string;
-  visualization_data?: Record<string, any>;
-}
+type Question = Database['public']['Tables']['transformer_questions']['Row'];
 
 const Quiz = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -42,7 +32,9 @@ const Quiz = () => {
         throw error;
       }
 
-      setQuestions(data);
+      if (data) {
+        setQuestions(data);
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching questions:', error);
@@ -122,7 +114,7 @@ const Quiz = () => {
         <p className="text-lg mb-2">{questions[currentQuestion].description}</p>
         <p className="text-lg mb-4 font-medium">{questions[currentQuestion].question}</p>
         <div className="space-y-4">
-          {questions[currentQuestion].options.map((option, index) => (
+          {(questions[currentQuestion].options as string[]).map((option, index) => (
             <Button
               key={index}
               variant={answered ? (index === questions[currentQuestion].correct_answer ? "default" : "outline") : "outline"}

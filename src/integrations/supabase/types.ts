@@ -105,6 +105,48 @@ export type Database = {
         }
         Relationships: []
       }
+      transformer_questions: {
+        Row: {
+          category: string
+          correct_answer: number
+          created_at: string | null
+          description: string
+          difficulty_level: string
+          explanation: string
+          id: number
+          options: Json
+          question: string
+          title: string
+          visualization_data: Json | null
+        }
+        Insert: {
+          category: string
+          correct_answer: number
+          created_at?: string | null
+          description: string
+          difficulty_level: string
+          explanation: string
+          id?: number
+          options: Json
+          question: string
+          title: string
+          visualization_data?: Json | null
+        }
+        Update: {
+          category?: string
+          correct_answer?: number
+          created_at?: string | null
+          description?: string
+          difficulty_level?: string
+          explanation?: string
+          id?: number
+          options?: Json
+          question?: string
+          title?: string
+          visualization_data?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
