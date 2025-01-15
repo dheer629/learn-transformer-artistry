@@ -32,9 +32,6 @@ const Auth = () => {
         case 'SIGNED_IN':
           setErrorMessage("");
           break;
-        case 'USER_DELETED':
-          setErrorMessage("Account has been deleted");
-          break;
         case 'PASSWORD_RECOVERY':
           setErrorMessage("Check your email for password reset instructions");
           break;
