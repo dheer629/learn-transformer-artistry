@@ -14,16 +14,31 @@ const TransformerArchitecture: React.FC<TransformerArchitectureProps> = ({
 }) => {
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error("Error loading image:", mainImageUrl);
     setImageError(true);
-    toast({
-      variant: "destructive",
-      title: "Image Loading Error",
-      description: "Failed to load the transformer architecture image. Please try refreshing the page.",
-    });
-    e.currentTarget.src = "/placeholder.svg";
+    
+    if (retryCount < maxRetries) {
+      // Attempt to reload the image
+      setRetryCount(prev => prev + 1);
+      e.currentTarget.src = mainImageUrl || '/placeholder.svg';
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Image Loading Error",
+        description: "Failed to load the transformer architecture image. Using fallback image.",
+      });
+      e.currentTarget.src = '/placeholder.svg';
+    }
+  };
+
+  const handleImageLoad = () => {
+    console.log("Image loaded successfully:", mainImageUrl);
+    setImageError(false);
+    setRetryCount(0);
   };
 
   return (
@@ -51,13 +66,12 @@ const TransformerArchitecture: React.FC<TransformerArchitectureProps> = ({
               alt="Complete Transformer Architecture"
               className={`rounded-lg shadow-lg hover:shadow-xl transition-shadow max-w-full h-auto ${imageError ? 'opacity-50' : ''}`}
               onError={handleImageError}
-              onLoad={() => {
-                console.log("Image loaded successfully:", mainImageUrl);
-                setImageError(false);
-              }}
+              onLoad={handleImageLoad}
             />
             <p className="text-sm text-gray-600 text-center mt-4 font-medium">
-              {imageError ? "Error loading image - Using placeholder" : "Complete Transformer Architecture Overview"}
+              {imageError ? 
+                `Error loading image (Attempt ${retryCount}/${maxRetries}) - Using fallback` : 
+                "Complete Transformer Architecture Overview"}
             </p>
           </div>
         ) : (
