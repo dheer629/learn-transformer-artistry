@@ -56,7 +56,7 @@ const LearningModule = () => {
             <img 
               src="/lovable-uploads/601290bb-ddc6-4a28-a3f1-7e2dc0944be7.png" 
               alt="Transformer Architecture Diagram" 
-              className="w-full max-w-5xl h-auto rounded-lg shadow-lg"
+              className="w-full max-w-4xl h-auto rounded-lg shadow-lg mb-8"
             />
           </div>
           <div className="space-y-6 text-gray-600">
