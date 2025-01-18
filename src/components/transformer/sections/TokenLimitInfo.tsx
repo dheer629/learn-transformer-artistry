@@ -15,19 +15,19 @@ const TokenLimitInfo: React.FC<TokenLimitInfoProps> = ({
   const isOverLimit = currentTokenCount > maxTokens;
 
   return (
-    <Alert variant={isOverLimit ? "destructive" : isNearLimit ? "warning" : "default"}>
+    <Alert variant={isOverLimit ? "destructive" : "default"}>
       <InfoCircledIcon className="h-4 w-4" />
       <AlertTitle>Token Usage Information</AlertTitle>
       <AlertDescription className="mt-2 space-y-2">
         <p>Current token count: {currentTokenCount}</p>
         <p>Maximum tokens allowed: {maxTokens}</p>
         {isNearLimit && !isOverLimit && (
-          <p className="text-yellow-600">
+          <p className="text-yellow-600 font-medium">
             Warning: Approaching token limit. Consider reducing input length.
           </p>
         )}
         {isOverLimit && (
-          <p className="text-red-600">
+          <p className="text-red-600 font-medium">
             Token limit exceeded. Please reduce input length or adjust parameters.
           </p>
         )}
