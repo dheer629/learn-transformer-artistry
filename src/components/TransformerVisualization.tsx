@@ -16,11 +16,14 @@ const COMPLETION_TOKENS = 8000; // Default completion tokens
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
+  const [outputText, setOutputText] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [tokenizedOutput, setTokenizedOutput] = useState<EmbeddingVector[]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
   const [nextWordProbabilities, setNextWordProbabilities] = useState<Array<{ word: string; probability: number }>>([]);
+  const [learningRate, setLearningRate] = useState(0.001);
+  const [isPaused, setIsPaused] = useState(false);
   const { toast } = useToast();
 
   const handleProcess = () => {
@@ -52,19 +55,36 @@ const TransformerVisualization = () => {
     setTokenizedOutput(tokens);
     setLayerOutputs([]); // Reset layer outputs
     setNextWordProbabilities([]); // Reset next word probabilities
+    
     // Simulate processing steps
     for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
       setTimeout(() => {
         setCurrentStep(i);
         // Simulate layer outputs and next word probabilities
         if (i < encoderSteps.length) {
-          setLayerOutputs(prev => [...prev, { output: `Encoder output for step ${i}` }]);
+          setLayerOutputs(prev => [...prev, {
+            inputEmbeddings: tokens,
+            outputEmbeddings: tokens,
+            attentionWeights: Array(tokens.length).fill(Array(tokens.length).fill(0).map(() => Math.random())),
+            intermediateOutputs: {
+              queryVectors: [Array(512).fill(0).map(() => Math.random())],
+              keyVectors: [Array(512).fill(0).map(() => Math.random())],
+              valueVectors: [Array(512).fill(0).map(() => Math.random())],
+              weightedSum: [Array(512).fill(0).map(() => Math.random())]
+            }
+          }]);
         } else {
           setNextWordProbabilities(prev => [...prev, { word: `Word ${i - encoderSteps.length}`, probability: Math.random() }]);
         }
       }, i * 1000); // Simulate processing delay
     }
     setIsProcessing(false);
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < encoderSteps.length + decoderSteps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+    }
   };
 
   return (
@@ -82,8 +102,11 @@ const TransformerVisualization = () => {
           <InputOutputSection
             inputText={inputText}
             setInputText={setInputText}
+            outputText={outputText}
             handleProcess={handleProcess}
             isProcessing={isProcessing}
+            learningRate={learningRate}
+            setLearningRate={setLearningRate}
           />
           
           {tokenizedOutput.length > 0 && (
@@ -99,10 +122,11 @@ const TransformerVisualization = () => {
               />
               
               <ControlsSection
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                totalSteps={encoderSteps.length + decoderSteps.length}
+                isPaused={isPaused}
+                setIsPaused={setIsPaused}
+                handleNextStep={handleNextStep}
                 isProcessing={isProcessing}
+                canProgress={currentStep < encoderSteps.length + decoderSteps.length - 1}
               />
               
               <LayersVisualization
