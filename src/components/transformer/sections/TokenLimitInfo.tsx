@@ -1,6 +1,6 @@
 import React from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface TokenLimitInfoProps {
   currentTokenCount: number;
@@ -32,8 +32,7 @@ const TokenLimitInfo: React.FC<TokenLimitInfoProps> = ({
           </p>
         )}
         <p className="text-sm text-muted-foreground mt-2">
-          Token limits are determined by the underlying AI model. You can adjust behavior
-          by modifying parameters or using a different model configuration.
+          In Bolt.DIY, the token limit is typically determined by the underlying AI model (e.g., Deepseek, OpenAI, etc.) and the configuration of the API call. If you're encountering token limit issues, you can adjust the behavior of your Bolt.DIY setup by modifying the parameters or logic in your code.
         </p>
       </AlertDescription>
     </Alert>
