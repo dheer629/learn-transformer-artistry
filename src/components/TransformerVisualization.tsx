@@ -11,11 +11,14 @@ import VisualizationContent from "./transformer/sections/VisualizationContent";
 import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
 import PredictionsSection from "./transformer/sections/PredictionsSection";
 import TokenizerPlayground from "./transformer/sections/TokenizerPlayground";
+import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
 import StepInfo from "./transformer/sections/StepInfo";
 import NextWordPredictions from "./transformer/sections/NextWordPredictions";
 import { generateEmbeddings, generateLayerOutput, generateNextWordPredictions } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
+
+const MAX_TOKENS = 2048; // Example token limit
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -34,6 +37,15 @@ const TransformerVisualization = () => {
 
   const handleTokenize = (tokens: { text: string; id: number }[]) => {
     setTokenizedOutput(tokens);
+    
+    // Check token limits
+    if (tokens.length > MAX_TOKENS) {
+      toast({
+        title: "Token Limit Exceeded",
+        description: "The input text exceeds the maximum token limit. Please reduce the length of your input.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNextStep = () => {
@@ -142,6 +154,11 @@ const TransformerVisualization = () => {
       >
         <Card className="p-6 space-y-6 overflow-hidden bg-gradient-to-br from-white to-gray-50">
           <VisualizationHeader title="Transformer Architecture Visualization" />
+          
+          <TokenLimitInfo
+            currentTokenCount={tokenizedOutput.length}
+            maxTokens={MAX_TOKENS}
+          />
           
           <InputOutputSection
             inputText={inputText}
