@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { MathJaxContext } from "better-react-mathjax";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
@@ -18,7 +18,8 @@ import { generateEmbeddings, generateLayerOutput, generateNextWordPredictions } 
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 
-const MAX_TOKENS = 2048; // Example token limit
+const MAX_TOKENS = 65536; // Deepseek's maximum context length
+const COMPLETION_TOKENS = 8000; // Default completion tokens
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -40,11 +41,14 @@ const TransformerVisualization = () => {
     
     // Check token limits
     if (tokens.length > MAX_TOKENS) {
+      const totalRequestedTokens = tokens.length + COMPLETION_TOKENS;
       toast({
         title: "Token Limit Exceeded",
-        description: "The input text exceeds the maximum token limit. Please reduce the length of your input.",
+        description: `AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${totalRequestedTokens} tokens (${tokens.length} in the messages, ${COMPLETION_TOKENS} in the completion). Please reduce the length of the messages or completion.`,
         variant: "destructive",
       });
+      console.error(`Total message length: ${tokens.length} tokens`);
+      console.info("Sending llm call to Deepseek with model deepseek-chat");
     }
   };
 
@@ -158,6 +162,7 @@ const TransformerVisualization = () => {
           <TokenLimitInfo
             currentTokenCount={tokenizedOutput.length}
             maxTokens={MAX_TOKENS}
+            modelName="deepseek-chat"
           />
           
           <InputOutputSection
