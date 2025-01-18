@@ -5,16 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { MathJaxContext } from "better-react-mathjax";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
-import VisualizationHeader from "./transformer/sections/VisualizationHeader";
-import InputOutputSection from "./transformer/sections/InputOutputSection";
-import VisualizationContent from "./transformer/sections/VisualizationContent";
-import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
-import PredictionsSection from "./transformer/sections/PredictionsSection";
-import TokenizerPlayground from "./transformer/sections/TokenizerPlayground";
+import TokenVisualization from "./transformer/TokenVisualization";
 import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
-import StepInfo from "./transformer/sections/StepInfo";
-import NextWordPredictions from "./transformer/sections/NextWordPredictions";
-import { generateEmbeddings, generateLayerOutput, generateNextWordPredictions } from "./transformer/utils/transformerUtils";
+import InputOutputSection from "./transformer/sections/InputOutputSection";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 
@@ -23,141 +16,62 @@ const COMPLETION_TOKENS = 8000; // Default completion tokens
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
-  const [outputText, setOutputText] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [learningRate, setLearningRate] = useState(0.1);
-  const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
-  const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [tokenizedOutput, setTokenizedOutput] = useState<EmbeddingVector[]>([]);
   const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
-  const [nextWordProbabilities, setNextWordProbabilities] = useState<{ word: string; probability: number }[]>([]);
-  const [tokenizedOutput, setTokenizedOutput] = useState<{ text: string; id: number }[]>([]);
+  const [nextWordProbabilities, setNextWordProbabilities] = useState<Array<{ word: string; probability: number }>>([]);
   const { toast } = useToast();
-  const totalSteps = encoderSteps.length + decoderSteps.length;
 
-  const handleTokenize = (tokens: { text: string; id: number }[]) => {
-    setTokenizedOutput(tokens);
-    
+  const handleProcess = () => {
+    if (!inputText) return;
+
+    setIsProcessing(true);
+    const tokens = inputText.split(" ").map((word, index) => ({
+      word,
+      vector: Array(512).fill(0).map(() => Math.random()),
+      positionalVector: Array(512).fill(0).map(() => Math.random()),
+      contextualVector: Array(512).fill(0).map(() => Math.random()),
+    }));
+
     // Check token limits
     if (tokens.length > MAX_TOKENS) {
       const totalRequestedTokens = tokens.length + COMPLETION_TOKENS;
+      console.debug(`Total message length: ${tokens.length}, words`);
+      console.info("Sending llm call to Deepseek with model deepseek-chat");
       toast({
         title: "Token Limit Exceeded",
         description: `AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${totalRequestedTokens} tokens (${tokens.length} in the messages, ${COMPLETION_TOKENS} in the completion). Please reduce the length of the messages or completion.`,
         variant: "destructive",
       });
-      console.error(`Total message length: ${tokens.length} tokens`);
-      console.info("Sending llm call to Deepseek with model deepseek-chat");
-    }
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < totalSteps - 1) {
-      try {
-        const output = generateLayerOutput(embeddings, currentStep + 1);
-        setLayerOutputs(prev => [...prev, output]);
-        setCurrentStep(prev => prev + 1);
-        
-        const stepInfo = currentStep < encoderSteps.length 
-          ? encoderSteps[currentStep]
-          : decoderSteps[currentStep - encoderSteps.length];
-
-        // Generate next word predictions if we're in the decoder phase
-        if (currentStep >= encoderSteps.length) {
-          const predictions = generateNextWordPredictions(output);
-          setNextWordProbabilities(predictions);
-        }
-      } catch (error) {
-        console.error("Error in processing step:", error);
-        toast({
-          title: "Error Processing Step",
-          description: "There was an error processing this transformation step.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleProcess = () => {
-    if (!inputText) {
-      toast({
-        title: "Input Required",
-        description: "Please enter some text to process.",
-        variant: "destructive",
-      });
+      setIsProcessing(false);
       return;
     }
-    
-    setIsProcessing(true);
-    setCurrentStep(0);
-    setOutputText("");
-    setLayerOutputs([]);
-    setNextWordProbabilities([]);
-    
-    try {
-      const newEmbeddings = generateEmbeddings(inputText);
-      setEmbeddings(newEmbeddings);
-      
-      // Generate initial attention weights matrix
-      const weights = Array(newEmbeddings.length).fill(0).map(() => 
-        Array(newEmbeddings.length).fill(0).map(() => 
-          Number((Math.random()).toFixed(2))
-        )
-      );
-      setAttentionWeights(weights);
 
-      const initialOutput = generateLayerOutput(newEmbeddings, 0);
-      setLayerOutputs([initialOutput]);
-      
-      // Show initial token values with detailed breakdown
-      toast({
-        title: "Token Processing Started",
-        description: (
-          <div className="space-y-2">
-            <p className="font-medium">Input text tokenized into {newEmbeddings.length} tokens</p>
-            <div className="text-sm text-muted-foreground">
-              {newEmbeddings.map((embed, i) => (
-                <div key={i} className="mt-1">
-                  <span className="font-semibold">Token {i + 1}:</span> {embed.word}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-        duration: 5000,
-      });
-    } catch (error) {
-      console.error("Error in initial processing:", error);
-      setIsProcessing(false);
-      toast({
-        title: "Processing Error",
-        description: "Failed to process input text. Please try again.",
-        variant: "destructive",
-      });
+    // Processing logic
+    setTokenizedOutput(tokens);
+    setLayerOutputs([]); // Reset layer outputs
+    setNextWordProbabilities([]); // Reset next word probabilities
+    // Simulate processing steps
+    for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
+      setTimeout(() => {
+        setCurrentStep(i);
+        // Simulate layer outputs and next word probabilities
+        if (i < encoderSteps.length) {
+          setLayerOutputs(prev => [...prev, { output: `Encoder output for step ${i}` }]);
+        } else {
+          setNextWordProbabilities(prev => [...prev, { word: `Word ${i - encoderSteps.length}`, probability: Math.random() }]);
+        }
+      }, i * 1000); // Simulate processing delay
     }
+    setIsProcessing(false);
   };
 
   return (
     <MathJaxContext>
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { 
-            opacity: 1,
-            transition: {
-              duration: 0.7,
-              ease: "easeOut",
-              staggerChildren: 0.2
-            }
-          }
-        }}
-        className="space-y-8"
-      >
-        <Card className="p-6 space-y-6 overflow-hidden bg-gradient-to-br from-white to-gray-50">
-          <VisualizationHeader title="Transformer Architecture Visualization" />
+      <div className="container mx-auto p-4 space-y-8">
+        <Card className="p-6">
+          <h2 className="text-2xl font-bold mb-6">Transformer Architecture Visualization</h2>
           
           <TokenLimitInfo
             currentTokenCount={tokenizedOutput.length}
@@ -168,79 +82,38 @@ const TransformerVisualization = () => {
           <InputOutputSection
             inputText={inputText}
             setInputText={setInputText}
-            outputText={outputText}
-            learningRate={learningRate}
-            setLearningRate={setLearningRate}
             handleProcess={handleProcess}
             isProcessing={isProcessing}
           />
-
-          <TokenizerPlayground
-            inputText={inputText}
-            onTokenize={handleTokenize}
-          />
-
-          {embeddings.length > 0 && (
-            <>
-              <motion.div variants={{}} className="mb-6">
-                <TokenProcessingSection
-                  tokens={embeddings}
-                  currentStep={currentStep}
-                  tokenizedOutput={tokenizedOutput}
-                />
-              </motion.div>
-
-              {currentStep > 0 && layerOutputs[currentStep - 1] && (
-                <StepInfo
-                  currentStep={currentStep - 1}
-                  stepInfo={
-                    currentStep <= encoderSteps.length
-                      ? encoderSteps[currentStep - 1]
-                      : decoderSteps[currentStep - encoderSteps.length - 1]
-                  }
-                  embeddings={embeddings}
-                  output={layerOutputs[currentStep - 1]}
-                />
-              )}
-
-              <NextWordPredictions predictions={nextWordProbabilities} />
-            </>
-          )}
-
-          <motion.div variants={{}}>
-            <ControlsSection
-              isPaused={isPaused}
-              setIsPaused={setIsPaused}
-              handleNextStep={handleNextStep}
-              isProcessing={isProcessing}
-              canProgress={currentStep < totalSteps - 1}
-            />
-          </motion.div>
-
-          <motion.div 
-            variants={{}}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <LayersVisualization
-              currentStep={currentStep}
-              layerOutputs={layerOutputs}
-              nextWordProbabilities={nextWordProbabilities}
-            />
-          </motion.div>
-
-          <VisualizationContent
-            currentStep={currentStep}
-            embeddings={embeddings}
-            attentionWeights={attentionWeights}
-            nextWordProbabilities={nextWordProbabilities}
-          />
-
-          {nextWordProbabilities.length > 0 && (
-            <PredictionsSection predictions={nextWordProbabilities} />
+          
+          {tokenizedOutput.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-8"
+            >
+              <TokenVisualization
+                tokens={tokenizedOutput}
+                currentStep={currentStep}
+              />
+              
+              <ControlsSection
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                totalSteps={encoderSteps.length + decoderSteps.length}
+                isProcessing={isProcessing}
+              />
+              
+              <LayersVisualization
+                currentStep={currentStep}
+                layerOutputs={layerOutputs}
+                nextWordProbabilities={nextWordProbabilities}
+              />
+            </motion.div>
           )}
         </Card>
-      </motion.div>
+      </div>
     </MathJaxContext>
   );
 };
