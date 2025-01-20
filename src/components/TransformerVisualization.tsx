@@ -49,10 +49,6 @@ const TransformerVisualization = () => {
     });
 
     if (!validation.isValid) {
-      console.error(`ERROR   api.chat  AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${validation.totalTokens} tokens (${validation.tokenCount} in the messages, ${COMPLETION_TOKENS} in the completion).`);
-      console.debug(`DEBUG   api.chat  Total message length: ${inputText.split(' ').length} words`);
-      console.info(`INFO   stream-text  Sending llm call to Deepseek with model deepseek-chat`);
-      
       toast({
         variant: "destructive",
         title: "Token limit exceeded",
@@ -62,6 +58,9 @@ const TransformerVisualization = () => {
     }
 
     setIsProcessing(true);
+    setCurrentStep(0);
+    setLayerOutputs([]);
+    setNextWordProbabilities([]);
     
     try {
       // Split text into manageable chunks
@@ -75,33 +74,46 @@ const TransformerVisualization = () => {
       }
 
       setTokenizedOutput(allTokens);
-      setLayerOutputs([]);
-      setNextWordProbabilities([]);
       
-      // Simulate processing steps
-      for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
-        setTimeout(() => {
-          setCurrentStep(i);
-          if (i < encoderSteps.length) {
-            setLayerOutputs(prev => [...prev, {
-              inputEmbeddings: allTokens,
-              outputEmbeddings: allTokens,
-              attentionWeights: Array(allTokens.length).fill(Array(allTokens.length).fill(0).map(() => Math.random())),
-              intermediateOutputs: {
-                queryVectors: [Array(512).fill(0).map(() => Math.random())],
-                keyVectors: [Array(512).fill(0).map(() => Math.random())],
-                valueVectors: [Array(512).fill(0).map(() => Math.random())],
-                weightedSum: [Array(512).fill(0).map(() => Math.random())]
-              }
-            }]);
-          } else {
-            setNextWordProbabilities(prev => [...prev, { 
-              word: `Word ${i - encoderSteps.length}`, 
-              probability: Math.random() 
-            }]);
-          }
-        }, i * 1000);
+      // Process encoder steps
+      for (let i = 0; i < encoderSteps.length; i++) {
+        if (!isPaused) {
+          const layerOutput: LayerOutput = {
+            inputEmbeddings: allTokens,
+            outputEmbeddings: allTokens,
+            attentionWeights: Array(allTokens.length).fill(0).map(() => 
+              Array(allTokens.length).fill(0).map(() => Math.random())
+            ),
+            intermediateOutputs: {
+              queryVectors: [Array(512).fill(0).map(() => Math.random())],
+              keyVectors: [Array(512).fill(0).map(() => Math.random())],
+              valueVectors: [Array(512).fill(0).map(() => Math.random())],
+              weightedSum: [Array(512).fill(0).map(() => Math.random())]
+            }
+          };
+          
+          setLayerOutputs(prev => [...prev, layerOutput]);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
+
+      // Process decoder steps
+      for (let i = 0; i < decoderSteps.length; i++) {
+        if (!isPaused) {
+          const probability = Math.random();
+          setNextWordProbabilities(prev => [
+            ...prev,
+            { 
+              word: `Word ${i + 1}`,
+              probability
+            }
+          ]);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      setOutputText("Processing complete!");
+      
     } catch (error) {
       console.error('Error processing text:', error);
       toast({
