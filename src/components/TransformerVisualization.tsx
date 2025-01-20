@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import InputOutputSection from "./transformer/sections/InputOutputSection";
 import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
@@ -8,9 +8,14 @@ import LayersVisualization from "./transformer/sections/LayersVisualization";
 import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
-
-const MAX_TOKENS = 65536;
-const COMPLETION_TOKENS = 8000;
+import { 
+  CHUNK_SIZE, 
+  MAX_TOKENS, 
+  COMPLETION_TOKENS,
+  splitIntoChunks,
+  validateTokenLimit,
+  calculateTokenCount
+} from "@/utils/textChunking";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -24,18 +29,28 @@ const TransformerVisualization = () => {
   const [isPaused, setIsPaused] = useState(false);
   const { toast } = useToast();
 
-  const calculateTokenCount = (text: string): number => {
-    // Simple approximation: 1 token ≈ 4 characters
-    return Math.ceil(text.length / 4);
-  };
+  const processChunk = useCallback(async (chunk: string) => {
+    // Simulate token processing for the chunk
+    const tokens: EmbeddingVector[] = chunk.split(' ').map((word, index) => ({
+      word,
+      vector: Array(512).fill(0).map(() => Math.random()),
+      positionalVector: Array(512).fill(0).map(() => Math.random()),
+      contextualVector: Array(512).fill(0).map(() => Math.random())
+    }));
 
-  const handleProcess = () => {
-    const tokenCount = calculateTokenCount(inputText);
-    const totalTokens = tokenCount + COMPLETION_TOKENS;
+    return tokens;
+  }, []);
 
-    if (totalTokens > MAX_TOKENS) {
-      console.error(`ERROR   api.chat  AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${totalTokens} tokens (${tokenCount} in the messages, ${COMPLETION_TOKENS} in the completion). Please reduce the length of the messages or completion.`);
-      console.debug(`DEBUG   api.chat  Total message length: ${inputText.split(' ').length}, words`);
+  const handleProcess = async () => {
+    const validation = validateTokenLimit(inputText, {
+      maxTokens: MAX_TOKENS,
+      completionTokens: COMPLETION_TOKENS,
+      chunkSize: CHUNK_SIZE
+    });
+
+    if (!validation.isValid) {
+      console.error(`ERROR   api.chat  AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${validation.totalTokens} tokens (${validation.tokenCount} in the messages, ${COMPLETION_TOKENS} in the completion).`);
+      console.debug(`DEBUG   api.chat  Total message length: ${inputText.split(' ').length} words`);
       console.info(`INFO   stream-text  Sending llm call to Deepseek with model deepseek-chat`);
       
       toast({
@@ -48,40 +63,55 @@ const TransformerVisualization = () => {
 
     setIsProcessing(true);
     
-    // Simulate token processing
-    const tokens: EmbeddingVector[] = inputText.split(' ').map((word, index) => ({
-      word,
-      vector: Array(512).fill(0).map(() => Math.random()),
-      positionalVector: Array(512).fill(0).map(() => Math.random()),
-      contextualVector: Array(512).fill(0).map(() => Math.random())
-    }));
+    try {
+      // Split text into manageable chunks
+      const chunks = splitIntoChunks(inputText);
+      let allTokens: EmbeddingVector[] = [];
+      
+      // Process each chunk
+      for (const chunk of chunks) {
+        const chunkTokens = await processChunk(chunk);
+        allTokens = [...allTokens, ...chunkTokens];
+      }
 
-    setTokenizedOutput(tokens);
-    setLayerOutputs([]);
-    setNextWordProbabilities([]);
-    
-    // Simulate processing steps
-    for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
-      setTimeout(() => {
-        setCurrentStep(i);
-        if (i < encoderSteps.length) {
-          setLayerOutputs(prev => [...prev, {
-            inputEmbeddings: tokens,
-            outputEmbeddings: tokens,
-            attentionWeights: Array(tokens.length).fill(Array(tokens.length).fill(0).map(() => Math.random())),
-            intermediateOutputs: {
-              queryVectors: [Array(512).fill(0).map(() => Math.random())],
-              keyVectors: [Array(512).fill(0).map(() => Math.random())],
-              valueVectors: [Array(512).fill(0).map(() => Math.random())],
-              weightedSum: [Array(512).fill(0).map(() => Math.random())]
-            }
-          }]);
-        } else {
-          setNextWordProbabilities(prev => [...prev, { word: `Word ${i - encoderSteps.length}`, probability: Math.random() }]);
-        }
-      }, i * 1000);
+      setTokenizedOutput(allTokens);
+      setLayerOutputs([]);
+      setNextWordProbabilities([]);
+      
+      // Simulate processing steps
+      for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
+        setTimeout(() => {
+          setCurrentStep(i);
+          if (i < encoderSteps.length) {
+            setLayerOutputs(prev => [...prev, {
+              inputEmbeddings: allTokens,
+              outputEmbeddings: allTokens,
+              attentionWeights: Array(allTokens.length).fill(Array(allTokens.length).fill(0).map(() => Math.random())),
+              intermediateOutputs: {
+                queryVectors: [Array(512).fill(0).map(() => Math.random())],
+                keyVectors: [Array(512).fill(0).map(() => Math.random())],
+                valueVectors: [Array(512).fill(0).map(() => Math.random())],
+                weightedSum: [Array(512).fill(0).map(() => Math.random())]
+              }
+            }]);
+          } else {
+            setNextWordProbabilities(prev => [...prev, { 
+              word: `Word ${i - encoderSteps.length}`, 
+              probability: Math.random() 
+            }]);
+          }
+        }, i * 1000);
+      }
+    } catch (error) {
+      console.error('Error processing text:', error);
+      toast({
+        variant: "destructive",
+        title: "Processing Error",
+        description: "An error occurred while processing the text. Please try again."
+      });
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const handleNextStep = () => {
