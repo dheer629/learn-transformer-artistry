@@ -6,6 +6,7 @@ import VisualizationContent from "./transformer/sections/VisualizationContent";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
 import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
+import StepInfo from "./transformer/sections/StepInfo";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 import { 
@@ -49,6 +50,10 @@ const TransformerVisualization = () => {
     });
 
     if (!validation.isValid) {
+      console.error(`ERROR   api.chat  AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${validation.totalTokens} tokens (${validation.tokenCount} in the messages, ${COMPLETION_TOKENS} in the completion).`);
+      console.debug(`DEBUG   api.chat  Total message length: ${inputText.split(' ').length} words`);
+      console.info(`INFO   stream-text  Sending llm call to Deepseek with model deepseek-chat`);
+      
       toast({
         variant: "destructive",
         title: "Token limit exceeded",
@@ -91,8 +96,25 @@ const TransformerVisualization = () => {
               weightedSum: [Array(512).fill(0).map(() => Math.random())]
             }
           };
-          
+
           setLayerOutputs(prev => [...prev, layerOutput]);
+          
+          // Show step information in toast
+          const stepInfo = encoderSteps[i];
+          toast({
+            title: `Encoder Step ${i + 1}: ${stepInfo.title}`,
+            description: (
+              <div className="space-y-2">
+                <p className="font-medium">{stepInfo.description}</p>
+                <div className="bg-muted p-2 rounded">
+                  <p className="font-mono text-sm">{stepInfo.formula}</p>
+                </div>
+                <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
+              </div>
+            ),
+            duration: 5000,
+          });
+          
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -108,6 +130,23 @@ const TransformerVisualization = () => {
               probability
             }
           ]);
+
+          // Show step information in toast
+          const stepInfo = decoderSteps[i];
+          toast({
+            title: `Decoder Step ${i + 1}: ${stepInfo.title}`,
+            description: (
+              <div className="space-y-2">
+                <p className="font-medium">{stepInfo.description}</p>
+                <div className="bg-muted p-2 rounded">
+                  <p className="font-mono text-sm">{stepInfo.formula}</p>
+                </div>
+                <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
+              </div>
+            ),
+            duration: 5000,
+          });
+
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -129,6 +168,26 @@ const TransformerVisualization = () => {
   const handleNextStep = () => {
     if (currentStep < encoderSteps.length + decoderSteps.length - 1) {
       setCurrentStep(prev => prev + 1);
+      
+      // Show step information for the new step
+      const isEncoderStep = currentStep < encoderSteps.length;
+      const stepInfo = isEncoderStep 
+        ? encoderSteps[currentStep]
+        : decoderSteps[currentStep - encoderSteps.length];
+      
+      toast({
+        title: `${isEncoderStep ? 'Encoder' : 'Decoder'} Step ${currentStep + 1}: ${stepInfo.title}`,
+        description: (
+          <div className="space-y-2">
+            <p className="font-medium">{stepInfo.description}</p>
+            <div className="bg-muted p-2 rounded">
+              <p className="font-mono text-sm">{stepInfo.formula}</p>
+            </div>
+            <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
+          </div>
+        ),
+        duration: 5000,
+      });
     }
   };
 
@@ -182,6 +241,23 @@ const TransformerVisualization = () => {
               layerOutputs={layerOutputs}
               nextWordProbabilities={nextWordProbabilities}
             />
+
+            {/* Add StepInfo component to show current step details */}
+            {(currentStep < encoderSteps.length + decoderSteps.length) && (
+              <StepInfo
+                currentStep={currentStep}
+                stepInfo={currentStep < encoderSteps.length 
+                  ? encoderSteps[currentStep] 
+                  : decoderSteps[currentStep - encoderSteps.length]
+                }
+                embeddings={tokenizedOutput}
+                output={layerOutputs[currentStep] || {
+                  inputEmbeddings: [],
+                  outputEmbeddings: [],
+                  attentionWeights: [],
+                }}
+              />
+            )}
           </div>
         )}
       </div>
