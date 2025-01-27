@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { pipeline } from "@huggingface/transformers";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -20,7 +18,12 @@ const TokenizerPlayground: React.FC<TokenizerPlaygroundProps> = ({ inputText, on
   useEffect(() => {
     const initTokenizer = async () => {
       try {
-        const pipe = await pipeline("text-classification", "Xenova/bert-base-multilingual-uncased");
+        // Using a smaller, more efficient model for tokenization
+        const pipe = await pipeline(
+          "text-classification",
+          "Xenova/distilbert-base-uncased",
+          { quantized: true }
+        );
         setTokenizer(pipe.tokenizer);
         setIsLoading(false);
       } catch (error) {
