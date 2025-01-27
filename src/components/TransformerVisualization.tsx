@@ -41,6 +41,13 @@ const TransformerVisualization = () => {
     return tokens;
   }, []);
 
+  const generateNextWord = useCallback((step: number) => {
+    const words = ["the", "is", "and", "in", "to", "of", "that", "for"];
+    const word = words[Math.floor(Math.random() * words.length)];
+    const probability = 0.1 + Math.random() * 0.8;
+    return { word: `${word}_${step}`, probability };
+  }, []);
+
   const handleProcess = async () => {
     const validation = validateTokenLimit(inputText, {
       maxTokens: MAX_TOKENS,
@@ -93,18 +100,19 @@ const TransformerVisualization = () => {
           setCurrentStep(i);
           
           if (i >= encoderSteps.length) {
-            const probability = Math.random();
-            setNextWordProbabilities(prev => [
-              ...prev,
-              { word: `Word ${i + 1}`, probability }
-            ]);
+            const nextWord = generateNextWord(i);
+            setNextWordProbabilities(prev => [...prev, nextWord]);
+            setOutputText(prev => prev + " " + nextWord.word);
           }
 
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 
-      setOutputText("Processing complete!");
+      toast({
+        title: "Processing complete!",
+        description: "The transformer has finished processing your input.",
+      });
       
     } catch (error) {
       console.error('Error processing text:', error);
@@ -115,6 +123,17 @@ const TransformerVisualization = () => {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < encoderSteps.length + decoderSteps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+      if (currentStep >= encoderSteps.length) {
+        const nextWord = generateNextWord(currentStep);
+        setNextWordProbabilities(prev => [...prev, nextWord]);
+        setOutputText(prev => prev + " " + nextWord.word);
+      }
     }
   };
 
@@ -158,9 +177,7 @@ const TransformerVisualization = () => {
             <ControlsSection
               isPaused={isPaused}
               setIsPaused={setIsPaused}
-              handleNextStep={() => setCurrentStep(prev => 
-                prev < encoderSteps.length + decoderSteps.length - 1 ? prev + 1 : prev
-              )}
+              handleNextStep={handleNextStep}
               isProcessing={isProcessing}
               canProgress={currentStep < encoderSteps.length + decoderSteps.length - 1}
             />
