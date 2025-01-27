@@ -210,6 +210,36 @@ export type Database = {
         }
         Relationships: []
       }
+      transformer_steps: {
+        Row: {
+          created_at: string | null
+          description: string
+          formula: string
+          id: number
+          image_url: string | null
+          order_number: number
+          step_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          formula: string
+          id?: number
+          image_url?: string | null
+          order_number: number
+          step_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          formula?: string
+          id?: number
+          image_url?: string | null
+          order_number?: number
+          step_name?: string
+        }
+        Relationships: []
+      }
       transformer_visualization_images: {
         Row: {
           category: string

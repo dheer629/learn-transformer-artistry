@@ -6,7 +6,7 @@ import VisualizationContent from "./transformer/sections/VisualizationContent";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
 import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
-import StepInfo from "./transformer/sections/StepInfo";
+import ProcessingSteps from "./transformer/sections/ProcessingSteps";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
 import { 
@@ -31,7 +31,6 @@ const TransformerVisualization = () => {
   const { toast } = useToast();
 
   const processChunk = useCallback(async (chunk: string) => {
-    // Simulate token processing for the chunk
     const tokens: EmbeddingVector[] = chunk.split(' ').map((word, index) => ({
       word,
       vector: Array(512).fill(0).map(() => Math.random()),
@@ -50,10 +49,6 @@ const TransformerVisualization = () => {
     });
 
     if (!validation.isValid) {
-      console.error(`ERROR   api.chat  AI_APICallError: This model's maximum context length is ${MAX_TOKENS} tokens. However, you requested ${validation.totalTokens} tokens (${validation.tokenCount} in the messages, ${COMPLETION_TOKENS} in the completion).`);
-      console.debug(`DEBUG   api.chat  Total message length: ${inputText.split(' ').length} words`);
-      console.info(`INFO   stream-text  Sending llm call to Deepseek with model deepseek-chat`);
-      
       toast({
         variant: "destructive",
         title: "Token limit exceeded",
@@ -68,11 +63,9 @@ const TransformerVisualization = () => {
     setNextWordProbabilities([]);
     
     try {
-      // Split text into manageable chunks
       const chunks = splitIntoChunks(inputText);
       let allTokens: EmbeddingVector[] = [];
       
-      // Process each chunk
       for (const chunk of chunks) {
         const chunkTokens = await processChunk(chunk);
         allTokens = [...allTokens, ...chunkTokens];
@@ -80,8 +73,7 @@ const TransformerVisualization = () => {
 
       setTokenizedOutput(allTokens);
       
-      // Process encoder steps
-      for (let i = 0; i < encoderSteps.length; i++) {
+      for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
         if (!isPaused) {
           const layerOutput: LayerOutput = {
             inputEmbeddings: allTokens,
@@ -98,54 +90,15 @@ const TransformerVisualization = () => {
           };
 
           setLayerOutputs(prev => [...prev, layerOutput]);
+          setCurrentStep(i);
           
-          // Show step information in toast
-          const stepInfo = encoderSteps[i];
-          toast({
-            title: `Encoder Step ${i + 1}: ${stepInfo.title}`,
-            description: (
-              <div className="space-y-2">
-                <p className="font-medium">{stepInfo.description}</p>
-                <div className="bg-muted p-2 rounded">
-                  <p className="font-mono text-sm">{stepInfo.formula}</p>
-                </div>
-                <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
-              </div>
-            ),
-            duration: 5000,
-          });
-          
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      // Process decoder steps
-      for (let i = 0; i < decoderSteps.length; i++) {
-        if (!isPaused) {
-          const probability = Math.random();
-          setNextWordProbabilities(prev => [
-            ...prev,
-            { 
-              word: `Word ${i + 1}`,
-              probability
-            }
-          ]);
-
-          // Show step information in toast
-          const stepInfo = decoderSteps[i];
-          toast({
-            title: `Decoder Step ${i + 1}: ${stepInfo.title}`,
-            description: (
-              <div className="space-y-2">
-                <p className="font-medium">{stepInfo.description}</p>
-                <div className="bg-muted p-2 rounded">
-                  <p className="font-mono text-sm">{stepInfo.formula}</p>
-                </div>
-                <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
-              </div>
-            ),
-            duration: 5000,
-          });
+          if (i >= encoderSteps.length) {
+            const probability = Math.random();
+            setNextWordProbabilities(prev => [
+              ...prev,
+              { word: `Word ${i + 1}`, probability }
+            ]);
+          }
 
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -162,32 +115,6 @@ const TransformerVisualization = () => {
       });
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const handleNextStep = () => {
-    if (currentStep < encoderSteps.length + decoderSteps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-      
-      // Show step information for the new step
-      const isEncoderStep = currentStep < encoderSteps.length;
-      const stepInfo = isEncoderStep 
-        ? encoderSteps[currentStep]
-        : decoderSteps[currentStep - encoderSteps.length];
-      
-      toast({
-        title: `${isEncoderStep ? 'Encoder' : 'Decoder'} Step ${currentStep + 1}: ${stepInfo.title}`,
-        description: (
-          <div className="space-y-2">
-            <p className="font-medium">{stepInfo.description}</p>
-            <div className="bg-muted p-2 rounded">
-              <p className="font-mono text-sm">{stepInfo.formula}</p>
-            </div>
-            <p className="text-sm">{stepInfo.explanation.vectorExplanation}</p>
-          </div>
-        ),
-        duration: 5000,
-      });
     }
   };
 
@@ -231,7 +158,9 @@ const TransformerVisualization = () => {
             <ControlsSection
               isPaused={isPaused}
               setIsPaused={setIsPaused}
-              handleNextStep={handleNextStep}
+              handleNextStep={() => setCurrentStep(prev => 
+                prev < encoderSteps.length + decoderSteps.length - 1 ? prev + 1 : prev
+              )}
               isProcessing={isProcessing}
               canProgress={currentStep < encoderSteps.length + decoderSteps.length - 1}
             />
@@ -242,22 +171,22 @@ const TransformerVisualization = () => {
               nextWordProbabilities={nextWordProbabilities}
             />
 
-            {/* Add StepInfo component to show current step details */}
-            {(currentStep < encoderSteps.length + decoderSteps.length) && (
-              <StepInfo
-                currentStep={currentStep}
-                stepInfo={currentStep < encoderSteps.length 
-                  ? encoderSteps[currentStep] 
-                  : decoderSteps[currentStep - encoderSteps.length]
+            <ProcessingSteps
+              currentStep={currentStep}
+              embeddings={tokenizedOutput}
+              output={layerOutputs[currentStep] || {
+                inputEmbeddings: [],
+                outputEmbeddings: [],
+                attentionWeights: [],
+                intermediateOutputs: {
+                  queryVectors: [],
+                  keyVectors: [],
+                  valueVectors: [],
+                  weightedSum: []
                 }
-                embeddings={tokenizedOutput}
-                output={layerOutputs[currentStep] || {
-                  inputEmbeddings: [],
-                  outputEmbeddings: [],
-                  attentionWeights: [],
-                }}
-              />
-            )}
+              }}
+              isPaused={isPaused}
+            />
           </div>
         )}
       </div>
