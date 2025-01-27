@@ -21,8 +21,7 @@ const TokenizerPlayground: React.FC<TokenizerPlaygroundProps> = ({ inputText, on
         // Using a smaller, more efficient model for tokenization
         const pipe = await pipeline(
           "text-classification",
-          "Xenova/distilbert-base-uncased",
-          { quantized: true }
+          "Xenova/distilbert-base-uncased"
         );
         setTokenizer(pipe.tokenizer);
         setIsLoading(false);
