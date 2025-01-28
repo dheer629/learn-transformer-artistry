@@ -42,7 +42,7 @@ const TransformerVisualization = () => {
   }, []);
 
   const generateNextWord = useCallback((step: number) => {
-    const words = ["the", "is", "and", "in", "to", "of", "that", "for"];
+    const words = ["the", "is", "and", "in", "to", "of", "that", "for", "with", "as"];
     const word = words[Math.floor(Math.random() * words.length)];
     const probability = 0.1 + Math.random() * 0.8;
     return { word: `${word}_${step}`, probability };
@@ -68,6 +68,7 @@ const TransformerVisualization = () => {
     setCurrentStep(0);
     setLayerOutputs([]);
     setNextWordProbabilities([]);
+    setOutputText("");
     
     try {
       const chunks = splitIntoChunks(inputText);
