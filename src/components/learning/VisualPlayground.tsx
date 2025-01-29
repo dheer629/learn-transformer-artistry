@@ -6,19 +6,15 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { Play, Pause, SkipForward, RotateCcw } from "lucide-react";
 import { MathJax } from "better-react-mathjax";
-
-interface VectorData {
-  values: number[];
-  attention: number[];
-  position: number[];
-}
+import { processStep } from "./utils/vectorCalculations";
+import type { VectorData } from "./utils/vectorCalculations";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [currentStep, setCurrentStep] = useState(0);
   const [inputText, setInputText] = useState("Hello world");
-  const [vectorData, setVectorData] = useState<VectorData[]>([]);
+  const [vectorData, setVectorData] = useState<VectorData>({ values: [], attention: [], position: [] });
   const { toast } = useToast();
 
   const transformerSteps = [
@@ -27,83 +23,35 @@ const VisualPlayground = () => {
       description: "Convert input tokens to vectors",
       formula: "E(x) = WᵉX",
       details: "Converting words into numerical vectors that capture meaning",
-      getVectorData: (text: string): VectorData => {
-        // Generate embeddings based on character codes
-        const values = Array.from(text).map(char => 
-          (char.charCodeAt(0) % 100) / 100
-        );
-        return {
-          values,
-          attention: Array(values.length).fill(0),
-          position: Array(values.length).fill(0)
-        };
-      }
+      explanation: "Each word is converted into a vector of dimension 8 using a hash-based embedding function. These vectors represent the semantic meaning of the words."
     },
     {
       title: "Positional Encoding",
       description: "Add position information",
       formula: "PE(pos,2i) = sin(pos/10000^{2i/d})",
       details: "Adding position information to each token vector",
-      getVectorData: (prevData: VectorData): VectorData => {
-        const position = prevData.values.map((_, i) => 
-          Math.sin(i / Math.pow(10000, 2 * i / prevData.values.length))
-        );
-        return {
-          values: prevData.values,
-          attention: prevData.attention,
-          position
-        };
-      }
+      explanation: "Sinusoidal position encodings are added to the embeddings to give the model information about token positions."
     },
     {
       title: "Self-Attention",
       description: "Calculate attention scores",
       formula: "Attention(Q,K,V) = softmax(QK^T/√d)V",
       details: "Computing relationships between all tokens",
-      getVectorData: (prevData: VectorData): VectorData => {
-        // Simplified attention calculation
-        const attention = prevData.values.map((val, i) => {
-          const scores = prevData.values.map((other, j) => {
-            const dot = val * other;
-            const scale = Math.sqrt(prevData.values.length);
-            return Math.exp(dot / scale);
-          });
-          const sum = scores.reduce((a, b) => a + b, 0);
-          return scores.map(s => s / sum);
-        }).flat();
-        
-        return {
-          values: prevData.values,
-          attention,
-          position: prevData.position
-        };
-      }
+      explanation: "Attention weights are calculated using scaled dot-product attention, showing how much each token attends to others."
     },
     {
       title: "Feed Forward",
       description: "Process through neural network",
       formula: "FFN(x) = max(0, xW₁ + b₁)W₂ + b₂",
       details: "Transforming token representations through neural layers",
-      getVectorData: (prevData: VectorData): VectorData => {
-        // Simplified feed-forward calculation with ReLU
-        const processed = prevData.values.map(v => {
-          const hidden = Math.max(0, v * 1.5 + 0.1); // W₁=1.5, b₁=0.1
-          return hidden * 0.8 + 0.2; // W₂=0.8, b₂=0.2
-        });
-        
-        return {
-          values: processed,
-          attention: prevData.attention,
-          position: prevData.position
-        };
-      }
-    },
+      explanation: "Vectors are processed through a two-layer feed-forward network with ReLU activation."
+    }
   ];
 
   useEffect(() => {
     if (inputText) {
-      const initialData = transformerSteps[0].getVectorData(inputText);
-      setVectorData([initialData]);
+      const initialData = processStep(inputText, 0);
+      setVectorData(initialData);
     }
   }, [inputText]);
 
@@ -113,8 +61,8 @@ const VisualPlayground = () => {
       interval = setInterval(() => {
         setCurrentStep((prev) => {
           if (prev < transformerSteps.length - 1) {
-            const nextData = transformerSteps[prev + 1].getVectorData(vectorData[vectorData.length - 1]);
-            setVectorData(prev => [...prev, nextData]);
+            const nextData = processStep(inputText, prev + 1);
+            setVectorData(nextData);
             return prev + 1;
           }
           setIsPlaying(false);
@@ -123,7 +71,7 @@ const VisualPlayground = () => {
       }, 2000 / speed);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speed, vectorData]);
+  }, [isPlaying, speed, inputText]);
 
   const handleSpeedChange = (value: number[]) => {
     setSpeed(value[0]);
@@ -139,8 +87,8 @@ const VisualPlayground = () => {
 
   const handleNextStep = () => {
     if (currentStep < transformerSteps.length - 1) {
-      const nextData = transformerSteps[currentStep + 1].getVectorData(vectorData[vectorData.length - 1]);
-      setVectorData(prev => [...prev, nextData]);
+      const nextData = processStep(inputText, currentStep + 1);
+      setVectorData(nextData);
       setCurrentStep(prev => prev + 1);
       
       const nextStep = transformerSteps[currentStep + 1];
@@ -152,6 +100,7 @@ const VisualPlayground = () => {
             <MathJax>
               <p className="font-mono text-sm">{nextStep.formula}</p>
             </MathJax>
+            <p className="text-sm text-muted-foreground">{nextStep.explanation}</p>
           </div>
         ),
       });
@@ -162,8 +111,8 @@ const VisualPlayground = () => {
     setCurrentStep(0);
     setIsPlaying(false);
     if (inputText) {
-      const initialData = transformerSteps[0].getVectorData(inputText);
-      setVectorData([initialData]);
+      const initialData = processStep(inputText, 0);
+      setVectorData(initialData);
     }
     toast({
       title: "Visualization Reset",
@@ -221,7 +170,7 @@ const VisualPlayground = () => {
           </h2>
           <p className="text-gray-600">
             Explore and understand the Transformer architecture through this interactive visualization.
-            Watch how vectors are processed through different layers.
+            Watch how vectors are processed through different layers with actual numeric values.
           </p>
         </div>
 
@@ -229,6 +178,17 @@ const VisualPlayground = () => {
           <Card className="p-4 bg-gray-50">
             <h3 className="font-semibold mb-3">Controls</h3>
             <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600 mb-2 block">
+                  Input Text
+                </label>
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
               <div>
                 <label className="text-sm text-gray-600 mb-2 block">
                   Animation Speed
@@ -275,6 +235,14 @@ const VisualPlayground = () => {
               <p>Speed: {speed}x</p>
               <p>Current Step: {currentStep + 1}/{transformerSteps.length}</p>
               <p>Status: {isPlaying ? "Playing" : "Paused"}</p>
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">Vector Information:</h4>
+                <div className="bg-white p-2 rounded text-xs font-mono">
+                  <p>Dimensions: {vectorData.values.length}</p>
+                  <p>Max Value: {Math.max(...vectorData.values).toFixed(4)}</p>
+                  <p>Min Value: {Math.min(...vectorData.values).toFixed(4)}</p>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
@@ -293,7 +261,7 @@ const VisualPlayground = () => {
             </h3>
             <div className="space-y-4">
               <p className="text-gray-600">
-                {transformerSteps[currentStep].details}
+                {transformerSteps[currentStep].explanation}
               </p>
               
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -304,20 +272,68 @@ const VisualPlayground = () => {
                 </MathJax>
               </div>
               
-              {vectorData[currentStep] && renderVectorVisualization(vectorData[currentStep])}
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-2">Value Vectors</h4>
+                  <div className="grid grid-cols-4 gap-2">
+                    {vectorData.values.map((value, i) => (
+                      <motion.div
+                        key={`value-${i}`}
+                        initial={{ height: 0 }}
+                        animate={{ height: Math.abs(value) * 100 }}
+                        className="bg-blue-500 rounded-t-lg"
+                        title={`Value: ${value.toFixed(4)}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-2 text-xs font-mono">
+                    [{vectorData.values.map(v => v.toFixed(4)).join(', ')}]
+                  </div>
+                </div>
+
+                {currentStep >= 1 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Position Encodings</h4>
+                    <div className="grid grid-cols-4 gap-2">
+                      {vectorData.position.map((value, i) => (
+                        <motion.div
+                          key={`position-${i}`}
+                          initial={{ height: 0 }}
+                          animate={{ height: Math.abs(value) * 100 }}
+                          className="bg-green-500 rounded-t-lg"
+                          title={`Value: ${value.toFixed(4)}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-2 text-xs font-mono">
+                      [{vectorData.position.map(v => v.toFixed(4)).join(', ')}]
+                    </div>
+                  </div>
+                )}
+
+                {currentStep >= 2 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Attention Weights</h4>
+                    <div className="grid grid-cols-4 gap-2">
+                      {vectorData.attention.map((value, i) => (
+                        <motion.div
+                          key={`attention-${i}`}
+                          initial={{ height: 0 }}
+                          animate={{ height: value * 100 }}
+                          className="bg-purple-500 rounded-t-lg"
+                          title={`Value: ${value.toFixed(4)}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-2 text-xs font-mono">
+                      [{vectorData.attention.map(v => v.toFixed(4)).join(', ')}]
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         </AnimatePresence>
-
-        <div className="bg-gray-50 p-4 rounded-lg mt-6">
-          <h3 className="font-semibold mb-3">Vector Information</h3>
-          <div className="space-y-2 text-sm">
-            <p>• Blue bars represent token embeddings</p>
-            <p>• Green bars show positional encodings</p>
-            <p>• Purple bars indicate attention weights</p>
-            <p>• Heights represent vector values (normalized)</p>
-          </div>
-        </div>
       </Card>
     </div>
   );
