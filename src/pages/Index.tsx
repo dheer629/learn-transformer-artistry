@@ -9,6 +9,7 @@ import MLResources from "@/components/learning/MLResources";
 import Author from "@/components/Author";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import VisualPlayground from "@/components/learning/VisualPlayground";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Index = () => {
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <TooltipProvider>
           <Tabs defaultValue="learn" className="space-y-8">
-            <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-5 gap-2 p-1 bg-muted rounded-lg">
+            <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-6 gap-2 p-1 bg-muted rounded-lg">
               <TabsTrigger 
                 value="learn" 
                 className="data-[state=active]:bg-primary data-[state=active]:text-white px-3 py-2"
@@ -63,6 +64,12 @@ const Index = () => {
                 className="data-[state=active]:bg-primary data-[state=active]:text-white px-3 py-2"
               >
                 ✏️ Practice
+              </TabsTrigger>
+              <TabsTrigger 
+                value="playground"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white px-3 py-2"
+              >
+                🎮 Playground
               </TabsTrigger>
               <TabsTrigger 
                 value="resources"
@@ -94,6 +101,12 @@ const Index = () => {
               <TabsContent value="practice">
                 <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
                   <Quiz />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="playground">
+                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+                  <VisualPlayground />
                 </div>
               </TabsContent>
 
