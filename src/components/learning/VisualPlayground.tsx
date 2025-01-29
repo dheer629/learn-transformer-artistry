@@ -1,23 +1,68 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
-import TransformerArchitecture from "./TransformerArchitecture";
+import { Play, Pause, SkipForward, RotateCcw } from "lucide-react";
 
 const VisualPlayground = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [mainImageUrl, setMainImageUrl] = useState("/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png");
+  const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
+
+  const transformerSteps = [
+    {
+      title: "Input Embedding",
+      description: "Convert input tokens to vectors",
+      values: [0.2, 0.5, 0.8, 0.3],
+    },
+    {
+      title: "Positional Encoding",
+      description: "Add position information",
+      values: [0.4, 0.6, 0.9, 0.5],
+    },
+    {
+      title: "Self-Attention",
+      description: "Calculate attention scores",
+      values: [0.7, 0.8, 0.4, 0.6],
+    },
+    {
+      title: "Feed Forward",
+      description: "Process through neural network",
+      values: [0.9, 0.3, 0.5, 0.7],
+    },
+  ];
 
   const handleSpeedChange = (value: number[]) => {
     setSpeed(value[0]);
     toast({
       title: "Animation Speed Updated",
       description: `Speed set to ${value[0]}x`,
+    });
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < transformerSteps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+      toast({
+        title: transformerSteps[currentStep + 1].title,
+        description: transformerSteps[currentStep + 1].description,
+      });
+    }
+  };
+
+  const handleReset = () => {
+    setCurrentStep(0);
+    setIsPlaying(false);
+    toast({
+      title: "Visualization Reset",
+      description: "Starting from the beginning",
     });
   };
 
@@ -49,7 +94,7 @@ const VisualPlayground = () => {
             </h2>
             <p className="text-gray-600">
               Explore and understand the Transformer architecture through this interactive visualization.
-              Adjust the animation speed and observe how different components work together.
+              Watch how data flows through different layers and components.
             </p>
           </div>
 
@@ -70,6 +115,30 @@ const VisualPlayground = () => {
                     className="w-full"
                   />
                 </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePlayPause}
+                  >
+                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextStep}
+                    disabled={currentStep >= transformerSteps.length - 1}
+                  >
+                    <SkipForward className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </Card>
 
@@ -77,25 +146,57 @@ const VisualPlayground = () => {
               <h3 className="font-semibold mb-3">Current Status</h3>
               <div className="space-y-2 text-sm">
                 <p>Speed: {speed}x</p>
-                <p>Mode: Interactive</p>
+                <p>Current Step: {currentStep + 1}/{transformerSteps.length}</p>
+                <p>Status: {isPlaying ? "Playing" : "Paused"}</p>
               </div>
             </Card>
           </div>
 
-          <div className="mt-8">
-            <TransformerArchitecture
-              mainImageUrl={mainImageUrl}
-              isLoading={isLoading}
-            />
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white rounded-xl p-6 shadow-sm"
+            >
+              <h3 className="text-xl font-semibold mb-4">
+                {transformerSteps[currentStep].title}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {transformerSteps[currentStep].description}
+              </p>
+              
+              <div className="grid grid-cols-4 gap-4">
+                {transformerSteps[currentStep].values.map((value, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ height: 0 }}
+                    animate={{ height: value * 200 }}
+                    transition={{ duration: 0.5 * speed }}
+                    className="bg-blue-500 rounded-t-lg"
+                  />
+                ))}
+              </div>
+              
+              <div className="grid grid-cols-4 gap-4 mt-2">
+                {transformerSteps[currentStep].values.map((value, index) => (
+                  <div key={index} className="text-center text-sm text-gray-600">
+                    {value.toFixed(2)}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           <div className="bg-gray-50 p-4 rounded-lg mt-6">
             <h3 className="font-semibold mb-3">How to Use</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li>• Use the speed slider to control animation speed</li>
-              <li>• Click on different components to see detailed explanations</li>
-              <li>• Observe how data flows through the architecture</li>
-              <li>• Experiment with different configurations</li>
+              <li>• Use the play/pause button to control the animation</li>
+              <li>• Click next step to move through the transformation process</li>
+              <li>• Adjust the speed slider to control animation speed</li>
+              <li>• Reset to start over from the beginning</li>
             </ul>
           </div>
         </Card>
