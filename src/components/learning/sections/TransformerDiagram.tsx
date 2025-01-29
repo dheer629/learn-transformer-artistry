@@ -18,9 +18,15 @@ const TransformerDiagram = () => {
     <motion.div variants={itemAnimation} className="space-y-6">
       <div className="flex flex-col items-center space-y-4">
         <div className="max-w-sm mx-auto">
-          <div className="bg-gray-100 rounded-lg p-8 text-center">
-            <p className="text-gray-600">Transformer Architecture Diagram</p>
-          </div>
+          <img
+            src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
+            alt="Transformer Architecture Diagram"
+            className={cn(
+              "rounded-lg shadow-md w-full h-auto",
+              "hover:shadow-lg transition-shadow duration-300",
+              "border border-gray-100"
+            )}
+          />
         </div>
         <p className="text-sm text-gray-600 text-center italic">
           The transformer architecture showing how information flows through the model

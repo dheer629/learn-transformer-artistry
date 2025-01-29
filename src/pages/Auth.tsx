@@ -28,22 +28,15 @@ const Auth = () => {
           break;
         case 'SIGNED_OUT':
           setErrorMessage("");
-          // Clear any stored session data
-          await supabase.auth.signOut();
           break;
         case 'SIGNED_IN':
           setErrorMessage("");
           break;
-        case 'TOKEN_REFRESHED':
-          console.log("Token refreshed successfully");
+        case 'PASSWORD_RECOVERY':
+          setErrorMessage("Check your email for password reset instructions");
           break;
-        case 'INITIAL_SESSION':
-          // Handle initial session load
-          const { error: sessionError } = await supabase.auth.getSession();
-          if (sessionError) {
-            console.error("Session error:", sessionError);
-            setErrorMessage(getErrorMessage(sessionError));
-          }
+        case 'TOKEN_REFRESHED':
+          console.log("Token refreshed");
           break;
         default:
           if (event.includes('ERROR')) {
@@ -79,8 +72,6 @@ const Auth = () => {
           return 'No user found with these credentials.';
         case 'invalid_grant':
           return 'Invalid login credentials.';
-        case 'refresh_token_not_found':
-          return 'Your session has expired. Please sign in again.';
         case 'invalid_claim':
           return 'Session expired. Please sign in again.';
         default:

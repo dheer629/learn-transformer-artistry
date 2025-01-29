@@ -1,214 +1,282 @@
-import React, { useState, useCallback } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import InputOutputSection from "./transformer/sections/InputOutputSection";
-import TokenProcessingSection from "./transformer/sections/TokenProcessingSection";
-import VisualizationContent from "./transformer/sections/VisualizationContent";
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import ControlsSection from "./transformer/sections/ControlsSection";
 import LayersVisualization from "./transformer/sections/LayersVisualization";
-import TokenLimitInfo from "./transformer/sections/TokenLimitInfo";
-import ProcessingSteps from "./transformer/sections/ProcessingSteps";
+import VisualizationHeader from "./transformer/sections/VisualizationHeader";
+import InputOutputSection from "./transformer/sections/InputOutputSection";
+import VisualizationContent from "./transformer/sections/VisualizationContent";
+import TokenVisualization from "./transformer/TokenVisualization";
+import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
-import { 
-  CHUNK_SIZE, 
-  MAX_TOKENS, 
-  COMPLETION_TOKENS,
-  splitIntoChunks,
-  validateTokenLimit,
-  calculateTokenCount
-} from "@/utils/textChunking";
+import { useToast } from "@/components/ui/use-toast";
+import { MathJax } from "better-react-mathjax";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
-  const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [tokenizedOutput, setTokenizedOutput] = useState<EmbeddingVector[]>([]);
-  const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
-  const [nextWordProbabilities, setNextWordProbabilities] = useState<Array<{ word: string; probability: number }>>([]);
-  const [learningRate, setLearningRate] = useState(0.001);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [learningRate, setLearningRate] = useState(0.1);
+  const [embeddings, setEmbeddings] = useState<EmbeddingVector[]>([]);
+  const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
+  const [layerOutputs, setLayerOutputs] = useState<LayerOutput[]>([]);
+  const [nextWordProbabilities, setNextWordProbabilities] = useState<{ word: string; probability: number }[]>([]);
   const { toast } = useToast();
+  const totalSteps = encoderSteps.length + decoderSteps.length;
 
-  const processChunk = useCallback(async (chunk: string) => {
-    const tokens: EmbeddingVector[] = chunk.split(' ').map((word, index) => ({
-      word,
-      vector: Array(512).fill(0).map(() => Math.random()),
-      positionalVector: Array(512).fill(0).map(() => Math.random()),
-      contextualVector: Array(512).fill(0).map(() => Math.random())
-    }));
+  const handleNextStep = () => {
+    if (currentStep < totalSteps - 1) {
+      try {
+        const output = generateLayerOutput(embeddings, currentStep + 1);
+        setLayerOutputs(prev => [...prev, output]);
+        setCurrentStep(prev => prev + 1);
+        
+        // Show detailed formula, calculation, and token values for current step
+        const stepInfo = currentStep < encoderSteps.length 
+          ? encoderSteps[currentStep]
+          : decoderSteps[currentStep - encoderSteps.length];
+        
+        const tokenValues = embeddings.map(embed => ({
+          word: embed.word,
+          vector: embed.vector,
+          positionalEncoding: embed.positionalVector,
+          contextualVector: embed.contextualVector
+        }));
 
-    return tokens;
-  }, []);
-
-  const generateNextWord = useCallback((step: number) => {
-    const words = ["the", "is", "and", "in", "to", "of", "that", "for", "with", "as"];
-    const word = words[Math.floor(Math.random() * words.length)];
-    const probability = 0.1 + Math.random() * 0.8;
-    return { word: `${word}_${step}`, probability };
-  }, []);
-
-  const handleProcess = async () => {
-    const validation = validateTokenLimit(inputText, {
-      maxTokens: MAX_TOKENS,
-      completionTokens: COMPLETION_TOKENS,
-      chunkSize: CHUNK_SIZE
-    });
-
-    if (!validation.isValid) {
-      toast({
-        variant: "destructive",
-        title: "Token limit exceeded",
-        description: `Maximum context length (${MAX_TOKENS} tokens) exceeded. Please reduce input length.`
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    setCurrentStep(0);
-    setLayerOutputs([]);
-    setNextWordProbabilities([]);
-    setOutputText("");
-    
-    try {
-      const chunks = splitIntoChunks(inputText);
-      let allTokens: EmbeddingVector[] = [];
-      
-      for (const chunk of chunks) {
-        const chunkTokens = await processChunk(chunk);
-        allTokens = [...allTokens, ...chunkTokens];
-      }
-
-      setTokenizedOutput(allTokens);
-      
-      for (let i = 0; i < encoderSteps.length + decoderSteps.length; i++) {
-        if (!isPaused) {
-          const layerOutput: LayerOutput = {
-            inputEmbeddings: allTokens,
-            outputEmbeddings: allTokens,
-            attentionWeights: Array(allTokens.length).fill(0).map(() => 
-              Array(allTokens.length).fill(0).map(() => Math.random())
-            ),
-            intermediateOutputs: {
-              queryVectors: [Array(512).fill(0).map(() => Math.random())],
-              keyVectors: [Array(512).fill(0).map(() => Math.random())],
-              valueVectors: [Array(512).fill(0).map(() => Math.random())],
-              weightedSum: [Array(512).fill(0).map(() => Math.random())]
-            }
-          };
-
-          setLayerOutputs(prev => [...prev, layerOutput]);
-          setCurrentStep(i);
+        const formulaExplanation = `
+          ${stepInfo.explanation.vectorExplanation}
           
-          if (i >= encoderSteps.length) {
-            const nextWord = generateNextWord(i);
-            setNextWordProbabilities(prev => [...prev, nextWord]);
-            setOutputText(prev => prev + " " + nextWord.word);
-          }
+          Token Values:
+          ${tokenValues.map(token => `
+            Word: "${token.word}"
+            Base Vector: [${token.vector.map(v => v.toFixed(3)).join(", ")}]
+            Position Encoding: [${token.positionalEncoding?.map(v => v.toFixed(3)).join(", ") || ''}]
+            Context Vector: [${token.contextualVector?.map(v => v.toFixed(3)).join(", ") || ''}]
+          `).join('\n')}
+          
+          Calculations:
+          ${output.intermediateOutputs?.queryVectors ? 
+            `Query vectors (Q = W_q * X):
+             [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+          ${output.intermediateOutputs?.keyVectors ? 
+            `Key vectors (K = W_k * X):
+             [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+          ${output.intermediateOutputs?.valueVectors ? 
+            `Value vectors (V = W_v * X):
+             [${output.intermediateOutputs.valueVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+            ''}
+        `;
+        
+        toast({
+          title: `Step ${currentStep + 1}: ${stepInfo.title}`,
+          description: (
+            <div className="space-y-2">
+              <MathJax>
+                <p className="font-medium">Formula: {stepInfo.formula}</p>
+              </MathJax>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap font-mono">{formulaExplanation}</p>
+            </div>
+          ),
+          duration: 8000,
+        });
 
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        // Generate next word predictions if we're in the decoder phase
+        if (currentStep >= encoderSteps.length) {
+          const predictions = generateNextWordPredictions(output);
+          setNextWordProbabilities(predictions);
+          
+          toast({
+            title: "Next Word Predictions",
+            description: (
+              <div className="space-y-2">
+                <p className="font-medium">Top 5 predicted next words:</p>
+                {predictions.slice(0, 5).map((pred, i) => (
+                  <div key={i} className="flex justify-between">
+                    <span>{pred.word}</span>
+                    <span className="font-mono">{(pred.probability * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            ),
+            duration: 5000,
+          });
         }
+      } catch (error) {
+        console.error("Error in processing step:", error);
+        toast({
+          title: "Error Processing Step",
+          description: "There was an error processing this transformation step.",
+          variant: "destructive",
+        });
       }
-
-      toast({
-        title: "Processing complete!",
-        description: "The transformer has finished processing your input.",
-      });
-      
-    } catch (error) {
-      console.error('Error processing text:', error);
-      toast({
-        variant: "destructive",
-        title: "Processing Error",
-        description: "An error occurred while processing the text. Please try again."
-      });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const handleNextStep = () => {
-    if (currentStep < encoderSteps.length + decoderSteps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-      if (currentStep >= encoderSteps.length) {
-        const nextWord = generateNextWord(currentStep);
-        setNextWordProbabilities(prev => [...prev, nextWord]);
-        setOutputText(prev => prev + " " + nextWord.word);
+  const generateNextWordPredictions = (output: LayerOutput) => {
+    // Simplified next word prediction using the last token's output
+    const lastTokenVector = output.outputEmbeddings[output.outputEmbeddings.length - 1].contextualVector;
+    if (!lastTokenVector) return [];
+
+    // Generate mock vocabulary with probabilities
+    const mockVocabulary = [
+      "the", "is", "are", "was", "were", "will", "would", "could", "should", "may",
+      "might", "must", "can", "shall", "have", "has", "had", "been", "being", "do"
+    ];
+
+    // Calculate softmax scores for each word based on vector similarity
+    const scores = mockVocabulary.map(word => {
+      const hash = word.split("").reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      
+      // Generate a probability based on hash and last token vector
+      const probability = Math.abs(Math.sin(hash + lastTokenVector.reduce((a, b) => a + b, 0)));
+      return { word, probability };
+    });
+
+    // Sort by probability
+    return scores.sort((a, b) => b.probability - a.probability);
+  };
+
+  const handleProcess = () => {
+    if (!inputText) {
+      toast({
+        title: "Input Required",
+        description: "Please enter some text to process.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    setCurrentStep(0);
+    setOutputText("");
+    setLayerOutputs([]);
+    setNextWordProbabilities([]);
+    
+    try {
+      const newEmbeddings = generateEmbeddings(inputText);
+      setEmbeddings(newEmbeddings);
+      
+      // Generate initial attention weights matrix
+      const weights = Array(newEmbeddings.length).fill(0).map(() => 
+        Array(newEmbeddings.length).fill(0).map(() => 
+          Number((Math.random()).toFixed(2))
+        )
+      );
+      setAttentionWeights(weights);
+
+      const initialOutput = generateLayerOutput(newEmbeddings, 0);
+      setLayerOutputs([initialOutput]);
+      
+      // Show initial token values with detailed breakdown
+      toast({
+        title: "Token Processing Started",
+        description: (
+          <div className="space-y-2">
+            <p className="font-medium">Input text tokenized into {newEmbeddings.length} tokens</p>
+            <div className="text-sm text-muted-foreground">
+              {newEmbeddings.map((embed, i) => (
+                <div key={i} className="mt-1">
+                  <span className="font-semibold">Token {i + 1}:</span> {embed.word}
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error("Error in initial processing:", error);
+      setIsProcessing(false);
+      toast({
+        title: "Processing Error",
+        description: "Failed to process input text. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        duration: 0.7,
+        ease: "easeOut",
+        staggerChildren: 0.2
       }
     }
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-8">
-      <TokenLimitInfo
-        currentTokenCount={calculateTokenCount(inputText)}
-        maxTokens={MAX_TOKENS}
-        modelName="deepseek-chat"
-      />
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerAnimation}
+      className="space-y-8"
+    >
+      <Card className="p-6 space-y-6 overflow-hidden bg-gradient-to-br from-white to-gray-50">
+        <VisualizationHeader title="Transformer Architecture Visualization" />
+        
+        <InputOutputSection
+          inputText={inputText}
+          setInputText={setInputText}
+          outputText={outputText}
+          learningRate={learningRate}
+          setLearningRate={setLearningRate}
+          handleProcess={handleProcess}
+          isProcessing={isProcessing}
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <InputOutputSection
-            inputText={inputText}
-            setInputText={setInputText}
-            outputText={outputText}
-            handleProcess={handleProcess}
-            isProcessing={isProcessing}
-            learningRate={learningRate}
-            setLearningRate={setLearningRate}
-          />
-          
-          {tokenizedOutput.length > 0 && (
-            <TokenProcessingSection
-              tokens={tokenizedOutput}
+        {embeddings.length > 0 && (
+          <motion.div
+            variants={containerAnimation}
+            className="mb-6"
+          >
+            <TokenVisualization
+              tokens={embeddings}
               currentStep={currentStep}
             />
-          )}
-        </div>
-
-        {isProcessing && (
-          <div className="space-y-6">
-            <VisualizationContent
-              currentStep={currentStep}
-              embeddings={tokenizedOutput}
-              attentionWeights={layerOutputs[currentStep]?.attentionWeights || []}
-              nextWordProbabilities={nextWordProbabilities}
-            />
-            
-            <ControlsSection
-              isPaused={isPaused}
-              setIsPaused={setIsPaused}
-              handleNextStep={handleNextStep}
-              isProcessing={isProcessing}
-              canProgress={currentStep < encoderSteps.length + decoderSteps.length - 1}
-            />
-            
-            <LayersVisualization
-              currentStep={currentStep}
-              layerOutputs={layerOutputs}
-              nextWordProbabilities={nextWordProbabilities}
-            />
-
-            <ProcessingSteps
-              currentStep={currentStep}
-              embeddings={tokenizedOutput}
-              output={layerOutputs[currentStep] || {
-                inputEmbeddings: [],
-                outputEmbeddings: [],
-                attentionWeights: [],
-                intermediateOutputs: {
-                  queryVectors: [],
-                  keyVectors: [],
-                  valueVectors: [],
-                  weightedSum: []
-                }
-              }}
-              isPaused={isPaused}
-            />
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+
+        <motion.div variants={containerAnimation}>
+          <ControlsSection
+            isPaused={isPaused}
+            setIsPaused={setIsPaused}
+            handleNextStep={handleNextStep}
+            isProcessing={isProcessing}
+            canProgress={currentStep < totalSteps - 1}
+          />
+        </motion.div>
+
+        <motion.div 
+          variants={containerAnimation}
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <LayersVisualization
+            currentStep={currentStep}
+            layerOutputs={layerOutputs}
+            nextWordProbabilities={nextWordProbabilities}
+          />
+        </motion.div>
+
+        <VisualizationContent
+          currentStep={currentStep}
+          embeddings={embeddings}
+          attentionWeights={attentionWeights}
+          nextWordProbabilities={nextWordProbabilities}
+        />
+      </Card>
+    </motion.div>
   );
 };
 
