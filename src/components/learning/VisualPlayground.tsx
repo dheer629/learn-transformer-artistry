@@ -31,16 +31,16 @@ const VisualPlayground = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isPlaying && layers.length > 0) {
+    if (isPlaying && layers && layers.length > 0) {
       interval = setInterval(() => {
         setCurrentStep((prev) => {
-          if (prev < layers.length - 1) {
-            // Generate output tokens progressively
+          const maxStep = layers.length - 1;
+          if (prev < maxStep) {
             const midPoint = Math.floor(layers.length / 2);
-            if (prev >= midPoint) {
-              setOutputTokens(prev => {
+            if (prev >= midPoint && inputTokens[prev - midPoint]) {
+              setOutputTokens(prevTokens => {
                 const newToken = inputTokens[prev - midPoint];
-                return [...prev, newToken];
+                return [...prevTokens, newToken];
               });
             }
             return prev + 1;
@@ -51,7 +51,7 @@ const VisualPlayground = () => {
       }, 2000 / speed);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speed, layers.length, inputTokens]);
+  }, [isPlaying, speed, layers, inputTokens]);
 
   const handleSpeedChange = (value: number[]) => {
     setSpeed(value[0]);
@@ -66,10 +66,10 @@ const VisualPlayground = () => {
   };
 
   const handleNextStep = () => {
-    if (currentStep < layers.length - 1) {
+    if (layers && layers.length > 0 && currentStep < layers.length - 1) {
       setCurrentStep(prev => prev + 1);
       const midPoint = Math.floor(layers.length / 2);
-      if (currentStep >= midPoint) {
+      if (currentStep >= midPoint && inputTokens[currentStep - midPoint]) {
         const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
       }
@@ -90,10 +90,12 @@ const VisualPlayground = () => {
     setSelectedLayer(layerIndex);
     setCurrentStep(layerIndex);
     
-    toast({
-      title: `Layer ${layerIndex + 1} Selected`,
-      description: `Viewing ${layers[layerIndex].name}`,
-    });
+    if (layers[layerIndex]) {
+      toast({
+        title: `Layer ${layerIndex + 1} Selected`,
+        description: `Viewing ${layers[layerIndex].name}`,
+      });
+    }
   };
 
   return (
