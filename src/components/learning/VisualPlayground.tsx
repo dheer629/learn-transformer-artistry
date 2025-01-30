@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/use-toast";
 import { Play, Pause, SkipForward, RotateCcw } from "lucide-react";
-import { MathJax } from "better-react-mathjax";
 import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
+import TokenDisplay from "./visualization/TokenDisplay";
 import { getTransformerLayers } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./utils/neuralNetworkUtils";
 
@@ -17,11 +17,14 @@ const VisualPlayground = () => {
   const [inputText, setInputText] = useState("Hello world");
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [layers, setLayers] = useState<LayerData[]>([]);
+  const [inputTokens, setInputTokens] = useState<string[]>([]);
+  const [outputTokens, setOutputTokens] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     if (inputText) {
       const tokens = inputText.split(" ");
+      setInputTokens(tokens);
       setLayers(getTransformerLayers(tokens.length));
     }
   }, [inputText]);
@@ -32,6 +35,13 @@ const VisualPlayground = () => {
       interval = setInterval(() => {
         setCurrentStep((prev) => {
           if (prev < layers.length - 1) {
+            // Generate output tokens progressively
+            if (prev >= Math.floor(layers.length / 2)) {
+              setOutputTokens(prev => {
+                const newToken = inputTokens[prev - Math.floor(layers.length / 2)];
+                return [...prev, newToken];
+              });
+            }
             return prev + 1;
           }
           setIsPlaying(false);
@@ -40,7 +50,7 @@ const VisualPlayground = () => {
       }, 2000 / speed);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speed, layers.length]);
+  }, [isPlaying, speed, layers.length, inputTokens]);
 
   const handleSpeedChange = (value: number[]) => {
     setSpeed(value[0]);
@@ -57,12 +67,17 @@ const VisualPlayground = () => {
   const handleNextStep = () => {
     if (currentStep < layers.length - 1) {
       setCurrentStep(prev => prev + 1);
+      if (currentStep >= Math.floor(layers.length / 2)) {
+        const newToken = inputTokens[currentStep - Math.floor(layers.length / 2)];
+        setOutputTokens(prev => [...prev, newToken]);
+      }
     }
   };
 
   const handleReset = () => {
     setCurrentStep(0);
     setIsPlaying(false);
+    setOutputTokens([]);
     toast({
       title: "Visualization Reset",
       description: "Starting from the beginning",
@@ -168,6 +183,12 @@ const VisualPlayground = () => {
             </div>
           </Card>
         </div>
+
+        <TokenDisplay
+          inputTokens={inputTokens}
+          outputTokens={outputTokens}
+          currentStep={currentStep}
+        />
 
         <NeuralNetworkDisplay
           layers={layers}
