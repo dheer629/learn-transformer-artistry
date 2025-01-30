@@ -31,14 +31,15 @@ const VisualPlayground = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isPlaying) {
+    if (isPlaying && layers.length > 0) {
       interval = setInterval(() => {
         setCurrentStep((prev) => {
           if (prev < layers.length - 1) {
             // Generate output tokens progressively
-            if (prev >= Math.floor(layers.length / 2)) {
+            const midPoint = Math.floor(layers.length / 2);
+            if (prev >= midPoint) {
               setOutputTokens(prev => {
-                const newToken = inputTokens[prev - Math.floor(layers.length / 2)];
+                const newToken = inputTokens[prev - midPoint];
                 return [...prev, newToken];
               });
             }
@@ -67,8 +68,9 @@ const VisualPlayground = () => {
   const handleNextStep = () => {
     if (currentStep < layers.length - 1) {
       setCurrentStep(prev => prev + 1);
-      if (currentStep >= Math.floor(layers.length / 2)) {
-        const newToken = inputTokens[currentStep - Math.floor(layers.length / 2)];
+      const midPoint = Math.floor(layers.length / 2);
+      if (currentStep >= midPoint) {
+        const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
       }
     }
@@ -147,7 +149,7 @@ const VisualPlayground = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleNextStep}
-                  disabled={currentStep >= layers.length - 1}
+                  disabled={currentStep >= (layers.length - 1)}
                 >
                   <SkipForward className="h-4 w-4" />
                 </Button>
