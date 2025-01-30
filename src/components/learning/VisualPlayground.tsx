@@ -202,6 +202,8 @@ const VisualPlayground = () => {
           layers={layers}
           currentStep={currentStep}
           onLayerSelect={handleLayerSelect}
+          inputTokens={inputTokens}
+          outputTokens={outputTokens}
         />
 
         {layers?.[selectedLayer]?.weights && (

@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Tooltip } from "@/components/ui/tooltip";
-import { 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Layer {
@@ -19,12 +14,16 @@ interface NeuralNetworkDisplayProps {
   layers: Layer[];
   currentStep: number;
   onLayerSelect: (layerIndex: number) => void;
+  inputTokens?: string[];
+  outputTokens?: string[];
 }
 
 const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
   layers,
   currentStep,
-  onLayerSelect
+  onLayerSelect,
+  inputTokens = [],
+  outputTokens = []
 }) => {
   const [hoveredNeuron, setHoveredNeuron] = useState<{layer: number, neuron: number} | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -42,17 +41,47 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
-  
+
   const getWeightColor = (weight: number, distance: number) => {
-    const normalizedWeight = (weight + 1) / 2; // Convert -1 to 1 range to 0 to 1
-    const intensity = Math.max(0, 1 - distance / 300); // Fade based on mouse distance
-    return `rgba(59, 130, 246, ${normalizedWeight * intensity})`; // Blue with dynamic opacity
+    const normalizedWeight = (weight + 1) / 2;
+    const intensity = Math.max(0, 1 - distance / 300);
+    return `rgba(59, 130, 246, ${normalizedWeight * intensity})`;
   };
 
   const getDistanceFromMouse = (x1: number, y1: number, x2: number, y2: number) => {
     const dx = (x1 + x2) / 2 - mousePosition.x;
     const dy = (y1 + y2) / 2 - mousePosition.y;
     return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const renderTokens = (tokens: string[], isInput: boolean) => {
+    return tokens.map((token, index) => (
+      <motion.div
+        key={`${isInput ? 'input' : 'output'}-${index}`}
+        initial={{ opacity: 0, y: isInput ? -20 : 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        className={`absolute ${isInput ? 'left-0' : 'right-0'} px-3 py-1 rounded-full text-sm 
+          ${isInput ? 'bg-blue-100' : 'bg-green-100'} shadow-sm`}
+        style={{
+          top: `${(index * 400) / Math.max(tokens.length, 1)}px`,
+          transform: 'translateX(-50%)',
+          zIndex: 10
+        }}
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="font-medium">{token}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isInput ? 'Input' : 'Output'} Token {index + 1}</p>
+              <p className="text-xs text-gray-500">Processing Step: {currentStep}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </motion.div>
+    ));
   };
 
   const renderConnections = (fromLayer: number, toLayer: number) => {
@@ -107,6 +136,9 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
       </div>
 
       <div className="relative w-full h-[500px] overflow-x-auto">
+        {renderTokens(inputTokens, true)}
+        {renderTokens(outputTokens, false)}
+        
         <svg width={100 + (layers?.length || 0) * 150} height="500">
           {layers?.map((_, idx) => 
             idx < (layers?.length || 0) - 1 && renderConnections(idx, idx + 1)
