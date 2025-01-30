@@ -151,7 +151,7 @@ const VisualPlayground = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleNextStep}
-                  disabled={currentStep >= (layers.length - 1)}
+                  disabled={!layers || currentStep >= (layers.length - 1)}
                 >
                   <SkipForward className="h-4 w-4" />
                 </Button>
@@ -170,11 +170,11 @@ const VisualPlayground = () => {
             <h3 className="font-semibold mb-3">Current Status</h3>
             <div className="space-y-2 text-sm">
               <p>Speed: {speed}x</p>
-              <p>Current Step: {currentStep + 1}/{layers.length}</p>
+              <p>Current Step: {currentStep + 1}/{layers?.length || 0}</p>
               <p>Status: {isPlaying ? "Playing" : "Paused"}</p>
               <div className="mt-4">
                 <h4 className="font-medium mb-2">Layer Information:</h4>
-                {layers[selectedLayer] && (
+                {layers?.[selectedLayer] && (
                   <div className="bg-white p-2 rounded text-xs font-mono">
                     <p>Layer: {layers[selectedLayer].name}</p>
                     <p>Neurons: {layers[selectedLayer].neurons}</p>
@@ -188,11 +188,15 @@ const VisualPlayground = () => {
           </Card>
         </div>
 
-        <TokenDisplay
-          inputTokens={inputTokens}
-          outputTokens={outputTokens}
-          currentStep={currentStep}
-        />
+        {/* Token Display Section */}
+        <Card className="p-4 bg-white shadow-sm">
+          <h3 className="font-semibold mb-4">Token Processing</h3>
+          <TokenDisplay
+            inputTokens={inputTokens}
+            outputTokens={outputTokens}
+            currentStep={currentStep}
+          />
+        </Card>
 
         <NeuralNetworkDisplay
           layers={layers}
@@ -200,7 +204,7 @@ const VisualPlayground = () => {
           onLayerSelect={handleLayerSelect}
         />
 
-        {layers[selectedLayer] && layers[selectedLayer].weights && (
+        {layers?.[selectedLayer]?.weights && (
           <Card className="p-4 bg-gray-50">
             <h3 className="font-semibold mb-3">Weight Matrix</h3>
             <div className="overflow-x-auto">
