@@ -201,7 +201,6 @@ const VisualPlayground = () => {
           </Card>
         </div>
 
-        {/* Token Display Section */}
         <Card className="p-4 bg-white shadow-sm">
           <h3 className="font-semibold mb-4">Token Processing</h3>
           <TokenDisplay
