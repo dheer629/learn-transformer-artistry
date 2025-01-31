@@ -9,6 +9,7 @@ import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
 import TokenDisplay from "./visualization/TokenDisplay";
 import { getTransformerLayers } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./utils/neuralNetworkUtils";
+import OutputSection from "@/components/transformer/sections/OutputSection";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,6 +21,7 @@ const VisualPlayground = () => {
   const [inputTokens, setInputTokens] = useState<string[]>([]);
   const [outputTokens, setOutputTokens] = useState<string[]>([]);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
+  const [intermediateOutput, setIntermediateOutput] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const VisualPlayground = () => {
       setLayers(getTransformerLayers(tokens.length));
       setIsProcessingComplete(false);
       setOutputTokens([]);
+      setIntermediateOutput("");
     }
   }, [inputText]);
 
@@ -45,6 +48,7 @@ const VisualPlayground = () => {
                 const newToken = inputTokens[prev - midPoint];
                 return [...prevTokens, newToken];
               });
+              setIntermediateOutput(`Processing token: ${inputTokens[prev - midPoint]}`);
             }
             return prev + 1;
           }
@@ -76,6 +80,7 @@ const VisualPlayground = () => {
       if (currentStep >= midPoint && inputTokens[currentStep - midPoint]) {
         const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
+        setIntermediateOutput(`Processing token: ${newToken}`);
       }
       if (currentStep === layers.length - 2) {
         setIsProcessingComplete(true);
@@ -88,6 +93,7 @@ const VisualPlayground = () => {
     setIsPlaying(false);
     setOutputTokens([]);
     setIsProcessingComplete(false);
+    setIntermediateOutput("");
     toast({
       title: "Visualization Reset",
       description: "Starting from the beginning",
@@ -212,6 +218,14 @@ const VisualPlayground = () => {
           onLayerSelect={handleLayerSelect}
           inputTokens={inputTokens}
           outputTokens={outputTokens}
+        />
+
+        <OutputSection
+          outputText={outputTokens.join(" ")}
+          isProcessingComplete={isProcessingComplete}
+          currentStep={currentStep}
+          totalSteps={layers.length}
+          intermediateOutput={intermediateOutput}
         />
 
         {layers?.[selectedLayer]?.weights && (

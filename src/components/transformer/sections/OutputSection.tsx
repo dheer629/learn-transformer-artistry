@@ -6,9 +6,18 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface OutputSectionProps {
   outputText: string;
   isProcessingComplete?: boolean;
+  currentStep?: number;
+  totalSteps?: number;
+  intermediateOutput?: string;
 }
 
-const OutputSection: React.FC<OutputSectionProps> = ({ outputText, isProcessingComplete = false }) => {
+const OutputSection: React.FC<OutputSectionProps> = ({ 
+  outputText, 
+  isProcessingComplete = false,
+  currentStep = 0,
+  totalSteps = 0,
+  intermediateOutput = ""
+}) => {
   const dataFlowAnimation = {
     initial: { scale: 0.8, opacity: 0 },
     animate: { 
@@ -21,6 +30,21 @@ const OutputSection: React.FC<OutputSectionProps> = ({ outputText, isProcessingC
     }
   };
 
+  const getStepOutput = () => {
+    if (!outputText && !intermediateOutput) return "Ready to process input...";
+    if (isProcessingComplete) return outputText;
+    if (intermediateOutput) {
+      return `Step ${currentStep}/${totalSteps}: ${intermediateOutput}`;
+    }
+    return outputText;
+  };
+
+  const getStatusColor = () => {
+    if (!outputText && !intermediateOutput) return "bg-gray-400";
+    if (isProcessingComplete) return "bg-green-500";
+    return "bg-yellow-500";
+  };
+
   return (
     <motion.div
       variants={dataFlowAnimation}
@@ -30,29 +54,32 @@ const OutputSection: React.FC<OutputSectionProps> = ({ outputText, isProcessingC
     >
       <label className="block text-sm font-medium mb-2">Processed Output</label>
       <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50">
-        {outputText ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 ${isProcessingComplete ? 'bg-green-500' : 'bg-yellow-500'} rounded-full ${isProcessingComplete ? 'animate-none' : 'animate-pulse'}`} />
-                  <span className="text-lg font-medium text-gray-800">{outputText}</span>
-                  {isProcessingComplete && (
-                    <span className="text-sm text-green-600 ml-2">(Processing complete)</span>
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isProcessingComplete ? 'Final processed output' : 'Processing in progress...'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <div className="flex items-center space-x-2 text-gray-500">
-            <div className="w-2 h-2 bg-gray-400 rounded-full" />
-            <span>Ready to process input...</span>
-          </div>
-        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="w-full text-left">
+              <div className="flex items-center space-x-2">
+                <div 
+                  className={`w-2 h-2 ${getStatusColor()} rounded-full ${
+                    !isProcessingComplete && (outputText || intermediateOutput) ? 'animate-pulse' : 'animate-none'
+                  }`} 
+                />
+                <span className="text-lg font-medium text-gray-800">
+                  {getStepOutput()}
+                </span>
+                {isProcessingComplete && (
+                  <span className="text-sm text-green-600 ml-2">(Processing complete)</span>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {!outputText && !intermediateOutput && "Waiting for input..."}
+                {intermediateOutput && !isProcessingComplete && `Processing step ${currentStep} of ${totalSteps}`}
+                {isProcessingComplete && "Final processed output"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Card>
     </motion.div>
   );
