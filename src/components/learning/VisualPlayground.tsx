@@ -19,6 +19,7 @@ const VisualPlayground = () => {
   const [layers, setLayers] = useState<LayerData[]>([]);
   const [inputTokens, setInputTokens] = useState<string[]>([]);
   const [outputTokens, setOutputTokens] = useState<string[]>([]);
+  const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,6 +27,8 @@ const VisualPlayground = () => {
       const tokens = inputText.split(" ");
       setInputTokens(tokens);
       setLayers(getTransformerLayers(tokens.length));
+      setIsProcessingComplete(false);
+      setOutputTokens([]);
     }
   }, [inputText]);
 
@@ -46,6 +49,7 @@ const VisualPlayground = () => {
             return prev + 1;
           }
           setIsPlaying(false);
+          setIsProcessingComplete(true);
           return prev;
         });
       }, 2000 / speed);
@@ -73,6 +77,9 @@ const VisualPlayground = () => {
         const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
       }
+      if (currentStep === layers.length - 2) {
+        setIsProcessingComplete(true);
+      }
     }
   };
 
@@ -80,6 +87,7 @@ const VisualPlayground = () => {
     setCurrentStep(0);
     setIsPlaying(false);
     setOutputTokens([]);
+    setIsProcessingComplete(false);
     toast({
       title: "Visualization Reset",
       description: "Starting from the beginning",

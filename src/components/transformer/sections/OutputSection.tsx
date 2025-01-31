@@ -5,9 +5,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface OutputSectionProps {
   outputText: string;
+  isProcessingComplete?: boolean;
 }
 
-const OutputSection: React.FC<OutputSectionProps> = ({ outputText }) => {
+const OutputSection: React.FC<OutputSectionProps> = ({ outputText, isProcessingComplete = false }) => {
   const dataFlowAnimation = {
     initial: { scale: 0.8, opacity: 0 },
     animate: { 
@@ -34,19 +35,22 @@ const OutputSection: React.FC<OutputSectionProps> = ({ outputText }) => {
             <Tooltip>
               <TooltipTrigger>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <div className={`w-2 h-2 ${isProcessingComplete ? 'bg-green-500' : 'bg-yellow-500'} rounded-full ${isProcessingComplete ? 'animate-none' : 'animate-pulse'}`} />
                   <span className="text-lg font-medium text-gray-800">{outputText}</span>
+                  {isProcessingComplete && (
+                    <span className="text-sm text-green-600 ml-2">(Processing complete)</span>
+                  )}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Final processed output</p>
+                <p>{isProcessingComplete ? 'Final processed output' : 'Processing in progress...'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : (
           <div className="flex items-center space-x-2 text-gray-500">
             <div className="w-2 h-2 bg-gray-400 rounded-full" />
-            <span>Waiting for input processing...</span>
+            <span>Ready to process input...</span>
           </div>
         )}
       </Card>
