@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      document_links: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          kag_reference: string | null
+          title: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          kag_reference?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          document_type?: Database["public"]["Enums"]["document_type"]
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          kag_reference?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string | null
@@ -463,7 +505,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      document_type: "STANDARD" | "SPECIFICATION" | "REPORT" | "OTHER"
     }
     CompositeTypes: {
       [_ in never]: never
