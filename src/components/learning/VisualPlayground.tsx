@@ -9,7 +9,6 @@ import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
 import TokenDisplay from "./visualization/TokenDisplay";
 import { getTransformerLayers } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./utils/neuralNetworkUtils";
-import OutputSection from "@/components/transformer/sections/OutputSection";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -218,14 +217,6 @@ const VisualPlayground = () => {
           onLayerSelect={handleLayerSelect}
           inputTokens={inputTokens}
           outputTokens={outputTokens}
-        />
-
-        <OutputSection
-          outputText={outputTokens.join(" ")}
-          isProcessingComplete={isProcessingComplete}
-          currentStep={currentStep}
-          totalSteps={layers.length}
-          intermediateOutput={intermediateOutput}
         />
 
         {layers?.[selectedLayer]?.weights && (
