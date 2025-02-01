@@ -1,12 +1,11 @@
 import React from "react";
-import { motion } from "framer-motion";
-import InputSection from "./InputSection";
-import OutputSection from "./OutputSection";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface InputOutputSectionProps {
   inputText: string;
   setInputText: (text: string) => void;
-  outputText?: string; // Made optional
   learningRate: number;
   setLearningRate: (rate: number) => void;
   handleProcess: () => void;
@@ -16,47 +15,43 @@ interface InputOutputSectionProps {
 const InputOutputSection: React.FC<InputOutputSectionProps> = ({
   inputText,
   setInputText,
-  outputText = "", // Default value
   learningRate,
   setLearningRate,
   handleProcess,
   isProcessing
 }) => {
-  const containerVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-        staggerChildren: 0.1
-      }
-    }
-  };
-
   return (
-    <motion.div 
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div variants={containerVariants}>
-        <InputSection
-          inputText={inputText}
-          setInputText={setInputText}
-          learningRate={learningRate}
-          setLearningRate={setLearningRate}
-          handleProcess={handleProcess}
-          isProcessing={isProcessing}
-        />
-      </motion.div>
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-2">Input Text</label>
+        <div className="flex gap-4">
+          <Input
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Enter text to process..."
+            className="flex-1"
+          />
+          <Button 
+            onClick={handleProcess}
+            disabled={isProcessing || !inputText}
+          >
+            Process
+          </Button>
+        </div>
+      </div>
       
-      <motion.div variants={containerVariants}>
-        <OutputSection outputText={outputText} />
-      </motion.div>
-    </motion.div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Learning Rate: {learningRate}</label>
+        <Slider
+          value={[learningRate]}
+          onValueChange={(value) => setLearningRate(value[0])}
+          min={0.01}
+          max={1}
+          step={0.01}
+          className="w-full"
+        />
+      </div>
+    </div>
   );
 };
 
