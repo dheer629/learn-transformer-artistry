@@ -6,10 +6,12 @@ import { AuthError, AuthApiError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -24,6 +26,11 @@ const Auth = () => {
           const { error } = await supabase.auth.getSession();
           if (error) {
             setErrorMessage(getErrorMessage(error));
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: getErrorMessage(error)
+            });
           }
           break;
         case 'SIGNED_OUT':
@@ -32,16 +39,21 @@ const Auth = () => {
         case 'SIGNED_IN':
           setErrorMessage("");
           break;
-        case 'PASSWORD_RECOVERY':
-          setErrorMessage("Check your email for password reset instructions");
-          break;
         case 'TOKEN_REFRESHED':
-          console.log("Token refreshed");
+          console.log("Token refreshed successfully");
+          break;
+        case 'INITIAL_SESSION':
+          // Handle initial session load
           break;
         default:
           if (event.includes('ERROR')) {
             console.error("Auth error event:", event);
             setErrorMessage("An authentication error occurred. Please try again.");
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: "Please sign in again to continue."
+            });
           }
       }
     });
@@ -51,19 +63,26 @@ const Auth = () => {
       if (error) {
         console.error("Session error:", error);
         setErrorMessage(getErrorMessage(error));
+        toast({
+          variant: "destructive",
+          title: "Session Error",
+          description: "Please sign in again to continue."
+        });
       } else if (session) {
         navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const getErrorMessage = (error: AuthError) => {
     console.error("Auth error:", error);
     
     if (error instanceof AuthApiError) {
-      switch (error.code) {
+      switch (error.message) {
+        case 'Invalid Refresh Token: Refresh Token Not Found':
+          return 'Your session has expired. Please sign in again.';
         case 'invalid_credentials':
           return 'Invalid email or password. Please check your credentials and try again.';
         case 'email_not_confirmed':

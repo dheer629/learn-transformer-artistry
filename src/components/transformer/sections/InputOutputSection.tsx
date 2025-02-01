@@ -6,7 +6,7 @@ import OutputSection from "./OutputSection";
 interface InputOutputSectionProps {
   inputText: string;
   setInputText: (text: string) => void;
-  outputText?: string; // Made optional with ?
+  outputText?: string; // Made optional
   learningRate: number;
   setLearningRate: (rate: number) => void;
   handleProcess: () => void;
@@ -16,7 +16,7 @@ interface InputOutputSectionProps {
 const InputOutputSection: React.FC<InputOutputSectionProps> = ({
   inputText,
   setInputText,
-  outputText = "", // Provide default empty string
+  outputText = "", // Default value
   learningRate,
   setLearningRate,
   handleProcess,
