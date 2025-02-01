@@ -6,7 +6,7 @@ import LayersVisualization from "./transformer/sections/LayersVisualization";
 import VisualizationHeader from "./transformer/sections/VisualizationHeader";
 import InputOutputSection from "./transformer/sections/InputOutputSection";
 import VisualizationContent from "./transformer/sections/VisualizationContent";
-import TokenVisualization from "./transformer/TokenVisualization";
+import ProcessingSection from "./transformer/sections/ProcessingSection";
 import { generateEmbeddings, generateLayerOutput } from "./transformer/utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "./transformer/config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "./transformer/types";
@@ -15,7 +15,6 @@ import { MathJax } from "better-react-mathjax";
 
 const TransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
-  const [outputText, setOutputText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -34,7 +33,6 @@ const TransformerVisualization = () => {
         setLayerOutputs(prev => [...prev, output]);
         setCurrentStep(prev => prev + 1);
         
-        // Show detailed formula, calculation, and token values for current step
         const stepInfo = currentStep < encoderSteps.length 
           ? encoderSteps[currentStep]
           : decoderSteps[currentStep - encoderSteps.length];
@@ -85,7 +83,6 @@ const TransformerVisualization = () => {
           duration: 8000,
         });
 
-        // Generate next word predictions if we're in the decoder phase
         if (currentStep >= encoderSteps.length) {
           const predictions = generateNextWordPredictions(output);
           setNextWordProbabilities(predictions);
@@ -118,29 +115,24 @@ const TransformerVisualization = () => {
   };
 
   const generateNextWordPredictions = (output: LayerOutput) => {
-    // Simplified next word prediction using the last token's output
     const lastTokenVector = output.outputEmbeddings[output.outputEmbeddings.length - 1].contextualVector;
     if (!lastTokenVector) return [];
 
-    // Generate mock vocabulary with probabilities
     const mockVocabulary = [
       "the", "is", "are", "was", "were", "will", "would", "could", "should", "may",
       "might", "must", "can", "shall", "have", "has", "had", "been", "being", "do"
     ];
 
-    // Calculate softmax scores for each word based on vector similarity
     const scores = mockVocabulary.map(word => {
       const hash = word.split("").reduce((a, b) => {
         a = ((a << 5) - a) + b.charCodeAt(0);
         return a & a;
       }, 0);
       
-      // Generate a probability based on hash and last token vector
       const probability = Math.abs(Math.sin(hash + lastTokenVector.reduce((a, b) => a + b, 0)));
       return { word, probability };
     });
 
-    // Sort by probability
     return scores.sort((a, b) => b.probability - a.probability);
   };
 
@@ -156,7 +148,6 @@ const TransformerVisualization = () => {
     
     setIsProcessing(true);
     setCurrentStep(0);
-    setOutputText("");
     setLayerOutputs([]);
     setNextWordProbabilities([]);
     
@@ -164,7 +155,6 @@ const TransformerVisualization = () => {
       const newEmbeddings = generateEmbeddings(inputText);
       setEmbeddings(newEmbeddings);
       
-      // Generate initial attention weights matrix
       const weights = Array(newEmbeddings.length).fill(0).map(() => 
         Array(newEmbeddings.length).fill(0).map(() => 
           Number((Math.random()).toFixed(2))
@@ -175,7 +165,6 @@ const TransformerVisualization = () => {
       const initialOutput = generateLayerOutput(newEmbeddings, 0);
       setLayerOutputs([initialOutput]);
       
-      // Show initial token values with detailed breakdown
       toast({
         title: "Token Processing Started",
         description: (
@@ -228,24 +217,16 @@ const TransformerVisualization = () => {
         <InputOutputSection
           inputText={inputText}
           setInputText={setInputText}
-          outputText={outputText}
           learningRate={learningRate}
           setLearningRate={setLearningRate}
           handleProcess={handleProcess}
           isProcessing={isProcessing}
         />
 
-        {embeddings.length > 0 && (
-          <motion.div
-            variants={containerAnimation}
-            className="mb-6"
-          >
-            <TokenVisualization
-              tokens={embeddings}
-              currentStep={currentStep}
-            />
-          </motion.div>
-        )}
+        <ProcessingSection
+          embeddings={embeddings}
+          currentStep={currentStep}
+        />
 
         <motion.div variants={containerAnimation}>
           <ControlsSection

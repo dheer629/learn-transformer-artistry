@@ -78,6 +78,39 @@ export type Database = {
         }
         Relationships: []
       }
+      document_summarizer: {
+        Row: {
+          created_at: string | null
+          data_type: string
+          document: string
+          id: number
+          paragraph: string | null
+          section: string | null
+          sentence: string | null
+          summary: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_type: string
+          document: string
+          id?: number
+          paragraph?: string | null
+          section?: string | null
+          sentence?: string | null
+          summary?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_type?: string
+          document?: string
+          id?: number
+          paragraph?: string | null
+          section?: string | null
+          sentence?: string | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string | null
@@ -207,6 +240,33 @@ export type Database = {
           id?: number
           query?: string
           summary?: string
+        }
+        Relationships: []
+      }
+      summarizer_images: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          document_name: string
+          id: number
+          image_data: string
+          image_name: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          document_name: string
+          id?: number
+          image_data: string
+          image_name: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          document_name?: string
+          id?: number
+          image_data?: string
+          image_name?: string
         }
         Relationships: []
       }
