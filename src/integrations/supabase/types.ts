@@ -111,6 +111,33 @@ export type Database = {
         }
         Relationships: []
       }
+      llm_configurations: {
+        Row: {
+          created_at: string | null
+          id: string
+          model_name: string
+          provider: Database["public"]["Enums"]["llm_provider"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          model_name: string
+          provider: Database["public"]["Enums"]["llm_provider"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          model_name?: string
+          provider?: Database["public"]["Enums"]["llm_provider"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string | null
@@ -593,6 +620,7 @@ export type Database = {
     }
     Enums: {
       document_type: "STANDARD" | "SPECIFICATION" | "REPORT" | "OTHER"
+      llm_provider: "openai" | "anthropic" | "google" | "mistral" | "deepseek"
     }
     CompositeTypes: {
       [_ in never]: never
