@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 const itemAnimation = {
   hidden: { opacity: 0, y: 20 },
@@ -17,20 +16,14 @@ const TransformerDiagram = () => {
   return (
     <motion.div variants={itemAnimation} className="space-y-6">
       <div className="flex flex-col items-center space-y-4">
-        <div className="max-w-sm mx-auto">
-          <img
-            src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
-            alt="Transformer Architecture Diagram"
-            className={cn(
-              "rounded-lg shadow-md w-full h-auto",
-              "hover:shadow-lg transition-shadow duration-300",
-              "border border-gray-100"
-            )}
-          />
+        <div className="bg-gray-50 p-8 rounded-lg w-full max-w-2xl">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Transformer Architecture</h3>
+          <p className="text-gray-600">
+            The transformer architecture is a neural network design that revolutionized natural language processing. 
+            It uses self-attention mechanisms to process sequential data in parallel, making it highly efficient and effective 
+            for various language tasks.
+          </p>
         </div>
-        <p className="text-sm text-gray-600 text-center italic">
-          The transformer architecture showing how information flows through the model
-        </p>
       </div>
     </motion.div>
   );
