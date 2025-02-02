@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const itemAnimation = {
   hidden: { opacity: 0, y: 20 },
@@ -16,34 +16,22 @@ const itemAnimation = {
 const TransformerDiagram = () => {
   return (
     <motion.div variants={itemAnimation} className="space-y-6">
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Transformer Architecture</h3>
-        <div className="relative aspect-[16/9] bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg overflow-hidden">
-          <img 
-            src="/transformer-architecture.png" 
+      <div className="flex flex-col items-center space-y-4">
+        <div className="max-w-sm mx-auto">
+          <img
+            src="/lovable-uploads/920119ca-4a91-4285-a54b-f7c7a01af8fa.png"
             alt="Transformer Architecture Diagram"
-            className="object-contain w-full h-full"
+            className={cn(
+              "rounded-lg shadow-md w-full h-auto",
+              "hover:shadow-lg transition-shadow duration-300",
+              "border border-gray-100"
+            )}
           />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center space-y-4 p-6 bg-white/90 rounded-lg shadow-sm">
-              <h4 className="text-lg font-medium text-gray-900">Multi-Head Attention Mechanism</h4>
-              <p className="text-sm text-gray-600">
-                Visualizing how transformers process input sequences through self-attention
-              </p>
-            </div>
-          </div>
         </div>
-        <div className="mt-4 text-sm text-gray-600">
-          <p>The diagram illustrates the key components:</p>
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Input Embeddings</li>
-            <li>Positional Encoding</li>
-            <li>Multi-Head Attention</li>
-            <li>Feed Forward Networks</li>
-            <li>Layer Normalization</li>
-          </ul>
-        </div>
-      </Card>
+        <p className="text-sm text-gray-600 text-center italic">
+          The transformer architecture showing how information flows through the model
+        </p>
+      </div>
     </motion.div>
   );
 };
