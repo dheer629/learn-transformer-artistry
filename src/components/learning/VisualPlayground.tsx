@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
 import TokenDisplay from "./visualization/TokenDisplay";
 import ControlPanel from "./visualization/ControlPanel";
 import StatusPanel from "./visualization/StatusPanel";
+import LayerVisualizer from "./visualization/LayerVisualizer";
+import AttentionPatternView from "./visualization/AttentionPatternView";
 import { getTransformerLayers } from "./utils/neuralNetworkUtils";
+import { supabase } from "@/integrations/supabase/client";
 import type { LayerData } from "./utils/neuralNetworkUtils";
 
 const VisualPlayground = () => {
@@ -14,9 +18,11 @@ const VisualPlayground = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [inputText, setInputText] = useState("Hello world");
   const [selectedLayer, setSelectedLayer] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("network");
   const [layers, setLayers] = useState<LayerData[]>([]);
   const [inputTokens, setInputTokens] = useState<string[]>([]);
   const [outputTokens, setOutputTokens] = useState<string[]>([]);
+  const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
@@ -27,6 +33,12 @@ const VisualPlayground = () => {
       setLayers(getTransformerLayers(tokens.length));
       setIsProcessingComplete(false);
       setOutputTokens([]);
+      
+      // Generate initial attention weights
+      const weights = Array(tokens.length).fill(0).map(() => 
+        Array(tokens.length).fill(0).map(() => Math.random())
+      );
+      setAttentionWeights(weights);
     }
   }, [inputText]);
 
@@ -43,6 +55,13 @@ const VisualPlayground = () => {
                 const newToken = inputTokens[prev - midPoint];
                 return [...prevTokens, newToken];
               });
+              
+              // Update attention weights
+              setAttentionWeights(prev => {
+                const newWeights = [...prev];
+                newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+                return newWeights;
+              });
             }
             return prev + 1;
           }
@@ -53,7 +72,7 @@ const VisualPlayground = () => {
       }, 2000 / speed);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speed, layers, inputTokens]);
+  }, [isPlaying, speed, layers, inputTokens, currentStep]);
 
   const handleSpeedChange = (value: number[]) => {
     setSpeed(value[0]);
@@ -74,6 +93,13 @@ const VisualPlayground = () => {
       if (currentStep >= midPoint && inputTokens[currentStep - midPoint]) {
         const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
+        
+        // Update attention weights
+        setAttentionWeights(prev => {
+          const newWeights = [...prev];
+          newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+          return newWeights;
+        });
       }
       if (currentStep === layers.length - 2) {
         setIsProcessingComplete(true);
@@ -104,8 +130,39 @@ const VisualPlayground = () => {
     }
   };
 
+  const saveVisualization = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transformer_visualizations')
+        .insert({
+          input_text: inputText,
+          tokens: { input: inputTokens, output: outputTokens },
+          attention_weights: attentionWeights,
+          layer_outputs: layers.map(layer => ({
+            name: layer.name,
+            neurons: layer.neurons,
+            weights: layer.weights
+          }))
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Visualization Saved",
+        description: "You can access this visualization later",
+      });
+    } catch (error) {
+      console.error('Error saving visualization:', error);
+      toast({
+        title: "Error Saving",
+        description: "Failed to save visualization",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto">
       <Card className="p-6 space-y-6">
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-primary">
@@ -113,7 +170,7 @@ const VisualPlayground = () => {
           </h2>
           <p className="text-gray-600">
             Explore and understand the Transformer architecture through this interactive visualization.
-            Watch how vectors are processed through different layers with actual numeric values.
+            Watch how tokens flow through different layers with actual numeric values and attention patterns.
           </p>
         </div>
 
@@ -129,6 +186,7 @@ const VisualPlayground = () => {
             handleReset={handleReset}
             currentStep={currentStep}
             maxSteps={layers.length - 1}
+            onSave={saveVisualization}
           />
           <StatusPanel 
             speed={speed}
@@ -139,43 +197,53 @@ const VisualPlayground = () => {
           />
         </div>
 
-        <Card className="p-4 bg-white shadow-sm">
-          <h3 className="font-semibold mb-4">Token Processing</h3>
-          <TokenDisplay
-            inputTokens={inputTokens}
-            outputTokens={outputTokens}
-            currentStep={currentStep}
-          />
-        </Card>
-
-        <NeuralNetworkDisplay
-          layers={layers}
-          currentStep={currentStep}
-          onLayerSelect={handleLayerSelect}
-          inputTokens={inputTokens}
-          outputTokens={outputTokens}
-        />
-
-        {layers?.[selectedLayer]?.weights && (
-          <Card className="p-4 bg-gray-50">
-            <h3 className="font-semibold mb-3">Weight Matrix</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs">
-                <tbody>
-                  {layers[selectedLayer].weights.map((row, i) => (
-                    <tr key={i}>
-                      {row.map((weight, j) => (
-                        <td key={j} className="p-1 text-center">
-                          {weight.toFixed(3)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 lg:max-w-[400px]">
+            <TabsTrigger value="network">Network View</TabsTrigger>
+            <TabsTrigger value="layers">Layer View</TabsTrigger>
+            <TabsTrigger value="attention">Attention View</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="network" className="mt-6">
+            <Card className="p-4">
+              <TokenDisplay
+                inputTokens={inputTokens}
+                outputTokens={outputTokens}
+                currentStep={currentStep}
+                attentionWeights={attentionWeights}
+              />
+              <div className="mt-6">
+                <NeuralNetworkDisplay
+                  layers={layers}
+                  currentStep={currentStep}
+                  onLayerSelect={handleLayerSelect}
+                  inputTokens={inputTokens}
+                  outputTokens={outputTokens}
+                  attentionWeights={attentionWeights}
+                />
+              </div>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="layers" className="mt-6">
+            <LayerVisualizer
+              layer={layers[selectedLayer]}
+              currentStep={currentStep}
+              inputTokens={inputTokens}
+              outputTokens={outputTokens}
+              attentionWeights={attentionWeights}
+            />
+          </TabsContent>
+          
+          <TabsContent value="attention" className="mt-6">
+            <AttentionPatternView
+              inputTokens={inputTokens}
+              outputTokens={outputTokens}
+              attentionWeights={attentionWeights}
+              currentStep={currentStep}
+            />
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );

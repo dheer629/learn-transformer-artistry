@@ -423,6 +423,33 @@ export type Database = {
         }
         Relationships: []
       }
+      transformer_visualizations: {
+        Row: {
+          attention_weights: Json
+          created_at: string | null
+          id: string
+          input_text: string
+          layer_outputs: Json
+          tokens: Json
+        }
+        Insert: {
+          attention_weights: Json
+          created_at?: string | null
+          id?: string
+          input_text: string
+          layer_outputs: Json
+          tokens: Json
+        }
+        Update: {
+          attention_weights?: Json
+          created_at?: string | null
+          id?: string
+          input_text?: string
+          layer_outputs?: Json
+          tokens?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
