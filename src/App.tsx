@@ -37,8 +37,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           console.log("User signed in");
           setIsAuthenticated(true);
           break;
-        case 'USER_DELETED':
-        case 'USER_UPDATED':
+        case AuthChangeEvent.USER_DELETED:
+        case AuthChangeEvent.USER_UPDATED:
           // Recheck session on user updates
           const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
           if (sessionError) {
