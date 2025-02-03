@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MathJaxContext } from "better-react-mathjax";
 import { useToast } from "@/components/ui/use-toast";
-import { AuthChangeEvent } from "@supabase/supabase-js";
+import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       console.log("Auth state changed:", event);
       
       switch (event) {
@@ -46,6 +46,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
             setIsAuthenticated(false);
           } else {
             setIsAuthenticated(!!currentSession);
+          }
+          break;
+        case 'INITIAL_SESSION':
+          if (session) {
+            setIsAuthenticated(true);
           }
           break;
         default:
