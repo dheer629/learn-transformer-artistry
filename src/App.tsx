@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MathJaxContext } from "better-react-mathjax";
+import { useToast } from "@/components/ui/use-toast";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
@@ -14,21 +15,51 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       setIsAuthenticated(!!session);
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log("Token refreshed successfully");
+      }
+      
+      if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
+        setIsAuthenticated(false);
+      }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Session error:", error);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please sign in again to continue.",
+        });
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(!!session);
+      }
+      setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
