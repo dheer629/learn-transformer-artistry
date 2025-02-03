@@ -23,24 +23,36 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
-      if (event === 'TOKEN_REFRESHED') {
-        console.log("Token refreshed successfully");
-        setIsAuthenticated(true);
-      } else if (event === 'SIGNED_OUT') {
-        console.log("User signed out");
-        setIsAuthenticated(false);
-      } else if (event === 'SIGNED_IN') {
-        console.log("User signed in");
-        setIsAuthenticated(true);
-      } else if (event === 'USER_DELETED' || event === 'USER_UPDATED') {
-        // Recheck session on user updates
-        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("Session error after user update:", sessionError);
+      switch (event) {
+        case 'TOKEN_REFRESHED':
+          console.log("Token refreshed successfully");
+          setIsAuthenticated(true);
+          break;
+        case 'SIGNED_OUT':
+          console.log("User signed out");
           setIsAuthenticated(false);
-        } else {
-          setIsAuthenticated(!!currentSession);
-        }
+          break;
+        case 'SIGNED_IN':
+          console.log("User signed in");
+          setIsAuthenticated(true);
+          break;
+        case 'USER_DELETED':
+        case 'USER_UPDATED':
+          // Recheck session on user updates
+          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError) {
+            console.error("Session error after user update:", sessionError);
+            setIsAuthenticated(false);
+          } else {
+            setIsAuthenticated(!!currentSession);
+          }
+          break;
+        default:
+          // Handle any other auth events
+          if (session) {
+            setIsAuthenticated(true);
+          }
+          break;
       }
     });
 
