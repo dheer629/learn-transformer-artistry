@@ -16,6 +16,7 @@ interface NeuralNetworkDisplayProps {
   onLayerSelect: (layerIndex: number) => void;
   inputTokens?: string[];
   outputTokens?: string[];
+  attentionWeights: number[][];
 }
 
 const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
@@ -191,5 +192,3 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
     </Card>
   );
 };
-
-export default NeuralNetworkDisplay;

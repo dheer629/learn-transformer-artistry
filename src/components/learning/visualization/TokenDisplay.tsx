@@ -7,12 +7,14 @@ interface TokenDisplayProps {
   inputTokens: string[];
   outputTokens: string[];
   currentStep: number;
+  attentionWeights: number[][];
 }
 
 const TokenDisplay: React.FC<TokenDisplayProps> = ({
   inputTokens,
   outputTokens,
-  currentStep
+  currentStep,
+  attentionWeights
 }) => {
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -31,6 +33,12 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
     visible: { scale: 1, opacity: 1 }
   };
 
+  const getTokenColor = (index: number) => {
+    if (!attentionWeights[currentStep]) return "bg-gray-100";
+    const weight = attentionWeights[currentStep][index] || 0;
+    return `bg-blue-${Math.floor(weight * 500)}`;
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <div className="space-y-4">
@@ -44,7 +52,7 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
                     <motion.div
                       variants={tokenVariants}
                       className={`px-3 py-1 rounded-full text-sm ${
-                        currentStep > 0 ? "bg-blue-100" : "bg-gray-100"
+                        getTokenColor(index)
                       }`}
                     >
                       {token}
@@ -53,6 +61,7 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
                   <TooltipContent>
                     <p>Position: {index + 1}</p>
                     <p>Processing Step: {currentStep}</p>
+                    <p>Attention Weight: {attentionWeights[currentStep]?.[index]?.toFixed(3) || 0}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
