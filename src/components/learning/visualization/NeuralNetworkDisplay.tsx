@@ -24,7 +24,8 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
   currentStep,
   onLayerSelect,
   inputTokens = [],
-  outputTokens = []
+  outputTokens = [],
+  attentionWeights
 }) => {
   const [hoveredNeuron, setHoveredNeuron] = useState<{layer: number, neuron: number} | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -192,3 +193,5 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
     </Card>
   );
 };
+
+export default NeuralNetworkDisplay;

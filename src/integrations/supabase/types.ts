@@ -450,6 +450,30 @@ export type Database = {
         }
         Relationships: []
       }
+      vectors: {
+        Row: {
+          chunk: string
+          created_at: string | null
+          doc_id: string
+          embedding: Json
+          id: number
+        }
+        Insert: {
+          chunk: string
+          created_at?: string | null
+          doc_id: string
+          embedding: Json
+          id?: number
+        }
+        Update: {
+          chunk?: string
+          created_at?: string | null
+          doc_id?: string
+          embedding?: Json
+          id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
