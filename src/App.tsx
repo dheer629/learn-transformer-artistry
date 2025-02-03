@@ -19,35 +19,56 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
-      setIsAuthenticated(!!session);
       
       if (event === 'TOKEN_REFRESHED') {
         console.log("Token refreshed successfully");
-      }
-      
-      if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(true);
+      } else if (event === 'SIGNED_OUT') {
         console.log("User signed out");
         setIsAuthenticated(false);
+      } else if (event === 'SIGNED_IN') {
+        console.log("User signed in");
+        setIsAuthenticated(true);
+      } else if (event === 'USER_DELETED' || event === 'USER_UPDATED') {
+        // Recheck session on user updates
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("Session error after user update:", sessionError);
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(!!currentSession);
+        }
       }
     });
 
     // Initial session check
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Session error:", error);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "Please sign in again to continue.",
-        });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Initial session error:", error);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "Please sign in again to continue.",
+          });
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(!!session);
+        }
+      } catch (err) {
+        console.error("Auth initialization error:", err);
         setIsAuthenticated(false);
-      } else {
-        setIsAuthenticated(!!session);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     return () => {
       subscription.unsubscribe();
