@@ -33,17 +33,16 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
     visible: { scale: 1, opacity: 1 }
   };
 
-  const getTokenColor = (index: number) => {
-    if (!attentionWeights[currentStep]) return "bg-gray-100";
-    const weight = attentionWeights[currentStep][index] || 0;
-    return `bg-blue-${Math.floor(weight * 500)}`;
+  const getAttentionColor = (weight: number) => {
+    const intensity = Math.min(Math.max(weight * 255, 0), 255);
+    return `rgb(${intensity}, ${intensity}, 255)`;
   };
 
   return (
     <Card className="p-4 space-y-4">
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-medium mb-2">Input Tokens</h3>
+          <h3 className="text-sm font-medium mb-2">Input Processing</h3>
           <div className="flex flex-wrap gap-2">
             {inputTokens.map((token, index) => (
               <TooltipProvider key={`input-${index}`}>
@@ -51,17 +50,26 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
                   <TooltipTrigger>
                     <motion.div
                       variants={tokenVariants}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        getTokenColor(index)
-                      }`}
+                      className="relative px-3 py-1 rounded-lg"
+                      style={{
+                        backgroundColor: getAttentionColor(attentionWeights[currentStep]?.[index] || 0)
+                      }}
                     >
-                      {token}
+                      <span className="font-mono text-sm">{token}</span>
+                      <motion.div
+                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: attentionWeights[currentStep]?.[index] || 0 }}
+                        transition={{ duration: 0.5 }}
+                      />
                     </motion.div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Position: {index + 1}</p>
-                    <p>Processing Step: {currentStep}</p>
-                    <p>Attention Weight: {attentionWeights[currentStep]?.[index]?.toFixed(3) || 0}</p>
+                    <div className="p-2 space-y-1">
+                      <p>Position: {index + 1}</p>
+                      <p>Current Step: {currentStep}</p>
+                      <p>Attention: {(attentionWeights[currentStep]?.[index] || 0).toFixed(3)}</p>
+                    </div>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -71,7 +79,7 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
 
         {outputTokens.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium mb-2">Output Tokens</h3>
+            <h3 className="text-sm font-medium mb-2">Generated Output</h3>
             <div className="flex flex-wrap gap-2">
               {outputTokens.map((token, index) => (
                 <TooltipProvider key={`output-${index}`}>
@@ -79,13 +87,19 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
                     <TooltipTrigger>
                       <motion.div
                         variants={tokenVariants}
-                        className="px-3 py-1 rounded-full text-sm bg-green-100"
+                        className="px-3 py-1 rounded-lg bg-green-100"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {token}
+                        <span className="font-mono text-sm">{token}</span>
                       </motion.div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Generated at step: {currentStep}</p>
+                      <div className="p-2">
+                        <p>Generated at step: {index + currentStep}</p>
+                        <p>Position in sequence: {index + 1}</p>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -93,6 +107,16 @@ const TokenDisplay: React.FC<TokenDisplayProps> = ({
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+        <h4 className="text-sm font-medium mb-2">Visualization Guide</h4>
+        <ul className="text-sm space-y-1 text-gray-600">
+          <li>• Token color intensity shows attention weight</li>
+          <li>• Blue bar indicates relative attention strength</li>
+          <li>• Hover over tokens for detailed information</li>
+          <li>• Green tokens represent generated output</li>
+        </ul>
       </div>
     </Card>
   );
