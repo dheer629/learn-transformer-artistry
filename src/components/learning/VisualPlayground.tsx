@@ -38,7 +38,7 @@ const VisualPlayground = () => {
       const weights = Array(tokens.length).fill(0).map(() => 
         Array(tokens.length).fill(0).map(() => Math.random())
       );
-      setAttentionWeights(weights);
+      setAttentionWeights(weights.length > 0 ? weights : [[0]]);
     }
   }, [inputText]);
 
@@ -56,10 +56,12 @@ const VisualPlayground = () => {
                 return [...prevTokens, newToken];
               });
               
-              // Update attention weights
+              // Update attention weights safely
               setAttentionWeights(prev => {
                 const newWeights = [...prev];
-                newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+                if (newWeights[currentStep]) {
+                  newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+                }
                 return newWeights;
               });
             }
@@ -94,10 +96,12 @@ const VisualPlayground = () => {
         const newToken = inputTokens[currentStep - midPoint];
         setOutputTokens(prev => [...prev, newToken]);
         
-        // Update attention weights
+        // Update attention weights safely
         setAttentionWeights(prev => {
           const newWeights = [...prev];
-          newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+          if (newWeights[currentStep]) {
+            newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
+          }
           return newWeights;
         });
       }
