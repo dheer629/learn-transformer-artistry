@@ -22,7 +22,7 @@ const VisualPlayground = () => {
   const [layers, setLayers] = useState<LayerData[]>([]);
   const [inputTokens, setInputTokens] = useState<string[]>([]);
   const [outputTokens, setOutputTokens] = useState<string[]>([]);
-  const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
+  const [attentionWeights, setAttentionWeights] = useState<number[][]>([[0]]);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
@@ -34,7 +34,7 @@ const VisualPlayground = () => {
       setIsProcessingComplete(false);
       setOutputTokens([]);
       
-      // Generate initial attention weights
+      // Generate initial attention weights matrix with proper dimensions
       const weights = Array(tokens.length).fill(0).map(() => 
         Array(tokens.length).fill(0).map(() => Math.random())
       );

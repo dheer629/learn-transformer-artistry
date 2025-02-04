@@ -1,10 +1,7 @@
-import React from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { MathJaxContext } from "better-react-mathjax";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,8 +12,8 @@ import Auth from "./pages/Auth";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,124 +21,64 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session) => {
       console.log("Auth state changed:", event);
       
-      switch (event) {
-        case 'TOKEN_REFRESHED':
-          console.log("Token refreshed successfully");
-          setIsAuthenticated(true);
-          break;
-        case 'SIGNED_OUT':
-          console.log("User signed out");
-          setIsAuthenticated(false);
-          break;
-        case 'SIGNED_IN':
-          console.log("User signed in");
-          setIsAuthenticated(true);
-          break;
-        case 'USER_DELETED':
-        case 'USER_UPDATED':
-          // Recheck session on user updates
-          const { error } = await supabase.auth.getSession();
-          if (error) {
-            console.error("Session error after user update:", error);
-            setIsAuthenticated(false);
-          } else {
-            setIsAuthenticated(!!session);
-          }
-          break;
-        case 'INITIAL_SESSION':
-          if (session) {
-            setIsAuthenticated(true);
-          }
-          break;
-        default:
-          // Handle any other auth events
-          if (session) {
-            setIsAuthenticated(true);
-          }
-          break;
+      if (session) {
+        console.log("User signed in");
+        setSession(session);
+      } else {
+        console.log("User signed out");
+        setSession(null);
+      }
+
+      if (event === "SIGNED_IN") {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
+      } else if (event === "SIGNED_OUT") {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
       }
     });
 
-    // Initial session check
-    const initializeAuth = async () => {
+    // Get initial session
+    const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Initial session error:", error);
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "Please sign in again to continue.",
-          });
-          setIsAuthenticated(false);
-        } else {
-          setIsAuthenticated(!!session);
-        }
-      } catch (err) {
-        console.error("Auth initialization error:", err);
-        setIsAuthenticated(false);
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (error) {
+        console.error("Error getting initial session:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    initializeAuth();
+    getInitialSession();
 
     return () => {
       subscription.unsubscribe();
     };
   }, [toast]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
+  if (!session) {
+    return <Auth />;
   }
 
   return <>{children}</>;
 };
 
 const App = () => {
-  const config = {
-    loader: { 
-      load: ["input/asciimath", "[tex]/html"] 
-    },
-    tex: {
-      packages: { "[+]": ["html"] },
-      inlineMath: [
-        ["$", "$"],
-        ["\\(", "\\)"]
-      ],
-      displayMath: [
-        ["$$", "$$"],
-        ["\\[", "\\]"]
-      ]
-    },
-    startup: {
-      typeset: false
-    },
-    options: {
-      enableMenu: false,
-      processHtmlClass: "mathjax"
-    }
-  };
-
   return (
-    <MathJaxContext version={3} config={config}>
+    <MathJaxContext>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <Router>
             <Routes>
-              <Route path="/auth" element={<Auth />} />
               <Route
                 path="/"
                 element={
@@ -150,8 +87,9 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/auth" element={<Auth />} />
             </Routes>
-          </BrowserRouter>
+          </Router>
         </TooltipProvider>
       </QueryClientProvider>
     </MathJaxContext>
