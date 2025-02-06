@@ -8,9 +8,8 @@ import ControlPanel from "./visualization/ControlPanel";
 import StatusPanel from "./visualization/StatusPanel";
 import LayerVisualizer from "./visualization/LayerVisualizer";
 import AttentionPatternView from "./visualization/AttentionPatternView";
-import { getTransformerLayers } from "./utils/neuralNetworkUtils";
-import { supabase } from "@/integrations/supabase/client";
-import type { LayerData } from "./utils/neuralNetworkUtils";
+import { getTransformerLayers, computeAttentionScores } from "./utils/neuralNetworkUtils";
+import type { LayerData } from "./types/neuralNetworkTypes";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,53 +25,73 @@ const VisualPlayground = () => {
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
+  // Initialize layers and tokens when input text changes
   useEffect(() => {
     if (inputText) {
       const tokens = inputText.split(" ");
       setInputTokens(tokens);
-      setLayers(getTransformerLayers(tokens.length));
+      const newLayers = getTransformerLayers(tokens.length);
+      setLayers(newLayers);
       setIsProcessingComplete(false);
       setOutputTokens([]);
       
       // Generate initial attention weights matrix with proper dimensions
-      const weights = Array(tokens.length).fill(0).map(() => 
-        Array(tokens.length).fill(0).map(() => Math.random())
+      const initialWeights = Array(tokens.length).fill(0).map(() => 
+        Array(tokens.length).fill(0).map(() => 0.1)
       );
-      setAttentionWeights(weights.length > 0 ? weights : [[0]]);
+      setAttentionWeights(initialWeights.length > 0 ? initialWeights : [[0]]);
     }
   }, [inputText]);
 
+  // Handle animation steps
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    
     if (isPlaying && layers && layers.length > 0) {
       interval = setInterval(() => {
         setCurrentStep((prev) => {
-          const maxStep = layers.length - 1;
-          if (prev < maxStep) {
+          if (prev < layers.length - 1) {
             const midPoint = Math.floor(layers.length / 2);
+            
             if (prev >= midPoint && inputTokens[prev - midPoint]) {
+              // Update output tokens
               setOutputTokens(prevTokens => {
                 const newToken = inputTokens[prev - midPoint];
                 return [...prevTokens, newToken];
               });
               
-              // Update attention weights safely
-              setAttentionWeights(prev => {
-                const newWeights = [...prev];
-                if (newWeights[currentStep]) {
-                  newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
-                }
-                return newWeights;
-              });
+              // Update attention weights using proper computation
+              if (layers[prev].attention_heads) {
+                const queries = layers[prev].weights?.[0] || [];
+                const keys = layers[prev].weights?.[1] || [];
+                const values = layers[prev].weights?.[2] || [];
+                
+                const newWeights = computeAttentionScores(
+                  [queries],
+                  [keys],
+                  [values]
+                );
+                
+                setAttentionWeights(prev => {
+                  const updated = [...prev];
+                  if (updated[currentStep]) {
+                    updated[currentStep] = newWeights[0];
+                  }
+                  return updated;
+                });
+              }
             }
+            
             return prev + 1;
           }
+          
           setIsPlaying(false);
           setIsProcessingComplete(true);
           return prev;
         });
       }, 2000 / speed);
     }
+    
     return () => clearInterval(interval);
   }, [isPlaying, speed, layers, inputTokens, currentStep]);
 
@@ -129,38 +148,7 @@ const VisualPlayground = () => {
     if (layers[layerIndex]) {
       toast({
         title: `Layer ${layerIndex + 1} Selected`,
-        description: `Viewing ${layers[layerIndex].name}`,
-      });
-    }
-  };
-
-  const saveVisualization = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('transformer_visualizations')
-        .insert({
-          input_text: inputText,
-          tokens: { input: inputTokens, output: outputTokens },
-          attention_weights: attentionWeights,
-          layer_outputs: layers.map(layer => ({
-            name: layer.name,
-            neurons: layer.neurons,
-            weights: layer.weights
-          }))
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Visualization Saved",
-        description: "You can access this visualization later",
-      });
-    } catch (error) {
-      console.error('Error saving visualization:', error);
-      toast({
-        title: "Error Saving",
-        description: "Failed to save visualization",
-        variant: "destructive",
+        description: `Viewing ${layers[layerIndex].name} with ${layers[layerIndex].neurons} neurons`,
       });
     }
   };
@@ -190,7 +178,6 @@ const VisualPlayground = () => {
             handleReset={handleReset}
             currentStep={currentStep}
             maxSteps={layers.length - 1}
-            onSave={saveVisualization}
           />
           <StatusPanel 
             speed={speed}
