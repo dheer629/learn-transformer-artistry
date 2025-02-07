@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +12,12 @@ import AttentionPatternView from "./visualization/AttentionPatternView";
 import { getTransformerLayers, computeAttentionScores } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./types/neuralNetworkTypes";
 
-const VisualPlayground = () => {
+const MemoizedTokenDisplay = memo(TokenDisplay);
+const MemoizedNeuralNetworkDisplay = memo(NeuralNetworkDisplay);
+const MemoizedLayerVisualizer = memo(LayerVisualizer);
+const MemoizedAttentionPatternView = memo(AttentionPatternView);
+
+const VisualPlayground: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [currentStep, setCurrentStep] = useState(0);
@@ -25,7 +31,6 @@ const VisualPlayground = () => {
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
-  // Initialize layers and tokens when input text changes
   useEffect(() => {
     if (inputText) {
       const tokens = inputText.split(" ");
@@ -34,8 +39,8 @@ const VisualPlayground = () => {
       setLayers(newLayers);
       setIsProcessingComplete(false);
       setOutputTokens([]);
+      setCurrentStep(0);
       
-      // Generate initial attention weights matrix with proper dimensions
       const initialWeights = Array(tokens.length).fill(0).map(() => 
         Array(tokens.length).fill(0).map(() => 0.1)
       );
@@ -43,94 +48,80 @@ const VisualPlayground = () => {
     }
   }, [inputText]);
 
-  // Handle animation steps
+  const processStep = useCallback((step: number) => {
+    if (layers && layers.length > 0) {
+      const midPoint = Math.floor(layers.length / 2);
+      
+      if (step >= midPoint && inputTokens[step - midPoint]) {
+        setOutputTokens(prevTokens => {
+          const newToken = inputTokens[step - midPoint];
+          return [...prevTokens, newToken];
+        });
+        
+        if (layers[step].attention_heads) {
+          const queries = layers[step].weights?.[0] || [];
+          const keys = layers[step].weights?.[1] || [];
+          const values = layers[step].weights?.[2] || [];
+          
+          const newWeights = computeAttentionScores([queries], [keys], [values]);
+          
+          setAttentionWeights(prev => {
+            const updated = [...prev];
+            if (updated[step]) {
+              updated[step] = newWeights[0];
+            }
+            return updated;
+          });
+        }
+      }
+      
+      if (step === layers.length - 1) {
+        setIsPlaying(false);
+        setIsProcessingComplete(true);
+      }
+    }
+  }, [layers, inputTokens]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isPlaying && layers && layers.length > 0) {
       interval = setInterval(() => {
-        setCurrentStep((prev) => {
-          if (prev < layers.length - 1) {
-            const midPoint = Math.floor(layers.length / 2);
-            
-            if (prev >= midPoint && inputTokens[prev - midPoint]) {
-              // Update output tokens
-              setOutputTokens(prevTokens => {
-                const newToken = inputTokens[prev - midPoint];
-                return [...prevTokens, newToken];
-              });
-              
-              // Update attention weights using proper computation
-              if (layers[prev].attention_heads) {
-                const queries = layers[prev].weights?.[0] || [];
-                const keys = layers[prev].weights?.[1] || [];
-                const values = layers[prev].weights?.[2] || [];
-                
-                const newWeights = computeAttentionScores(
-                  [queries],
-                  [keys],
-                  [values]
-                );
-                
-                setAttentionWeights(prev => {
-                  const updated = [...prev];
-                  if (updated[currentStep]) {
-                    updated[currentStep] = newWeights[0];
-                  }
-                  return updated;
-                });
-              }
-            }
-            
-            return prev + 1;
+        setCurrentStep(prev => {
+          const nextStep = prev + 1;
+          if (nextStep < layers.length) {
+            processStep(nextStep);
+            return nextStep;
           }
-          
-          setIsPlaying(false);
-          setIsProcessingComplete(true);
           return prev;
         });
       }, 2000 / speed);
     }
     
     return () => clearInterval(interval);
-  }, [isPlaying, speed, layers, inputTokens, currentStep]);
+  }, [isPlaying, speed, layers, processStep]);
 
-  const handleSpeedChange = (value: number[]) => {
+  const handleSpeedChange = useCallback((value: number[]) => {
     setSpeed(value[0]);
     toast({
       title: "Animation Speed Updated",
       description: `Speed set to ${value[0]}x`,
     });
-  };
+  }, [toast]);
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
+  const handlePlayPause = useCallback(() => {
+    setIsPlaying(prev => !prev);
+  }, []);
 
-  const handleNextStep = () => {
+  const handleNextStep = useCallback(() => {
     if (layers && layers.length > 0 && currentStep < layers.length - 1) {
-      setCurrentStep(prev => prev + 1);
-      const midPoint = Math.floor(layers.length / 2);
-      if (currentStep >= midPoint && inputTokens[currentStep - midPoint]) {
-        const newToken = inputTokens[currentStep - midPoint];
-        setOutputTokens(prev => [...prev, newToken]);
-        
-        // Update attention weights safely
-        setAttentionWeights(prev => {
-          const newWeights = [...prev];
-          if (newWeights[currentStep]) {
-            newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
-          }
-          return newWeights;
-        });
-      }
-      if (currentStep === layers.length - 2) {
-        setIsProcessingComplete(true);
-      }
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      processStep(nextStep);
     }
-  };
+  }, [currentStep, layers, processStep]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setCurrentStep(0);
     setIsPlaying(false);
     setOutputTokens([]);
@@ -139,9 +130,9 @@ const VisualPlayground = () => {
       title: "Visualization Reset",
       description: "Starting from the beginning",
     });
-  };
+  }, [toast]);
 
-  const handleLayerSelect = (layerIndex: number) => {
+  const handleLayerSelect = useCallback((layerIndex: number) => {
     setSelectedLayer(layerIndex);
     setCurrentStep(layerIndex);
     
@@ -151,22 +142,21 @@ const VisualPlayground = () => {
         description: `Viewing ${layers[layerIndex].name} with ${layers[layerIndex].neurons} neurons`,
       });
     }
-  };
+  }, [layers, toast]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <Card className="p-6 space-y-6">
-        <div className="space-y-4">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <Card className="p-4 space-y-4">
+        <div className="space-y-3">
           <h2 className="text-2xl font-bold text-primary">
             Interactive Transformer Architecture
           </h2>
           <p className="text-gray-600">
             Explore and understand the Transformer architecture through this interactive visualization.
-            Watch how tokens flow through different layers with actual numeric values and attention patterns.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ControlPanel 
             inputText={inputText}
             setInputText={setInputText}
@@ -195,16 +185,16 @@ const VisualPlayground = () => {
             <TabsTrigger value="attention">Attention View</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="network" className="mt-6">
+          <TabsContent value="network" className="mt-4">
             <Card className="p-4">
-              <TokenDisplay
+              <MemoizedTokenDisplay
                 inputTokens={inputTokens}
                 outputTokens={outputTokens}
                 currentStep={currentStep}
                 attentionWeights={attentionWeights}
               />
-              <div className="mt-6">
-                <NeuralNetworkDisplay
+              <div className="mt-4">
+                <MemoizedNeuralNetworkDisplay
                   layers={layers}
                   currentStep={currentStep}
                   onLayerSelect={handleLayerSelect}
@@ -216,8 +206,8 @@ const VisualPlayground = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="layers" className="mt-6">
-            <LayerVisualizer
+          <TabsContent value="layers" className="mt-4">
+            <MemoizedLayerVisualizer
               layer={layers[selectedLayer]}
               currentStep={currentStep}
               inputTokens={inputTokens}
@@ -226,8 +216,8 @@ const VisualPlayground = () => {
             />
           </TabsContent>
           
-          <TabsContent value="attention" className="mt-6">
-            <AttentionPatternView
+          <TabsContent value="attention" className="mt-4">
+            <MemoizedAttentionPatternView
               inputTokens={inputTokens}
               outputTokens={outputTokens}
               attentionWeights={attentionWeights}
