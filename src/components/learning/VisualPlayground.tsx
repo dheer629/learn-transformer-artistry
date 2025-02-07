@@ -1,21 +1,15 @@
 
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
-import TokenDisplay from "./visualization/TokenDisplay";
 import ControlPanel from "./visualization/ControlPanel";
 import StatusPanel from "./visualization/StatusPanel";
-import LayerVisualizer from "./visualization/LayerVisualizer";
-import AttentionPatternView from "./visualization/AttentionPatternView";
+import NetworkView from "./visualization/views/NetworkView";
+import LayerView from "./visualization/views/LayerView";
+import AttentionView from "./visualization/views/AttentionView";
 import { getTransformerLayers, computeAttentionScores } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./types/neuralNetworkTypes";
-
-const MemoizedTokenDisplay = memo(TokenDisplay);
-const MemoizedNeuralNetworkDisplay = memo(NeuralNetworkDisplay);
-const MemoizedLayerVisualizer = memo(LayerVisualizer);
-const MemoizedAttentionPatternView = memo(AttentionPatternView);
 
 const VisualPlayground: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -186,29 +180,19 @@ const VisualPlayground: React.FC = () => {
           </TabsList>
           
           <TabsContent value="network" className="mt-4">
-            <Card className="p-4">
-              <MemoizedTokenDisplay
-                inputTokens={inputTokens}
-                outputTokens={outputTokens}
-                currentStep={currentStep}
-                attentionWeights={attentionWeights}
-              />
-              <div className="mt-4">
-                <MemoizedNeuralNetworkDisplay
-                  layers={layers}
-                  currentStep={currentStep}
-                  onLayerSelect={handleLayerSelect}
-                  inputTokens={inputTokens}
-                  outputTokens={outputTokens}
-                  attentionWeights={attentionWeights}
-                />
-              </div>
-            </Card>
+            <NetworkView
+              layers={layers}
+              currentStep={currentStep}
+              onLayerSelect={handleLayerSelect}
+              inputTokens={inputTokens}
+              outputTokens={outputTokens}
+              attentionWeights={attentionWeights}
+            />
           </TabsContent>
           
           <TabsContent value="layers" className="mt-4">
-            <MemoizedLayerVisualizer
-              layer={layers[selectedLayer]}
+            <LayerView
+              selectedLayer={layers[selectedLayer]}
               currentStep={currentStep}
               inputTokens={inputTokens}
               outputTokens={outputTokens}
@@ -217,7 +201,7 @@ const VisualPlayground: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="attention" className="mt-4">
-            <MemoizedAttentionPatternView
+            <AttentionView
               inputTokens={inputTokens}
               outputTokens={outputTokens}
               attentionWeights={attentionWeights}
