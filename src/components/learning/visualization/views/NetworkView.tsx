@@ -54,6 +54,15 @@ const NetworkView: React.FC<NetworkViewProps> = memo(({
       </div>
     </Card>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return (
+    prevProps.currentStep === nextProps.currentStep &&
+    prevProps.layers.length === nextProps.layers.length &&
+    prevProps.inputTokens.length === nextProps.inputTokens.length &&
+    prevProps.outputTokens.length === nextProps.outputTokens.length &&
+    prevProps.attentionWeights.length === nextProps.attentionWeights.length
+  );
 });
 
 NetworkView.displayName = 'NetworkView';

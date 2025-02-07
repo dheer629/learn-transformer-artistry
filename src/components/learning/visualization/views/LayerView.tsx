@@ -42,6 +42,14 @@ const LayerView: React.FC<LayerViewProps> = memo(({
       </div>
     </Card>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return (
+    prevProps.currentStep === nextProps.currentStep &&
+    prevProps.selectedLayer?.name === nextProps.selectedLayer?.name &&
+    prevProps.inputTokens.length === nextProps.inputTokens.length &&
+    prevProps.outputTokens.length === nextProps.outputTokens.length
+  );
 });
 
 LayerView.displayName = 'LayerView';

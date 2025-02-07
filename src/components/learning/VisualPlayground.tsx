@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ControlPanel from "./visualization/ControlPanel";
@@ -31,8 +31,8 @@ const VisualPlayground: React.FC = () => {
     handleLayerSelect
   } = useVisualPlayground();
 
-  // Animation variants
-  const containerAnimation = {
+  // Memoize animation variants
+  const containerAnimation = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
@@ -41,7 +41,40 @@ const VisualPlayground: React.FC = () => {
         staggerChildren: 0.1
       }
     }
-  };
+  }), []);
+
+  // Memoize control panel props
+  const controlPanelProps = useMemo(() => ({
+    inputText,
+    setInputText,
+    speed,
+    handleSpeedChange,
+    isPlaying,
+    handlePlayPause,
+    handleNextStep,
+    handleReset,
+    currentStep,
+    maxSteps: layers.length - 1
+  }), [
+    inputText,
+    speed,
+    isPlaying,
+    currentStep,
+    layers.length,
+    handleSpeedChange,
+    handlePlayPause,
+    handleNextStep,
+    handleReset
+  ]);
+
+  // Memoize status panel props
+  const statusPanelProps = useMemo(() => ({
+    speed,
+    currentStep,
+    totalSteps: layers?.length || 0,
+    isPlaying,
+    selectedLayer: layers?.[selectedLayer]
+  }), [speed, currentStep, layers, isPlaying, selectedLayer]);
 
   return (
     <motion.div 
@@ -61,25 +94,8 @@ const VisualPlayground: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ControlPanel 
-            inputText={inputText}
-            setInputText={setInputText}
-            speed={speed}
-            handleSpeedChange={handleSpeedChange}
-            isPlaying={isPlaying}
-            handlePlayPause={handlePlayPause}
-            handleNextStep={handleNextStep}
-            handleReset={handleReset}
-            currentStep={currentStep}
-            maxSteps={layers.length - 1}
-          />
-          <StatusPanel 
-            speed={speed}
-            currentStep={currentStep}
-            totalSteps={layers?.length || 0}
-            isPlaying={isPlaying}
-            selectedLayer={layers?.[selectedLayer]}
-          />
+          <ControlPanel {...controlPanelProps} />
+          <StatusPanel {...statusPanelProps} />
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
