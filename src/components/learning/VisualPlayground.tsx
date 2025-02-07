@@ -8,6 +8,7 @@ import NetworkView from "./visualization/views/NetworkView";
 import LayerView from "./visualization/views/LayerView";
 import AttentionView from "./visualization/views/AttentionView";
 import { useVisualPlayground } from "./hooks/useVisualPlayground";
+import { useVisualPlaygroundAnimations } from "./hooks/useVisualPlaygroundAnimations";
 import { motion, AnimatePresence } from "framer-motion";
 
 const VisualPlayground: React.FC = () => {
@@ -31,17 +32,7 @@ const VisualPlayground: React.FC = () => {
     handleLayerSelect
   } = useVisualPlayground();
 
-  // Memoize animation variants
-  const containerAnimation = useMemo(() => ({
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
-  }), []);
+  const { containerAnimation, tabContentAnimation } = useVisualPlaygroundAnimations();
 
   // Memoize control panel props
   const controlPanelProps = useMemo(() => ({
@@ -108,10 +99,7 @@ const VisualPlayground: React.FC = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              {...tabContentAnimation}
             >
               <TabsContent value="network" className="mt-4">
                 <NetworkView
@@ -151,3 +139,4 @@ const VisualPlayground: React.FC = () => {
 };
 
 export default VisualPlayground;
+
