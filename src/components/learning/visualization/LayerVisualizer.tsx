@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import type { LayerData } from "../utils/neuralNetworkUtils";
+import type { LayerData } from "../types/neuralNetworkTypes";
 
 interface LayerVisualizerProps {
   layer: LayerData;
