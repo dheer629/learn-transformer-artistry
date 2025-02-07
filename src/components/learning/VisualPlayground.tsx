@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,7 @@ import LayerView from "./visualization/views/LayerView";
 import AttentionView from "./visualization/views/AttentionView";
 import { getTransformerLayers, computeAttentionScores } from "./utils/neuralNetworkUtils";
 import type { LayerData } from "./types/neuralNetworkTypes";
+import { motion, AnimatePresence } from "framer-motion";
 
 const VisualPlayground: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,61 +26,70 @@ const VisualPlayground: React.FC = () => {
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const { toast } = useToast();
 
+  // Memoize transformer layers computation
+  const initializeTransformerLayers = useCallback((tokens: string[]) => {
+    const newLayers = getTransformerLayers(tokens.length);
+    setLayers(newLayers);
+    setIsProcessingComplete(false);
+    setOutputTokens([]);
+    setCurrentStep(0);
+    
+    const initialWeights = Array(tokens.length).fill(0).map(() => 
+      Array(tokens.length).fill(0).map(() => 0.1)
+    );
+    setAttentionWeights(initialWeights.length > 0 ? initialWeights : [[0]]);
+  }, []);
+
   useEffect(() => {
     if (inputText) {
       const tokens = inputText.split(" ");
       setInputTokens(tokens);
-      const newLayers = getTransformerLayers(tokens.length);
-      setLayers(newLayers);
-      setIsProcessingComplete(false);
-      setOutputTokens([]);
-      setCurrentStep(0);
-      
-      const initialWeights = Array(tokens.length).fill(0).map(() => 
-        Array(tokens.length).fill(0).map(() => 0.1)
-      );
-      setAttentionWeights(initialWeights.length > 0 ? initialWeights : [[0]]);
+      initializeTransformerLayers(tokens);
     }
-  }, [inputText]);
+  }, [inputText, initializeTransformerLayers]);
 
   const processStep = useCallback((step: number) => {
-    if (layers && layers.length > 0) {
-      const midPoint = Math.floor(layers.length / 2);
+    if (!layers.length) return;
+
+    const midPoint = Math.floor(layers.length / 2);
+    
+    if (step >= midPoint && inputTokens[step - midPoint]) {
+      setOutputTokens(prevTokens => {
+        const newToken = inputTokens[step - midPoint];
+        return [...prevTokens, newToken];
+      });
       
-      if (step >= midPoint && inputTokens[step - midPoint]) {
-        setOutputTokens(prevTokens => {
-          const newToken = inputTokens[step - midPoint];
-          return [...prevTokens, newToken];
-        });
+      if (layers[step].attention_heads) {
+        const queries = layers[step].weights?.[0] || [];
+        const keys = layers[step].weights?.[1] || [];
+        const values = layers[step].weights?.[2] || [];
         
-        if (layers[step].attention_heads) {
-          const queries = layers[step].weights?.[0] || [];
-          const keys = layers[step].weights?.[1] || [];
-          const values = layers[step].weights?.[2] || [];
-          
-          const newWeights = computeAttentionScores([queries], [keys], [values]);
-          
-          setAttentionWeights(prev => {
-            const updated = [...prev];
-            if (updated[step]) {
-              updated[step] = newWeights[0];
-            }
-            return updated;
-          });
-        }
-      }
-      
-      if (step === layers.length - 1) {
-        setIsPlaying(false);
-        setIsProcessingComplete(true);
+        const newWeights = computeAttentionScores([queries], [keys], [values]);
+        
+        setAttentionWeights(prev => {
+          const updated = [...prev];
+          if (updated[step]) {
+            updated[step] = newWeights[0];
+          }
+          return updated;
+        });
       }
     }
-  }, [layers, inputTokens]);
+    
+    if (step === layers.length - 1) {
+      setIsPlaying(false);
+      setIsProcessingComplete(true);
+      toast({
+        title: "Processing Complete",
+        description: "All transformer layers have been processed",
+      });
+    }
+  }, [layers, inputTokens, toast]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isPlaying && layers && layers.length > 0) {
+    if (isPlaying && layers.length > 0) {
       interval = setInterval(() => {
         setCurrentStep(prev => {
           const nextStep = prev + 1;
@@ -108,7 +118,7 @@ const VisualPlayground: React.FC = () => {
   }, []);
 
   const handleNextStep = useCallback(() => {
-    if (layers && layers.length > 0 && currentStep < layers.length - 1) {
+    if (layers.length > 0 && currentStep < layers.length - 1) {
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
       processStep(nextStep);
@@ -138,9 +148,26 @@ const VisualPlayground: React.FC = () => {
     }
   }, [layers, toast]);
 
+  // Animation variants
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <Card className="p-4 space-y-4">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerAnimation}
+      className="space-y-6 max-w-7xl mx-auto"
+    >
+      <Card className="p-6 space-y-6 bg-gradient-to-br from-white to-gray-50">
         <div className="space-y-3">
           <h2 className="text-2xl font-bold text-primary">
             Interactive Transformer Architecture
@@ -179,38 +206,48 @@ const VisualPlayground: React.FC = () => {
             <TabsTrigger value="attention">Attention View</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="network" className="mt-4">
-            <NetworkView
-              layers={layers}
-              currentStep={currentStep}
-              onLayerSelect={handleLayerSelect}
-              inputTokens={inputTokens}
-              outputTokens={outputTokens}
-              attentionWeights={attentionWeights}
-            />
-          </TabsContent>
-          
-          <TabsContent value="layers" className="mt-4">
-            <LayerView
-              selectedLayer={layers[selectedLayer]}
-              currentStep={currentStep}
-              inputTokens={inputTokens}
-              outputTokens={outputTokens}
-              attentionWeights={attentionWeights}
-            />
-          </TabsContent>
-          
-          <TabsContent value="attention" className="mt-4">
-            <AttentionView
-              inputTokens={inputTokens}
-              outputTokens={outputTokens}
-              attentionWeights={attentionWeights}
-              currentStep={currentStep}
-            />
-          </TabsContent>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TabsContent value="network" className="mt-4">
+                <NetworkView
+                  layers={layers}
+                  currentStep={currentStep}
+                  onLayerSelect={handleLayerSelect}
+                  inputTokens={inputTokens}
+                  outputTokens={outputTokens}
+                  attentionWeights={attentionWeights}
+                />
+              </TabsContent>
+              
+              <TabsContent value="layers" className="mt-4">
+                <LayerView
+                  selectedLayer={layers[selectedLayer]}
+                  currentStep={currentStep}
+                  inputTokens={inputTokens}
+                  outputTokens={outputTokens}
+                  attentionWeights={attentionWeights}
+                />
+              </TabsContent>
+              
+              <TabsContent value="attention" className="mt-4">
+                <AttentionView
+                  inputTokens={inputTokens}
+                  outputTokens={outputTokens}
+                  attentionWeights={attentionWeights}
+                  currentStep={currentStep}
+                />
+              </TabsContent>
+            </motion.div>
+          </AnimatePresence>
         </Tabs>
       </Card>
-    </div>
+    </motion.div>
   );
 };
 

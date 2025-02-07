@@ -1,6 +1,7 @@
 
 import React, { memo } from "react";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import TokenDisplay from "../TokenDisplay";
 import NeuralNetworkDisplay from "../NeuralNetworkDisplay";
 import type { LayerData } from "../../types/neuralNetworkTypes";
@@ -22,23 +23,34 @@ const NetworkView: React.FC<NetworkViewProps> = memo(({
   outputTokens,
   attentionWeights
 }) => {
+  if (!layers.length) {
+    return (
+      <Card className="p-6">
+        <Skeleton className="h-[400px] w-full" />
+      </Card>
+    );
+  }
+
   return (
-    <Card className="p-4">
-      <TokenDisplay
-        inputTokens={inputTokens}
-        outputTokens={outputTokens}
-        currentStep={currentStep}
-        attentionWeights={attentionWeights}
-      />
-      <div className="mt-4">
-        <NeuralNetworkDisplay
-          layers={layers}
-          currentStep={currentStep}
-          onLayerSelect={onLayerSelect}
+    <Card className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50">
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-primary">Neural Network Architecture</h3>
+        <TokenDisplay
           inputTokens={inputTokens}
           outputTokens={outputTokens}
+          currentStep={currentStep}
           attentionWeights={attentionWeights}
         />
+        <div className="mt-4">
+          <NeuralNetworkDisplay
+            layers={layers}
+            currentStep={currentStep}
+            onLayerSelect={onLayerSelect}
+            inputTokens={inputTokens}
+            outputTokens={outputTokens}
+            attentionWeights={attentionWeights}
+          />
+        </div>
       </div>
     </Card>
   );
