@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import NeuronComponent from "./neural-network/NeuronComponent";
+import ConnectionComponent from "./neural-network/ConnectionComponent";
+import LayerInfo from "./neural-network/LayerInfo";
 
 interface Layer {
   name: string;
@@ -56,19 +58,14 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
         const y2 = 50 + (toNeuron * 400) / layers[toLayer].neurons;
 
         return (
-          <motion.path
+          <ConnectionComponent
             key={`${fromLayer}-${fromNeuron}-${toNeuron}`}
-            d={`M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`}
-            stroke={weight > 0 ? "#60a5fa" : "#f87171"}
-            strokeWidth={Math.abs(weight) * 3}
-            fill="none"
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            weight={weight}
             opacity={getConnectionOpacity(fromLayer, toLayer, weight)}
-            initial={{ pathLength: 0 }}
-            animate={{ 
-              pathLength: 1,
-              opacity: getConnectionOpacity(fromLayer, toLayer, weight)
-            }}
-            transition={{ duration: 1, ease: "easeInOut" }}
           />
         );
       })
@@ -78,53 +75,18 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
   const renderNeurons = (layer: Layer, layerIndex: number) => (
     <g key={layerIndex}>
       {Array.from({ length: layer.neurons }).map((_, neuronIdx) => (
-        <TooltipProvider key={`${layerIndex}-${neuronIdx}`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <motion.g
-                onMouseEnter={() => setHoveredNeuron({ layer: layerIndex, neuron: neuronIdx })}
-                onMouseLeave={() => setHoveredNeuron(null)}
-                whileHover={{ scale: 1.2 }}
-              >
-                <motion.circle
-                  cx={100 + layerIndex * 180}
-                  cy={50 + (neuronIdx * 400) / layer.neurons}
-                  r={12}
-                  fill={getLayerColor(layerIndex)}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: layerIndex * 0.1 }}
-                />
-                <motion.text
-                  x={100 + layerIndex * 180}
-                  y={50 + (neuronIdx * 400) / layer.neurons}
-                  textAnchor="middle"
-                  dy=".3em"
-                  fill="white"
-                  fontSize="10"
-                >
-                  {neuronIdx + 1}
-                </motion.text>
-              </motion.g>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="p-2 space-y-2">
-                <p className="font-semibold">{layer.name}</p>
-                <p className="text-sm">Neuron {neuronIdx + 1}</p>
-                {layer.weights && hoveredNeuron?.layer === layerIndex && (
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs font-medium">Connection Weights:</p>
-                    {layer.weights[neuronIdx]?.map((w, i) => (
-                      <p key={i} className="text-xs">
-                        To {i + 1}: {w.toFixed(3)}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <NeuronComponent
+          key={`${layerIndex}-${neuronIdx}`}
+          x={100 + layerIndex * 180}
+          y={50 + (neuronIdx * 400) / layer.neurons}
+          r={12}
+          fill={getLayerColor(layerIndex)}
+          neuronIndex={neuronIdx}
+          layerName={layer.name}
+          weights={layer.weights?.[neuronIdx]}
+          onMouseEnter={() => setHoveredNeuron({ layer: layerIndex, neuron: neuronIdx })}
+          onMouseLeave={() => setHoveredNeuron(null)}
+        />
       ))}
     </g>
   );
@@ -162,45 +124,27 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
             </marker>
           </defs>
 
-          {/* Layer connections */}
           {layers?.map((_, idx) => 
             idx < (layers?.length || 0) - 1 && renderConnections(idx, idx + 1)
           )}
 
-          {/* Neurons */}
           {layers?.map((layer, idx) => renderNeurons(layer, idx))}
 
-          {/* Layer labels */}
           {layers?.map((layer, idx) => (
-            <motion.text
+            <text
               key={`label-${idx}`}
               x={100 + idx * 180}
               y={20}
               textAnchor="middle"
               className="font-medium text-sm"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
             >
               {layer.name}
-            </motion.text>
+            </text>
           ))}
         </svg>
       </div>
 
-      <div className="mt-4 space-y-2">
-        <h4 className="font-medium text-sm">Layer Information</h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm font-medium">Current Layer:</p>
-            <p className="text-sm">{layers[currentStep]?.name}</p>
-          </div>
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <p className="text-sm font-medium">Neurons:</p>
-            <p className="text-sm">{layers[currentStep]?.neurons}</p>
-          </div>
-        </div>
-      </div>
+      <LayerInfo currentLayer={layers[currentStep]} />
 
       <div className="mt-4 text-sm text-gray-500">
         <p>• Hover over neurons to see connection weights</p>
@@ -211,4 +155,4 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
   );
 };
 
-export default NeuralNetworkDisplay;
+export default React.memo(NeuralNetworkDisplay);
