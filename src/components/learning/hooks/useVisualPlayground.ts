@@ -1,8 +1,9 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { getTransformerLayers, computeAttentionScores } from "../utils/neuralNetworkUtils";
 import type { LayerData } from "../types/neuralNetworkTypes";
+import { countTokens } from "@/components/transformer/utils/tokenUtils";
 
 export const useVisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -15,20 +16,41 @@ export const useVisualPlayground = () => {
   const [outputTokens, setOutputTokens] = useState<string[]>([]);
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([[0]]);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
 
-  const initializeTransformerLayers = useCallback((tokens: string[]) => {
-    const newLayers = getTransformerLayers(tokens.length);
-    setLayers(newLayers);
-    setIsProcessingComplete(false);
-    setOutputTokens([]);
-    setCurrentStep(0);
-    
-    const initialWeights = Array(tokens.length).fill(0).map(() => 
-      Array(tokens.length).fill(0).map(() => 0.1)
-    );
-    setAttentionWeights(initialWeights.length > 0 ? initialWeights : [[0]]);
-  }, []);
+  const initializeTransformerLayers = useCallback(async (text: string) => {
+    try {
+      const tokenCount = await countTokens(text);
+      if (tokenCount > 100) {
+        toast({
+          title: "⚠️ Warning",
+          description: "Large token count may affect performance",
+          variant: "default",
+        });
+      }
+      
+      const tokens = text.split(" ");
+      const newLayers = getTransformerLayers(tokens.length);
+      setLayers(newLayers);
+      setInputTokens(tokens);
+      setIsProcessingComplete(false);
+      setOutputTokens([]);
+      setCurrentStep(0);
+      
+      const initialWeights = Array(tokens.length).fill(0).map(() => 
+        Array(tokens.length).fill(0).map(() => 0.1)
+      );
+      setAttentionWeights(initialWeights.length > 0 ? initialWeights : [[0]]);
+    } catch (error) {
+      console.error("Error initializing layers:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize visualization",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   const processStep = useCallback((step: number) => {
     if (!layers.length) return;
@@ -70,38 +92,35 @@ export const useVisualPlayground = () => {
 
   useEffect(() => {
     if (inputText) {
-      const tokens = inputText.split(" ");
-      setInputTokens(tokens);
-      initializeTransformerLayers(tokens);
+      initializeTransformerLayers(inputText);
     }
   }, [inputText, initializeTransformerLayers]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
     if (isPlaying && layers.length > 0) {
-      interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setCurrentStep(prev => {
           const nextStep = prev + 1;
           if (nextStep < layers.length) {
             processStep(nextStep);
             return nextStep;
           }
+          setIsPlaying(false);
           return prev;
         });
       }, 2000 / speed);
     }
     
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [isPlaying, speed, layers, processStep]);
 
   const handleSpeedChange = useCallback((value: number[]) => {
     setSpeed(value[0]);
-    toast({
-      title: "Animation Speed Updated",
-      description: `Speed set to ${value[0]}x`,
-    });
-  }, [toast]);
+  }, []);
 
   const handlePlayPause = useCallback(() => {
     setIsPlaying(prev => !prev);
@@ -157,3 +176,4 @@ export const useVisualPlayground = () => {
     handleLayerSelect
   };
 };
+

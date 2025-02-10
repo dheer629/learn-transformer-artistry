@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ControlPanel from "./visualization/ControlPanel";
@@ -34,7 +34,7 @@ const VisualPlayground: React.FC = () => {
 
   const { containerAnimation, tabContentAnimation } = useVisualPlaygroundAnimations();
 
-  // Memoize control panel props
+  // Memoize props for child components
   const controlPanelProps = useMemo(() => ({
     inputText,
     setInputText,
@@ -58,7 +58,6 @@ const VisualPlayground: React.FC = () => {
     handleReset
   ]);
 
-  // Memoize status panel props
   const statusPanelProps = useMemo(() => ({
     speed,
     currentStep,
@@ -66,6 +65,34 @@ const VisualPlayground: React.FC = () => {
     isPlaying,
     selectedLayer: layers?.[selectedLayer]
   }), [speed, currentStep, layers, isPlaying, selectedLayer]);
+
+  const networkViewProps = useMemo(() => ({
+    layers,
+    currentStep,
+    onLayerSelect: handleLayerSelect,
+    inputTokens,
+    outputTokens,
+    attentionWeights
+  }), [layers, currentStep, handleLayerSelect, inputTokens, outputTokens, attentionWeights]);
+
+  const layerViewProps = useMemo(() => ({
+    selectedLayer: layers[selectedLayer],
+    currentStep,
+    inputTokens,
+    outputTokens,
+    attentionWeights
+  }), [layers, selectedLayer, currentStep, inputTokens, outputTokens, attentionWeights]);
+
+  const attentionViewProps = useMemo(() => ({
+    inputTokens,
+    outputTokens,
+    attentionWeights,
+    currentStep
+  }), [inputTokens, outputTokens, attentionWeights, currentStep]);
+
+  const handleTabChange = useCallback((value: string) => {
+    setSelectedTab(value);
+  }, []);
 
   return (
     <motion.div 
@@ -89,7 +116,7 @@ const VisualPlayground: React.FC = () => {
           <StatusPanel {...statusPanelProps} />
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+        <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 lg:max-w-[400px]">
             <TabsTrigger value="network">Network View</TabsTrigger>
             <TabsTrigger value="layers">Layer View</TabsTrigger>
@@ -102,33 +129,15 @@ const VisualPlayground: React.FC = () => {
               {...tabContentAnimation}
             >
               <TabsContent value="network" className="mt-4">
-                <NetworkView
-                  layers={layers}
-                  currentStep={currentStep}
-                  onLayerSelect={handleLayerSelect}
-                  inputTokens={inputTokens}
-                  outputTokens={outputTokens}
-                  attentionWeights={attentionWeights}
-                />
+                <NetworkView {...networkViewProps} />
               </TabsContent>
               
               <TabsContent value="layers" className="mt-4">
-                <LayerView
-                  selectedLayer={layers[selectedLayer]}
-                  currentStep={currentStep}
-                  inputTokens={inputTokens}
-                  outputTokens={outputTokens}
-                  attentionWeights={attentionWeights}
-                />
+                <LayerView {...layerViewProps} />
               </TabsContent>
               
               <TabsContent value="attention" className="mt-4">
-                <AttentionView
-                  inputTokens={inputTokens}
-                  outputTokens={outputTokens}
-                  attentionWeights={attentionWeights}
-                  currentStep={currentStep}
-                />
+                <AttentionView {...attentionViewProps} />
               </TabsContent>
             </motion.div>
           </AnimatePresence>
@@ -138,5 +147,5 @@ const VisualPlayground: React.FC = () => {
   );
 };
 
-export default VisualPlayground;
+export default React.memo(VisualPlayground);
 
