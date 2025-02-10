@@ -1,15 +1,24 @@
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ControlPanel from "./visualization/ControlPanel";
 import StatusPanel from "./visualization/StatusPanel";
-import NetworkView from "./visualization/views/NetworkView";
-import LayerView from "./visualization/views/LayerView";
-import AttentionView from "./visualization/views/AttentionView";
 import { useVisualPlayground } from "./hooks/useVisualPlayground";
 import { useVisualPlaygroundAnimations } from "./hooks/useVisualPlaygroundAnimations";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load views to improve initial load time
+const NetworkView = lazy(() => import("./visualization/views/NetworkView"));
+const LayerView = lazy(() => import("./visualization/views/LayerView"));
+const AttentionView = lazy(() => import("./visualization/views/AttentionView"));
+
+const LoadingFallback = () => (
+  <div className="space-y-4">
+    <Skeleton className="h-[400px] w-full" />
+  </div>
+);
 
 const VisualPlayground: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState("network");
@@ -129,15 +138,21 @@ const VisualPlayground: React.FC = () => {
               {...tabContentAnimation}
             >
               <TabsContent value="network" className="mt-4">
-                <NetworkView {...networkViewProps} />
+                <Suspense fallback={<LoadingFallback />}>
+                  <NetworkView {...networkViewProps} />
+                </Suspense>
               </TabsContent>
               
               <TabsContent value="layers" className="mt-4">
-                <LayerView {...layerViewProps} />
+                <Suspense fallback={<LoadingFallback />}>
+                  <LayerView {...layerViewProps} />
+                </Suspense>
               </TabsContent>
               
               <TabsContent value="attention" className="mt-4">
-                <AttentionView {...attentionViewProps} />
+                <Suspense fallback={<LoadingFallback />}>
+                  <AttentionView {...attentionViewProps} />
+                </Suspense>
               </TabsContent>
             </motion.div>
           </AnimatePresence>
@@ -148,4 +163,3 @@ const VisualPlayground: React.FC = () => {
 };
 
 export default React.memo(VisualPlayground);
-

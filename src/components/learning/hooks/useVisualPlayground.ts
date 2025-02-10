@@ -17,9 +17,13 @@ export const useVisualPlayground = () => {
   const [attentionWeights, setAttentionWeights] = useState<number[][]>([[0]]);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout>();
+  const processingRef = useRef(false);
   const { toast } = useToast();
 
   const initializeTransformerLayers = useCallback(async (text: string) => {
+    if (processingRef.current) return;
+    processingRef.current = true;
+
     try {
       const tokenCount = await countTokens(text);
       if (tokenCount > 100) {
@@ -49,11 +53,14 @@ export const useVisualPlayground = () => {
         description: "Failed to initialize visualization",
         variant: "destructive",
       });
+    } finally {
+      processingRef.current = false;
     }
   }, [toast]);
 
   const processStep = useCallback((step: number) => {
-    if (!layers.length) return;
+    if (!layers.length || processingRef.current) return;
+    processingRef.current = true;
 
     const midPoint = Math.floor(layers.length / 2);
     
@@ -88,6 +95,7 @@ export const useVisualPlayground = () => {
         description: "All transformer layers have been processed",
       });
     }
+    processingRef.current = false;
   }, [layers, inputTokens, toast]);
 
   useEffect(() => {
@@ -176,4 +184,3 @@ export const useVisualPlayground = () => {
     handleLayerSelect
   };
 };
-
