@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { motion } from "framer-motion";
 import { countTokens } from "../utils/tokenUtils";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface InputSectionProps {
   inputText: string;
@@ -60,9 +60,9 @@ const InputSection: React.FC<InputSectionProps> = ({
       const count = await countTokens(newText);
       if (count > 100) {
         toast({
-          title: "Warning",
+          title: "⚠️ Warning",
           description: "Large token count may affect performance",
-          variant: "warning",
+          variant: "default",
         });
       }
     }
@@ -130,3 +130,4 @@ const InputSection: React.FC<InputSectionProps> = ({
 };
 
 export default InputSection;
+
