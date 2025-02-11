@@ -492,6 +492,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      count_tokens: {
+        Args: {
+          text_input: string
+        }
+        Returns: number
+      }
       halfvec_avg: {
         Args: {
           "": number[]
