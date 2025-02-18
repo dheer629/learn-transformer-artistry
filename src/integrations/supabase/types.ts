@@ -246,90 +246,6 @@ export type Database = {
         }
         Relationships: []
       }
-      specifications: {
-        Row: {
-          created_at: string | null
-          download_url: string
-          file_name: string
-          hidden_ids: Json | null
-          id: number
-          meeting_code: string | null
-          release_date: string | null
-          remarks: string | null
-          spec_no: string | null
-          updated_at: string | null
-          version: string
-        }
-        Insert: {
-          created_at?: string | null
-          download_url: string
-          file_name: string
-          hidden_ids?: Json | null
-          id?: number
-          meeting_code?: string | null
-          release_date?: string | null
-          remarks?: string | null
-          spec_no?: string | null
-          updated_at?: string | null
-          version: string
-        }
-        Update: {
-          created_at?: string | null
-          download_url?: string
-          file_name?: string
-          hidden_ids?: Json | null
-          id?: number
-          meeting_code?: string | null
-          release_date?: string | null
-          remarks?: string | null
-          spec_no?: string | null
-          updated_at?: string | null
-          version?: string
-        }
-        Relationships: []
-      }
-      specifications_header: {
-        Row: {
-          common_ims: string | null
-          id: number
-          initial_planned_release: string | null
-          primary_rapporteur: string | null
-          primary_resp_grp: string | null
-          publication: string | null
-          spec_no: string
-          status: string | null
-          technology: string | null
-          title: string | null
-          type: string | null
-        }
-        Insert: {
-          common_ims?: string | null
-          id?: number
-          initial_planned_release?: string | null
-          primary_rapporteur?: string | null
-          primary_resp_grp?: string | null
-          publication?: string | null
-          spec_no: string
-          status?: string | null
-          technology?: string | null
-          title?: string | null
-          type?: string | null
-        }
-        Update: {
-          common_ims?: string | null
-          id?: number
-          initial_planned_release?: string | null
-          primary_rapporteur?: string | null
-          primary_resp_grp?: string | null
-          publication?: string | null
-          spec_no?: string
-          status?: string | null
-          technology?: string | null
-          title?: string | null
-          type?: string | null
-        }
-        Relationships: []
-      }
       summaries: {
         Row: {
           created_at: string | null
@@ -534,30 +450,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vectors: {
-        Row: {
-          chunk: string
-          created_at: string | null
-          doc_id: string
-          embedding: Json
-          id: number
-        }
-        Insert: {
-          chunk: string
-          created_at?: string | null
-          doc_id: string
-          embedding: Json
-          id?: number
-        }
-        Update: {
-          chunk?: string
-          created_at?: string | null
-          doc_id?: string
-          embedding?: Json
-          id?: number
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -576,12 +468,6 @@ export type Database = {
             }
             Returns: unknown
           }
-      count_tokens: {
-        Args: {
-          text_input: string
-        }
-        Returns: number
-      }
       halfvec_avg: {
         Args: {
           "": number[]

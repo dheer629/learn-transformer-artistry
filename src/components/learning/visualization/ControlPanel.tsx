@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, SkipForward, RotateCcw, Save } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface ControlPanelProps {
@@ -15,7 +15,6 @@ interface ControlPanelProps {
   handleReset: () => void;
   currentStep: number;
   maxSteps: number;
-  onSave?: () => Promise<void>;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -29,7 +28,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   handleReset,
   currentStep,
   maxSteps,
-  onSave,
 }) => {
   return (
     <Card className="p-4 bg-gray-50">
@@ -82,15 +80,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
-          {onSave && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onSave}
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </div>
     </Card>
