@@ -1,3 +1,4 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,7 @@ interface TokenDisplayProps {
   inputTokens: string[];
   outputTokens: string[];
   currentStep: number;
+  attentionWeights?: number[][];
 }
 
 const TokenDisplay: React.FC<TokenDisplayProps> = ({

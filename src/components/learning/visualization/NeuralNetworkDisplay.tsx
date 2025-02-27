@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ interface NeuralNetworkDisplayProps {
   onLayerSelect: (layerIndex: number) => void;
   inputTokens?: string[];
   outputTokens?: string[];
+  attentionWeights?: number[][];
 }
 
 const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
@@ -23,7 +25,8 @@ const NeuralNetworkDisplay: React.FC<NeuralNetworkDisplayProps> = ({
   currentStep,
   onLayerSelect,
   inputTokens = [],
-  outputTokens = []
+  outputTokens = [],
+  attentionWeights = []
 }) => {
   const [hoveredNeuron, setHoveredNeuron] = useState<{layer: number, neuron: number} | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
