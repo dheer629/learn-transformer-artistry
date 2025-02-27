@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NeuralNetworkDisplay from "./visualization/NeuralNetworkDisplay";
 import TokenDisplay from "./visualization/TokenDisplay";
@@ -8,157 +8,64 @@ import ControlPanel from "./visualization/ControlPanel";
 import StatusPanel from "./visualization/StatusPanel";
 import LayerVisualizer from "./visualization/LayerVisualizer";
 import AttentionPatternView from "./visualization/AttentionPatternView";
-import { getTransformerLayers } from "./utils/neuralNetworkUtils";
-import { supabase } from "@/integrations/supabase/client";
-import type { LayerData } from "./utils/neuralNetworkUtils";
+import { useTransformerState } from "./hooks/useTransformerState";
+import { useTransformerAnimation } from "./hooks/useTransformerAnimation";
+import { useTransformerControls } from "./hooks/useTransformerControls";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1);
   const [currentStep, setCurrentStep] = useState(0);
   const [inputText, setInputText] = useState("Hello world");
-  const [selectedLayer, setSelectedLayer] = useState(0);
-  const [selectedTab, setSelectedTab] = useState("network");
-  const [layers, setLayers] = useState<LayerData[]>([]);
-  const [inputTokens, setInputTokens] = useState<string[]>([]);
-  const [outputTokens, setOutputTokens] = useState<string[]>([]);
-  const [attentionWeights, setAttentionWeights] = useState<number[][]>([]);
-  const [isProcessingComplete, setIsProcessingComplete] = useState(false);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    if (inputText) {
-      const tokens = inputText.split(" ");
-      setInputTokens(tokens);
-      setLayers(getTransformerLayers(tokens.length));
-      setIsProcessingComplete(false);
-      setOutputTokens([]);
-      
-      // Generate initial attention weights
-      const weights = Array(tokens.length).fill(0).map(() => 
-        Array(tokens.length).fill(0).map(() => Math.random())
-      );
-      setAttentionWeights(weights);
-    }
-  }, [inputText]);
+  const {
+    layers,
+    inputTokens,
+    outputTokens,
+    setOutputTokens,
+    attentionWeights,
+    setAttentionWeights,
+    isProcessingComplete,
+    setIsProcessingComplete
+  } = useTransformerState(inputText);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying && layers && layers.length > 0) {
-      interval = setInterval(() => {
-        setCurrentStep((prev) => {
-          const maxStep = layers.length - 1;
-          if (prev < maxStep) {
-            const midPoint = Math.floor(layers.length / 2);
-            if (prev >= midPoint && inputTokens[prev - midPoint]) {
-              setOutputTokens(prevTokens => {
-                const newToken = inputTokens[prev - midPoint];
-                return [...prevTokens, newToken];
-              });
-              
-              // Update attention weights
-              setAttentionWeights(prev => {
-                const newWeights = [...prev];
-                newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
-                return newWeights;
-              });
-            }
-            return prev + 1;
-          }
-          setIsPlaying(false);
-          setIsProcessingComplete(true);
-          return prev;
-        });
-      }, 2000 / speed);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, speed, layers, inputTokens, currentStep]);
+  const {
+    speed,
+    selectedLayer,
+    selectedTab,
+    setSelectedTab,
+    handleSpeedChange,
+    handleNextStep,
+    handleReset,
+    handleLayerSelect,
+    saveVisualization
+  } = useTransformerControls(
+    layers,
+    inputTokens,
+    outputTokens,
+    attentionWeights,
+    setCurrentStep,
+    setOutputTokens,
+    setIsProcessingComplete,
+    setIsPlaying,
+    currentStep,
+    inputText
+  );
 
-  const handleSpeedChange = (value: number[]) => {
-    setSpeed(value[0]);
-    toast({
-      title: "Animation Speed Updated",
-      description: `Speed set to ${value[0]}x`,
-    });
-  };
+  useTransformerAnimation({
+    isPlaying,
+    speed,
+    layers,
+    currentStep,
+    setCurrentStep,
+    inputTokens,
+    setOutputTokens,
+    setAttentionWeights,
+    setIsPlaying,
+    setIsProcessingComplete
+  });
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
-  };
-
-  const handleNextStep = () => {
-    if (layers && layers.length > 0 && currentStep < layers.length - 1) {
-      setCurrentStep(prev => prev + 1);
-      const midPoint = Math.floor(layers.length / 2);
-      if (currentStep >= midPoint && inputTokens[currentStep - midPoint]) {
-        const newToken = inputTokens[currentStep - midPoint];
-        setOutputTokens(prev => [...prev, newToken]);
-        
-        // Update attention weights
-        setAttentionWeights(prev => {
-          const newWeights = [...prev];
-          newWeights[currentStep] = newWeights[currentStep].map(() => Math.random());
-          return newWeights;
-        });
-      }
-      if (currentStep === layers.length - 2) {
-        setIsProcessingComplete(true);
-      }
-    }
-  };
-
-  const handleReset = () => {
-    setCurrentStep(0);
-    setIsPlaying(false);
-    setOutputTokens([]);
-    setIsProcessingComplete(false);
-    toast({
-      title: "Visualization Reset",
-      description: "Starting from the beginning",
-    });
-  };
-
-  const handleLayerSelect = (layerIndex: number) => {
-    setSelectedLayer(layerIndex);
-    setCurrentStep(layerIndex);
-    
-    if (layers[layerIndex]) {
-      toast({
-        title: `Layer ${layerIndex + 1} Selected`,
-        description: `Viewing ${layers[layerIndex].name}`,
-      });
-    }
-  };
-
-  const saveVisualization = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('transformer_visualizations')
-        .insert({
-          input_text: inputText,
-          tokens: { input: inputTokens, output: outputTokens },
-          attention_weights: attentionWeights,
-          layer_outputs: layers.map(layer => ({
-            name: layer.name,
-            neurons: layer.neurons,
-            weights: layer.weights
-          }))
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Visualization Saved",
-        description: "You can access this visualization later",
-      });
-    } catch (error) {
-      console.error('Error saving visualization:', error);
-      toast({
-        title: "Error Saving",
-        description: "Failed to save visualization",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
@@ -250,3 +157,4 @@ const VisualPlayground = () => {
 };
 
 export default VisualPlayground;
+
