@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Database } from "@/integrations/supabase/types";
@@ -22,34 +23,35 @@ const Quiz = () => {
 
   const loadQuestions = async () => {
     try {
+      setIsLoading(true);
       const data = await fetchQuestions();
       setQuestions(data);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error loading questions:', error);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const onAnswer = (selectedOption: number) => {
+  const onAnswer = useCallback((selectedOption: number) => {
     if (answered) return;
     
     setAnswered(true);
     handleAnswer(
       selectedOption, 
       questions[currentQuestion].correct_answer,
-      () => setScore(score + 1)
+      () => setScore(prevScore => prevScore + 1)
     );
     setShowExplanation(true);
-  };
+  }, [answered, currentQuestion, questions]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion(prevQuestion => prevQuestion + 1);
       setShowExplanation(false);
       setAnswered(false);
     }
-  };
+  }, [currentQuestion, questions.length]);
 
   if (isLoading) {
     return (

@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Database } from "@/integrations/supabase/types";
@@ -12,9 +13,9 @@ interface QuestionCardProps {
   showExplanation: boolean;
 }
 
-const QuestionCard = ({ question, onAnswer, answered, showExplanation }: QuestionCardProps) => {
+const QuestionCard = memo(({ question, onAnswer, answered, showExplanation }: QuestionCardProps) => {
   return (
-    <Card className="p-6 max-w-2xl mx-auto animate-slide-in">
+    <Card className="p-6 max-w-2xl mx-auto animate-fade-in">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-primary">{question.title}</h2>
@@ -33,10 +34,10 @@ const QuestionCard = ({ question, onAnswer, answered, showExplanation }: Questio
             <Button
               key={index}
               variant={answered ? (index === question.correct_answer ? "default" : "outline") : "outline"}
-              className={`w-full text-left justify-start ${
+              className={`w-full text-left justify-start hover:translate-y-0 transition-colors ${
                 answered && index === question.correct_answer ? "bg-green-500 hover:bg-green-600" : ""
               }`}
-              onClick={() => onAnswer(index)}
+              onClick={() => !answered && onAnswer(index)}
               disabled={answered}
             >
               {option}
@@ -53,6 +54,8 @@ const QuestionCard = ({ question, onAnswer, answered, showExplanation }: Questio
       )}
     </Card>
   );
-};
+});
+
+QuestionCard.displayName = "QuestionCard";
 
 export default QuestionCard;

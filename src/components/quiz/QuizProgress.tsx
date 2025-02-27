@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { memo } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +11,7 @@ interface QuizProgressProps {
   onNext: () => void;
 }
 
-const QuizProgress = ({ 
+const QuizProgress = memo(({ 
   currentQuestion, 
   totalQuestions, 
   score, 
@@ -32,11 +33,18 @@ const QuizProgress = ({
           </div>
         </div>
         {answered && currentQuestion < totalQuestions - 1 && (
-          <Button onClick={onNext}>Next Question</Button>
+          <Button 
+            onClick={onNext}
+            className="animate-fade-in"
+          >
+            Next Question
+          </Button>
         )}
       </div>
     </div>
   );
-};
+});
+
+QuizProgress.displayName = "QuizProgress";
 
 export default QuizProgress;

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
@@ -11,6 +12,7 @@ export const fetchQuestions = async (): Promise<Question[]> => {
     .order('id');
 
   if (error) {
+    console.error('Error fetching questions:', error);
     toast.error('Failed to load questions. Please try again.');
     throw error;
   }
@@ -25,8 +27,13 @@ export const handleAnswer = (
 ) => {
   if (selectedOption === correctAnswer) {
     onScoreUpdate();
-    toast.success("Correct answer! 🎉");
+    toast.success("Correct answer! 🎉", {
+      duration: 2000,
+    });
   } else {
-    toast.error("Not quite right. Try to understand why!");
+    toast.error("Not quite right. Try to understand why!", {
+      duration: 2000,
+    });
   }
+  return selectedOption === correctAnswer;
 };
