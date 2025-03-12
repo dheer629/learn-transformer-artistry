@@ -14,6 +14,8 @@ import { PlaygroundHeader } from "./components/PlaygroundHeader";
 import { HelpDialogContent } from "./components/HelpDialogContent";
 import { IntroDialogContent } from "./components/IntroDialogContent";
 import { VisualizationTabs } from "./components/VisualizationTabs";
+import { ProcessingExplanation } from "./components/ProcessingExplanation";
+import { VisualizationGuide } from "./components/VisualizationGuide";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,6 +34,7 @@ const VisualPlayground = () => {
     isProcessingComplete,
     setIsProcessingComplete,
     activeProcessingStep,
+    setActiveProcessingStep,
     hints,
     visualizationMode,
     setVisualizationMode
@@ -81,6 +84,8 @@ const VisualPlayground = () => {
     "Machine learning helps solve complex problems"
   ];
 
+  const totalSteps = layers?.length || 0;
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       <Card className="p-6 space-y-6 bg-gradient-to-br from-white to-slate-50">
@@ -88,12 +93,23 @@ const VisualPlayground = () => {
           <PlaygroundHeader 
             onHelpClick={() => setShowHelp(true)}
             onIntroClick={() => setShowIntro(true)}
+            currentStep={currentStep}
+            totalSteps={totalSteps}
           />
           
           <p className="text-gray-600">
             Explore and understand the Transformer architecture through this interactive visualization.
             Watch how tokens flow through different layers with actual attention patterns.
           </p>
+          
+          {/* Processing explanation that updates based on current step */}
+          <ProcessingExplanation
+            currentStep={currentStep}
+            activeProcessingStep={activeProcessingStep}
+            inputTokens={inputTokens}
+            outputTokens={outputTokens}
+            isProcessingComplete={isProcessingComplete}
+          />
           
           {hints.length > 0 && (
             <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-start space-x-3">
@@ -146,6 +162,9 @@ const VisualPlayground = () => {
             selectedLayer={layers?.[selectedLayer]}
           />
         </div>
+
+        {/* Visualization guide that explains the current view */}
+        <VisualizationGuide selectedTab={selectedTab} />
 
         <VisualizationTabs
           selectedTab={selectedTab}
