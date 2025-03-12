@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,7 +91,6 @@ const VisualPlayground = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Example inputs for quick selection
   const exampleInputs = [
     "Hello world",
     "The transformer architecture revolutionized NLP",
@@ -103,21 +101,51 @@ const VisualPlayground = () => {
   const helpContent = (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">How to Use the Transformer Playground</h3>
-      <div className="space-y-2">
-        <p className="text-sm"><span className="font-semibold">1. Enter Text:</span> Type any phrase in the input box</p>
-        <p className="text-sm"><span className="font-semibold">2. Control Playback:</span> Use play/pause, step forward, or reset</p>
-        <p className="text-sm"><span className="font-semibold">3. Adjust Speed:</span> Slide to change animation speed</p>
-        <p className="text-sm"><span className="font-semibold">4. Switch Views:</span> Toggle between Network, Layer, and Attention views</p>
-        <p className="text-sm"><span className="font-semibold">5. Select Layers:</span> Click on specific layers to see their details</p>
-      </div>
-      <div className="pt-2">
-        <h4 className="text-md font-medium">Understanding the Visualization</h4>
-        <ul className="list-disc pl-5 text-sm space-y-1 mt-2">
-          <li>Blue nodes represent input embeddings</li>
-          <li>Yellow connections show attention patterns</li>
-          <li>Green nodes represent transformed outputs</li>
-          <li>Line thickness indicates connection strength</li>
-        </ul>
+      
+      <div className="space-y-4">
+        <section className="space-y-2">
+          <h4 className="font-medium text-primary">1. Getting Started</h4>
+          <p className="text-sm">Enter any text in the input box or choose from example phrases. The transformer will process this text through its architecture.</p>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="font-medium text-primary">2. Visualization Controls</h4>
+          <ul className="text-sm space-y-1.5">
+            <li>• <span className="font-medium">Play/Pause:</span> Start or stop the automatic visualization</li>
+            <li>• <span className="font-medium">Step:</span> Move through the process one step at a time</li>
+            <li>• <span className="font-medium">Reset:</span> Return to the beginning of the visualization</li>
+            <li>• <span className="font-medium">Speed:</span> Adjust how fast the visualization runs</li>
+          </ul>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="font-medium text-primary">3. Different Views</h4>
+          <ul className="text-sm space-y-1.5">
+            <li>• <span className="font-medium">Network View:</span> Shows the entire neural network architecture and how information flows between layers</li>
+            <li>• <span className="font-medium">Layer View:</span> Detailed view of each transformer layer's internal processing</li>
+            <li>• <span className="font-medium">Attention View:</span> Visualizes how the model pays attention to different parts of the input</li>
+          </ul>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="font-medium text-primary">4. Understanding the Process</h4>
+          <ul className="text-sm space-y-1.5">
+            <li>• <span className="font-medium">Input Tokens:</span> Your text is split into tokens (shown in blue)</li>
+            <li>• <span className="font-medium">Processing:</span> Watch how each token is processed through the layers</li>
+            <li>• <span className="font-medium">Attention Patterns:</span> Yellow lines show how different parts of the input relate to each other</li>
+            <li>• <span className="font-medium">Output:</span> See how the model generates the final output (shown in green)</li>
+          </ul>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="font-medium text-primary">5. Interactive Features</h4>
+          <ul className="text-sm space-y-1.5">
+            <li>• Hover over neurons to see their connections</li>
+            <li>• Click on layers to view detailed information</li>
+            <li>• Use the progress bar to track the current step</li>
+            <li>• Save interesting visualizations for later reference</li>
+          </ul>
+        </section>
       </div>
     </div>
   );
@@ -225,13 +253,34 @@ const VisualPlayground = () => {
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 lg:max-w-[400px]">
             <TabsTrigger value="network" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              Network View
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>Network View</TooltipTrigger>
+                  <TooltipContent side="bottom" className="w-80">
+                    <p>View the complete neural network architecture. Watch how information flows between layers and how attention patterns emerge.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TabsTrigger>
             <TabsTrigger value="layers" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              Layer View
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>Layer View</TooltipTrigger>
+                  <TooltipContent side="bottom" className="w-80">
+                    <p>Examine individual transformer layers in detail. See how each layer processes and transforms the input data.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TabsTrigger>
             <TabsTrigger value="attention" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              Attention View
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>Attention View</TooltipTrigger>
+                  <TooltipContent side="bottom" className="w-80">
+                    <p>Visualize attention patterns between tokens. Understand how the model focuses on different parts of the input.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </TabsTrigger>
           </TabsList>
           
@@ -280,9 +329,8 @@ const VisualPlayground = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Help Dialog */}
         <AlertDialog open={showHelp} onOpenChange={setShowHelp}>
-          <AlertDialogContent className="max-w-md">
+          <AlertDialogContent className="max-w-4xl">
             <AlertDialogHeader>
               <AlertDialogTitle>Transformer Playground Guide</AlertDialogTitle>
               <AlertDialogDescription asChild>
@@ -291,54 +339,64 @@ const VisualPlayground = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogAction asChild>
-                <Button onClick={() => setShowHelp(false)}>
-                  Got it!
+                <Button onClick={() => setShowHelp(false)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Got it, let's explore!
                 </Button>
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
         
-        {/* Introduction Dialog */}
         <AlertDialog open={showIntro} onOpenChange={setShowIntro}>
-          <AlertDialogContent className="max-w-md">
+          <AlertDialogContent className="max-w-3xl">
             <AlertDialogHeader>
-              <AlertDialogTitle>Welcome to the Transformer Playground</AlertDialogTitle>
-              <AlertDialogDescription className="space-y-4">
-                <p>
-                  This interactive playground helps you understand the famous Transformer architecture 
-                  that powers models like GPT, BERT, and T5.
+              <AlertDialogTitle className="text-2xl">Welcome to the Transformer Playground</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-6">
+                <p className="text-lg">
+                  This interactive playground helps you understand the revolutionary Transformer architecture 
+                  that powers modern AI models like GPT and BERT.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <h4 className="font-semibold text-blue-700">Key Features</h4>
-                    <ul className="list-disc pl-5 text-sm mt-2 text-blue-600">
-                      <li>Self-attention mechanism</li>
-                      <li>Parallel processing</li>
-                      <li>Position encodings</li>
-                      <li>Multi-head attention</li>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-700 mb-3">What You'll Learn</h4>
+                    <ul className="list-disc pl-5 text-sm space-y-2 text-blue-600">
+                      <li>How transformers process text input</li>
+                      <li>Self-attention mechanism visualization</li>
+                      <li>Multi-head attention patterns</li>
+                      <li>Layer-by-layer transformation</li>
                     </ul>
                   </div>
-                  <div className="bg-purple-50 p-3 rounded-lg">
-                    <h4 className="font-semibold text-purple-700">Visualization Options</h4>
-                    <ul className="list-disc pl-5 text-sm mt-2 text-purple-600">
-                      <li>Network architecture</li>
-                      <li>Layer-specific details</li>
-                      <li>Attention patterns</li>
-                      <li>Token processing</li>
+                  
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-purple-700 mb-3">Key Features</h4>
+                    <ul className="list-disc pl-5 text-sm space-y-2 text-purple-600">
+                      <li>Interactive visualization controls</li>
+                      <li>Real-time attention pattern display</li>
+                      <li>Step-by-step process breakdown</li>
+                      <li>Multiple visualization perspectives</li>
                     </ul>
                   </div>
                 </div>
-                <div className="pt-4">
-                  <p className="font-medium">Try different examples and see how the transformer processes text!</p>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-700 mb-3">Getting Started</h4>
+                  <ol className="list-decimal pl-5 text-sm space-y-2 text-green-600">
+                    <li>Enter some text in the input box or use an example</li>
+                    <li>Use the play/pause controls to start the visualization</li>
+                    <li>Switch between different views to explore various aspects</li>
+                    <li>Hover over elements to see detailed information</li>
+                  </ol>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogAction asChild>
-                <Button onClick={() => setShowIntro(false)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white">
-                  Let's explore!
+                <Button 
+                  onClick={() => setShowIntro(false)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Start Exploring!
                 </Button>
               </AlertDialogAction>
             </AlertDialogFooter>
