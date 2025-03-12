@@ -41,6 +41,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onSave,
   exampleInputs = []
 }) => {
+  // Function to handle resources link click
+  const handleResourcesClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Find the resources button by selector and create a MouseEvent to simulate a click
+    const resourcesButton = document.querySelector('button[value="resources"]');
+    if (resourcesButton instanceof HTMLElement) {
+      resourcesButton.click();
+    }
+  };
+
   return (
     <Card className="p-4 bg-gradient-to-br from-white to-blue-50 border border-blue-100">
       <h3 className="font-semibold mb-3 flex items-center text-blue-800">
@@ -161,10 +171,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <a 
           href="#resources" 
           className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
-          onClick={(e) => {
-            e.preventDefault();
-            document.querySelector('button[value="resources"]')?.click();
-          }}
+          onClick={handleResourcesClick}
         >
           <span>Explore learning resources</span>
           <ChevronRight className="h-4 w-4 ml-1" />
