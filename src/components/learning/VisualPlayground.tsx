@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/tooltip";
 import { 
   AlertDialog,
+  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -26,6 +28,7 @@ import { useTransformerState } from "./hooks/useTransformerState";
 import { useTransformerAnimation } from "./hooks/useTransformerAnimation";
 import { useTransformerControls } from "./hooks/useTransformerControls";
 import { Info, HelpCircle, BookOpen } from "lucide-react";
+import { Button } from "../ui/button";
 
 const VisualPlayground = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -279,19 +282,26 @@ const VisualPlayground = () => {
         
         {/* Help Dialog */}
         <AlertDialog open={showHelp} onOpenChange={setShowHelp}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Transformer Playground Guide</AlertDialogTitle>
               <AlertDialogDescription asChild>
                 {helpContent}
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction asChild>
+                <Button onClick={() => setShowHelp(false)}>
+                  Got it!
+                </Button>
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
         
         {/* Introduction Dialog */}
         <AlertDialog open={showIntro} onOpenChange={setShowIntro}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Welcome to the Transformer Playground</AlertDialogTitle>
               <AlertDialogDescription className="space-y-4">
@@ -324,6 +334,14 @@ const VisualPlayground = () => {
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction asChild>
+                <Button onClick={() => setShowIntro(false)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white">
+                  Let's explore!
+                </Button>
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </Card>

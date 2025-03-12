@@ -44,8 +44,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   // Function to handle resources link click
   const handleResourcesClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Find the resources button by selector and create a MouseEvent to simulate a click
+    
+    // Find the resources button by selector
     const resourcesButton = document.querySelector('button[value="resources"]');
+    
+    // Type guard to ensure it's an HTMLElement before accessing click method
     if (resourcesButton instanceof HTMLElement) {
       resourcesButton.click();
     }

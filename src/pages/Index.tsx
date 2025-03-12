@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ const Index = () => {
       
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <TooltipProvider>
-          <Tabs defaultValue="learn" className="space-y-8">
+          <Tabs defaultValue="playground" className="space-y-8">
             <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-6 gap-2 p-1 bg-muted rounded-lg">
               <TabsTrigger 
                 value="learn" 
