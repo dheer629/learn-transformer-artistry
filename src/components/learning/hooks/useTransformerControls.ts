@@ -97,7 +97,7 @@ export const useTransformerControls = (
   };
 
   const handlePlayPause = () => {
-    setIsPlaying(prev => !prev);
+    setIsPlaying((prev: boolean) => !prev);
     toast({
       title: "Animation Status",
       description: "Animation toggled",
