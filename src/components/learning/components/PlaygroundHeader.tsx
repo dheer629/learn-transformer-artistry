@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { HelpCircle, BookOpen, Info } from "lucide-react";
+import { HelpCircle, BookOpen, Info, Play, Pause } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface PlaygroundHeaderProps {
@@ -9,9 +9,18 @@ interface PlaygroundHeaderProps {
   onIntroClick: () => void;
   currentStep: number;
   totalSteps: number;
+  isPlaying?: boolean;
+  onPlayPause?: () => void;
 }
 
-export const PlaygroundHeader = ({ onHelpClick, onIntroClick, currentStep, totalSteps }: PlaygroundHeaderProps) => {
+export const PlaygroundHeader = ({ 
+  onHelpClick, 
+  onIntroClick, 
+  currentStep, 
+  totalSteps,
+  isPlaying,
+  onPlayPause 
+}: PlaygroundHeaderProps) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -24,6 +33,25 @@ export const PlaygroundHeader = ({ onHelpClick, onIntroClick, currentStep, total
           </p>
         </div>
         <div className="flex space-x-2">
+          {onPlayPause && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={onPlayPause}
+                    className="p-2 rounded-full bg-green-50 text-green-500 hover:bg-green-100 transition-colors"
+                    aria-label={isPlaying ? "Pause animation" : "Play animation"}
+                  >
+                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isPlaying ? "Pause animation" : "Play animation"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
