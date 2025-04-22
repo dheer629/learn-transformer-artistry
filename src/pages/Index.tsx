@@ -1,4 +1,3 @@
-
 import React from "react";
 import TransformerVisualization from "@/components/TransformerVisualization";
 import LearningModule from "@/components/LearningModule";
@@ -9,7 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import VisualPlayground from "@/components/learning/VisualPlayground";
 
-const Index = () => {
+interface IndexProps {
+  defaultTab?: string;
+}
+
+const Index = ({ defaultTab = "learn" }: IndexProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <header className="bg-primary py-6 mb-8 shadow-lg">
@@ -27,7 +30,7 @@ const Index = () => {
       
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <TooltipProvider>
-          <Tabs defaultValue="learn" className="space-y-8">
+          <Tabs defaultValue={defaultTab} className="space-y-8">
             <TabsList className="w-full max-w-2xl mx-auto grid grid-cols-6 gap-2 p-1 bg-muted rounded-lg">
               <TabsTrigger 
                 value="learn" 

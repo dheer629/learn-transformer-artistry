@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,6 +96,14 @@ export const useTransformerControls = (
     }
   };
 
+  const handlePlayPause = () => {
+    setIsPlaying(prev => !prev);
+    toast({
+      title: "Animation Status",
+      description: "Animation toggled",
+    });
+  };
+
   return {
     speed,
     selectedLayer,
@@ -106,7 +113,7 @@ export const useTransformerControls = (
     handleNextStep,
     handleReset,
     handleLayerSelect,
-    saveVisualization
+    saveVisualization,
+    handlePlayPause
   };
 };
-

@@ -43,7 +43,7 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Index defaultTab="learn" />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
