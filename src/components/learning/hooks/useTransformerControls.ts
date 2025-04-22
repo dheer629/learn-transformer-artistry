@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ export const useTransformerControls = (
   setCurrentStep: (step: number) => void,
   setOutputTokens: (tokens: string[]) => void,
   setIsProcessingComplete: (isComplete: boolean) => void,
-  setIsPlaying: (isPlaying: boolean) => void,
+  setIsPlaying: (isPlaying: boolean | ((prev: boolean) => boolean)) => void,
   currentStep: number,
   inputText: string
 ) => {
@@ -65,7 +66,7 @@ export const useTransformerControls = (
     }
   };
 
-  const saveVisualization = async () => {
+  const saveVisualization = async (): Promise<void> => {
     try {
       const { data, error } = await supabase
         .from('transformer_visualizations')
@@ -97,7 +98,7 @@ export const useTransformerControls = (
   };
 
   const handlePlayPause = () => {
-    setIsPlaying((prev: boolean) => !prev);
+    setIsPlaying(prev => !prev);
     toast({
       title: "Animation Status",
       description: "Animation toggled",

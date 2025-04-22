@@ -10,64 +10,92 @@ import { VisualizationGuide } from "../components/VisualizationGuide";
 import { VisualizationTabs } from "../components/VisualizationTabs";
 import { HelpDialogContent } from "../components/HelpDialogContent";
 import { IntroDialogContent } from "../components/IntroDialogContent";
+import { useVisualization } from "./state/VisualizationContext";
 
-const MainVisualization = () => {
+const MainVisualizationContent = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const {
+    selectedTab,
+    setSelectedTab,
+    layers,
+    currentStep,
+    selectedLayer,
+    handleLayerSelect,
+    inputTokens,
+    outputTokens,
+    attentionWeights
+  } = useVisualization();
 
   return (
-    <VisualizationProvider>
-      <div className="space-y-8 max-w-7xl mx-auto">
-        <Card className="p-6 space-y-6 bg-gradient-to-br from-white to-slate-50">
-          <HeaderSection 
-            onHelpClick={() => setShowHelp(true)}
-            onIntroClick={() => setShowIntro(true)}
-          />
-          
-          <ControlPanelsSection />
-
-          <VisualizationTabs />
-        </Card>
-
-        <AlertDialog open={showHelp} onOpenChange={setShowHelp}>
-          <AlertDialogContent className="max-w-4xl">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Transformer Playground Guide</AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <HelpDialogContent />
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction asChild>
-                <Button onClick={() => setShowHelp(false)} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Got it, let's explore!
-                </Button>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <Card className="p-6 space-y-6 bg-gradient-to-br from-white to-slate-50">
+        <HeaderSection 
+          onHelpClick={() => setShowHelp(true)}
+          onIntroClick={() => setShowIntro(true)}
+        />
         
-        <AlertDialog open={showIntro} onOpenChange={setShowIntro}>
-          <AlertDialogContent className="max-w-3xl">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-2xl">Welcome to the Transformer Playground</AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <IntroDialogContent />
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction asChild>
-                <Button 
-                  onClick={() => setShowIntro(false)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  Start Exploring!
-                </Button>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+        <ControlPanelsSection />
+
+        <VisualizationTabs 
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          layers={layers}
+          currentStep={currentStep}
+          selectedLayer={selectedLayer}
+          onLayerSelect={handleLayerSelect}
+          inputTokens={inputTokens}
+          outputTokens={outputTokens}
+          attentionWeights={attentionWeights}
+        />
+      </Card>
+
+      <AlertDialog open={showHelp} onOpenChange={setShowHelp}>
+        <AlertDialogContent className="max-w-4xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Transformer Playground Guide</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <HelpDialogContent />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction asChild>
+              <Button onClick={() => setShowHelp(false)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                Got it, let's explore!
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={showIntro} onOpenChange={setShowIntro}>
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl">Welcome to the Transformer Playground</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <IntroDialogContent />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction asChild>
+              <Button 
+                onClick={() => setShowIntro(false)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Start Exploring!
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+const MainVisualization = () => {
+  return (
+    <VisualizationProvider>
+      <MainVisualizationContent />
     </VisualizationProvider>
   );
 };

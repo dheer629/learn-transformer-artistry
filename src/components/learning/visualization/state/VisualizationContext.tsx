@@ -25,7 +25,7 @@ interface VisualizationContextType {
   handleNextStep: () => void;
   handleReset: () => void;
   handleLayerSelect: (index: number) => void;
-  saveVisualization: () => void;
+  saveVisualization: () => Promise<void>;
   handlePlayPause: () => void;
 }
 
@@ -35,8 +35,6 @@ export const VisualizationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState(0);
   const [inputText, setInputText] = React.useState("Hello world");
-  const [showHelp, setShowHelp] = React.useState(false);
-  const [showIntro, setShowIntro] = React.useState(true);
 
   const {
     layers,

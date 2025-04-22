@@ -26,6 +26,11 @@ export const ControlPanelsSection: React.FC = () => {
     "Machine learning helps solve complex problems"
   ];
 
+  // Create a wrapper for saveVisualization function since it needs to return a Promise
+  const handleSave = async (): Promise<void> => {
+    return saveVisualization();
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <ControlPanel 
@@ -39,7 +44,7 @@ export const ControlPanelsSection: React.FC = () => {
         handleReset={handleReset}
         currentStep={currentStep}
         maxSteps={layers.length - 1}
-        onSave={saveVisualization}
+        onSave={handleSave}
         exampleInputs={exampleInputs}
       />
       <StatusPanel 
