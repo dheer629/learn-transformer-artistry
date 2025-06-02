@@ -6,18 +6,35 @@ import { Database } from "@/integrations/supabase/types";
 type Question = Database['public']['Tables']['transformer_questions']['Row'];
 
 export const fetchQuestions = async (): Promise<Question[]> => {
-  const { data, error } = await supabase
-    .from('transformer_questions')
-    .select('*')
-    .order('id');
+  console.log('Attempting to fetch questions from Supabase...');
+  
+  try {
+    const { data, error } = await supabase
+      .from('transformer_questions')
+      .select('*')
+      .order('id');
 
-  if (error) {
-    console.error('Error fetching questions:', error);
-    toast.error('Failed to load questions. Please try again.');
-    throw error;
+    console.log('Supabase response:', { data: data?.length || 0, error });
+
+    if (error) {
+      console.error('Error fetching questions:', error);
+      toast.error(`Failed to load questions: ${error.message}`);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('No questions found in database');
+      toast.error('No questions available in the database.');
+      return [];
+    }
+
+    console.log('Successfully fetched questions:', data.length);
+    return data;
+  } catch (networkError) {
+    console.error('Network error when fetching questions:', networkError);
+    toast.error('Network connection failed. Please check your internet connection and try again.');
+    throw networkError;
   }
-
-  return data || [];
 };
 
 export const handleAnswer = (
