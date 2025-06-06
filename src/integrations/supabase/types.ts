@@ -78,6 +78,33 @@ export type Database = {
         }
         Relationships: []
       }
+      document_metadata: {
+        Row: {
+          chunk_count: number | null
+          file_name: string
+          file_size: number | null
+          id: string
+          upload_time: string | null
+          user_id: string
+        }
+        Insert: {
+          chunk_count?: number | null
+          file_name: string
+          file_size?: number | null
+          id?: string
+          upload_time?: string | null
+          user_id: string
+        }
+        Update: {
+          chunk_count?: number | null
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          upload_time?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       document_summarizer: {
         Row: {
           created_at: string | null
