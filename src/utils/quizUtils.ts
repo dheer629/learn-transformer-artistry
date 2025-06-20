@@ -60,6 +60,42 @@ const MOCK_QUESTIONS: Question[] = [
     description: "Understanding the role of positional encoding",
     created_at: new Date().toISOString(),
     visualization_data: null
+  },
+  {
+    id: 4,
+    title: "Feed Forward Networks",
+    question: "What is the role of the feed-forward network in each transformer layer?",
+    options: [
+      "To apply attention weights",
+      "To process each position independently with non-linear transformations",
+      "To normalize the layer outputs",
+      "To reduce dimensionality"
+    ],
+    correct_answer: 1,
+    explanation: "The feed-forward network processes each position independently, applying non-linear transformations to enhance the model's capacity to learn complex patterns.",
+    category: "architecture",
+    difficulty_level: "intermediate",
+    description: "Understanding feed-forward networks in transformers",
+    created_at: new Date().toISOString(),
+    visualization_data: null
+  },
+  {
+    id: 5,
+    title: "Layer Normalization",
+    question: "When is layer normalization typically applied in transformer architectures?",
+    options: [
+      "Only at the input layer",
+      "Before each sub-layer (pre-norm) or after each sub-layer (post-norm)",
+      "Only at the output layer",
+      "Between attention heads only"
+    ],
+    correct_answer: 1,
+    explanation: "Layer normalization can be applied either before each sub-layer (pre-norm) or after each sub-layer (post-norm), helping to stabilize training and improve convergence.",
+    category: "architecture",
+    difficulty_level: "advanced",
+    description: "Understanding layer normalization placement in transformers",
+    created_at: new Date().toISOString(),
+    visualization_data: null
   }
 ];
 
@@ -124,37 +160,98 @@ export const handleAnswer = (
   return isCorrect;
 };
 
-// Simplified function to save quiz results - stores locally for now
+// Enhanced function to save quiz results with better error handling
 export const saveQuizResult = async (
   score: number,
   totalQuestions: number,
   timeSpent: number
 ): Promise<void> => {
   try {
-    // Store quiz results in localStorage as fallback since quiz_results table doesn't exist
+    // Store quiz results in localStorage with enhanced data
     const quizResult = {
       score,
       total_questions: totalQuestions,
       time_spent: timeSpent,
       completed_at: new Date().toISOString(),
-      percentage: Math.round((score / totalQuestions) * 100)
+      percentage: Math.round((score / totalQuestions) * 100),
+      session_id: crypto.randomUUID() // Add unique session ID
     };
 
-    // Store in localStorage
+    // Store in localStorage with error handling
     const existingResults = JSON.parse(localStorage.getItem('quiz_results') || '[]');
     existingResults.push(quizResult);
     localStorage.setItem('quiz_results', JSON.stringify(existingResults));
 
+    // Enhanced success message with more details
+    const minutes = Math.floor(timeSpent / 60);
+    const seconds = timeSpent % 60;
+    const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    let performanceMessage = '';
+    if (quizResult.percentage >= 90) {
+      performanceMessage = 'Excellent work! 🌟';
+    } else if (quizResult.percentage >= 70) {
+      performanceMessage = 'Good job! 👍';
+    } else {
+      performanceMessage = 'Keep practicing! 💪';
+    }
+
     toast.success(`Quiz completed! You scored ${score}/${totalQuestions} (${quizResult.percentage}%)`, {
-      description: `Time taken: ${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toString().padStart(2, '0')}`,
+      description: `${performanceMessage} Time taken: ${timeString}`,
       duration: 4000,
     });
 
     console.log('Quiz result saved locally:', quizResult);
+    
+    // Attempt to sync with database in background (non-blocking)
+    syncQuizResultToDatabase(quizResult).catch(error => {
+      console.warn('Failed to sync quiz result to database:', error);
+    });
+
   } catch (error) {
     console.error('Failed to save quiz results:', error);
     toast.error('Failed to save results', {
       description: 'Your progress couldn\'t be saved, but you can continue learning.',
+      duration: 3000,
     });
+  }
+};
+
+// Background sync function (non-blocking)
+const syncQuizResultToDatabase = async (quizResult: any): Promise<void> => {
+  try {
+    // This would sync to database if quiz_results table existed
+    // For now, just log the attempt
+    console.log('Would sync to database:', quizResult);
+  } catch (error) {
+    console.warn('Database sync failed:', error);
+  }
+};
+
+// Utility function to get quiz statistics
+export const getQuizStatistics = (): {
+  totalQuizzes: number;
+  averageScore: number;
+  bestScore: number;
+  totalTimeSpent: number;
+} => {
+  try {
+    const results = JSON.parse(localStorage.getItem('quiz_results') || '[]');
+    
+    if (results.length === 0) {
+      return { totalQuizzes: 0, averageScore: 0, bestScore: 0, totalTimeSpent: 0 };
+    }
+
+    const totalQuizzes = results.length;
+    const averageScore = Math.round(
+      results.reduce((sum: number, result: any) => sum + result.percentage, 0) / totalQuizzes
+    );
+    const bestScore = Math.max(...results.map((r: any) => r.percentage));
+    const totalTimeSpent = results.reduce((sum: number, result: any) => sum + result.time_spent, 0);
+
+    return { totalQuizzes, averageScore, bestScore, totalTimeSpent };
+  } catch (error) {
+    console.error('Error calculating quiz statistics:', error);
+    return { totalQuizzes: 0, averageScore: 0, bestScore: 0, totalTimeSpent: 0 };
   }
 };
