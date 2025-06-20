@@ -3,8 +3,7 @@ import { useState } from "react";
 import { generateEmbeddings, generateLayerOutput } from "../utils/transformerUtils";
 import { encoderSteps, decoderSteps } from "../config/transformerSteps";
 import type { EmbeddingVector, LayerOutput } from "../types";
-import { useToast } from "@/components/ui/use-toast";
-import { MathJax } from "better-react-mathjax";
+import { useToast } from "@/hooks/use-toast";
 
 export const useTransformerVisualization = () => {
   const [inputText, setInputText] = useState("");
@@ -60,41 +59,36 @@ export const useTransformerVisualization = () => {
         }));
 
         const formulaExplanation = `
-          ${stepInfo.explanation.vectorExplanation}
-          
-          Token Values:
-          ${tokenValues.map(token => `
-            Word: "${token.word}"
-            Base Vector: [${token.vector.map(v => v.toFixed(3)).join(", ")}]
-            Position Encoding: [${token.positionalEncoding?.map(v => v.toFixed(3)).join(", ") || ''}]
-            Context Vector: [${token.contextualVector?.map(v => v.toFixed(3)).join(", ") || ''}]
-          `).join('\n')}
-          
-          Calculations:
-          ${output.intermediateOutputs?.queryVectors ? 
-            `Query vectors (Q = W_q * X):
-             [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
-            ''}
-          ${output.intermediateOutputs?.keyVectors ? 
-            `Key vectors (K = W_k * X):
-             [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
-            ''}
-          ${output.intermediateOutputs?.valueVectors ? 
-            `Value vectors (V = W_v * X):
-             [${output.intermediateOutputs.valueVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
-            ''}
+Formula: ${stepInfo.formula}
+
+${stepInfo.explanation.vectorExplanation}
+
+Token Values:
+${tokenValues.map(token => `
+Word: "${token.word}"
+Base Vector: [${token.vector.map(v => v.toFixed(3)).join(", ")}]
+Position Encoding: [${token.positionalEncoding?.map(v => v.toFixed(3)).join(", ") || ''}]
+Context Vector: [${token.contextualVector?.map(v => v.toFixed(3)).join(", ") || ''}]
+`).join('\n')}
+
+Calculations:
+${output.intermediateOutputs?.queryVectors ? 
+  `Query vectors (Q = W_q * X):
+   [${output.intermediateOutputs.queryVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+  ''}
+${output.intermediateOutputs?.keyVectors ? 
+  `Key vectors (K = W_k * X):
+   [${output.intermediateOutputs.keyVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+  ''}
+${output.intermediateOutputs?.valueVectors ? 
+  `Value vectors (V = W_v * X):
+   [${output.intermediateOutputs.valueVectors[0].map(v => v.toFixed(3)).join(", ")}]` : 
+  ''}
         `;
         
         toast({
           title: `Step ${currentStep + 1}: ${stepInfo.title}`,
-          description: (
-            <div className="space-y-2">
-              <MathJax>
-                <p className="font-medium">Formula: {stepInfo.formula}</p>
-              </MathJax>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap font-mono">{formulaExplanation}</p>
-            </div>
-          ),
+          description: formulaExplanation,
           duration: 8000,
         });
 
@@ -102,19 +96,12 @@ export const useTransformerVisualization = () => {
           const predictions = generateNextWordPredictions(output);
           setNextWordProbabilities(predictions);
           
+          const predictionText = `Top 5 predicted next words:
+${predictions.slice(0, 5).map((pred, i) => `${i + 1}. ${pred.word}: ${(pred.probability * 100).toFixed(1)}%`).join('\n')}`;
+          
           toast({
             title: "Next Word Predictions",
-            description: (
-              <div className="space-y-2">
-                <p className="font-medium">Top 5 predicted next words:</p>
-                {predictions.slice(0, 5).map((pred, i) => (
-                  <div key={i} className="flex justify-between">
-                    <span>{pred.word}</span>
-                    <span className="font-mono">{(pred.probability * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
-              </div>
-            ),
+            description: predictionText,
             duration: 5000,
           });
         }
@@ -158,20 +145,11 @@ export const useTransformerVisualization = () => {
       const initialOutput = generateLayerOutput(newEmbeddings, 0);
       setLayerOutputs([initialOutput]);
       
+      const tokenList = newEmbeddings.map((embed, i) => `Token ${i + 1}: ${embed.word}`).join('\n');
+      
       toast({
         title: "Token Processing Started",
-        description: (
-          <div className="space-y-2">
-            <p className="font-medium">Input text tokenized into {newEmbeddings.length} tokens</p>
-            <div className="text-sm text-muted-foreground">
-              {newEmbeddings.map((embed, i) => (
-                <div key={i} className="mt-1">
-                  <span className="font-semibold">Token {i + 1}:</span> {embed.word}
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
+        description: `Input text tokenized into ${newEmbeddings.length} tokens:\n\n${tokenList}`,
         duration: 5000,
       });
     } catch (error) {
