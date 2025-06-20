@@ -357,6 +357,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sprint_data: {
+        Row: {
+          additional_data: Json | null
+          created_at: string | null
+          demand_name: string | null
+          id: string
+          jira_id: string | null
+          sheet_name: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          additional_data?: Json | null
+          created_at?: string | null
+          demand_name?: string | null
+          id?: string
+          jira_id?: string | null
+          sheet_name?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          additional_data?: Json | null
+          created_at?: string | null
+          demand_name?: string | null
+          id?: string
+          jira_id?: string | null
+          sheet_name?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       summaries: {
         Row: {
           created_at: string | null

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, withRetry } from '@/integrations/supabase/client';
 import type { LayerData } from '../utils/neuralNetworkUtils';
 
 export const useTransformerControls = (
@@ -68,20 +68,24 @@ export const useTransformerControls = (
 
   const saveVisualization = async (): Promise<void> => {
     try {
-      const { data, error } = await supabase
-        .from('transformer_visualizations')
-        .insert({
-          input_text: inputText,
-          tokens: { input: inputTokens, output: outputTokens },
-          attention_weights: attentionWeights,
-          layer_outputs: layers.map(layer => ({
-            name: layer.name,
-            neurons: layer.neurons,
-            weights: layer.weights
-          }))
-        });
+      await withRetry(async () => {
+        const { error } = await supabase
+          .from('transformer_visualizations')
+          .insert({
+            input_text: inputText,
+            tokens: { input: inputTokens, output: outputTokens },
+            attention_weights: attentionWeights,
+            layer_outputs: layers.map(layer => ({
+              name: layer.name,
+              neurons: layer.neurons,
+              weights: layer.weights
+            }))
+          });
 
-      if (error) throw error;
+        if (error) {
+          throw new Error(`Database error: ${error.message}`);
+        }
+      }, 3, 1000);
 
       toast({
         title: "Visualization Saved",
@@ -91,7 +95,7 @@ export const useTransformerControls = (
       console.error('Error saving visualization:', error);
       toast({
         title: "Error Saving",
-        description: "Failed to save visualization",
+        description: "Failed to save visualization. Please try again.",
         variant: "destructive",
       });
     }

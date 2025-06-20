@@ -1,5 +1,6 @@
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, withRetry } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
 type TransformerImage = Database['public']['Tables']['transformer_visualization_images']['Row'];
@@ -10,27 +11,39 @@ export const useTransformerImages = () => {
     queryFn: async () => {
       console.log("Starting to fetch transformer visualization images...");
       
-      const { data: images, error } = await supabase
-        .from("transformer_visualization_images")
-        .select("*")
-        .order('created_at', { ascending: true });
+      try {
+        const images = await withRetry(async () => {
+          const { data, error } = await supabase
+            .from("transformer_visualization_images")
+            .select("*")
+            .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error("Error fetching images:", error);
-        throw error;
-      }
+          if (error) {
+            console.error("Database error fetching images:", error);
+            throw new Error(`Database error: ${error.message}`);
+          }
 
-      if (!images || images.length === 0) {
-        console.warn("No images found in the database");
+          return data || [];
+        }, 3, 1500);
+
+        if (images.length === 0) {
+          console.warn("No images found in the database");
+          return [];
+        }
+
+        console.log("Successfully fetched images:", images);
+        console.log("Image URLs:", images.map(img => img.image_url));
+        return images;
+
+      } catch (error) {
+        console.error("Failed to fetch transformer images:", error);
+        // Return empty array instead of throwing to prevent UI crashes
         return [];
       }
-
-      console.log("Successfully fetched images:", images);
-      console.log("Image URLs:", images.map(img => img.image_url));
-      return images;
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3,
-    retryDelay: 1000
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnWindowFocus: false,
   });
 };
