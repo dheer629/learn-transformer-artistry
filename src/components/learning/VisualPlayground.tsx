@@ -1,9 +1,9 @@
 
 import React from "react";
-import MainVisualization from "./visualization/MainVisualization";
+import EnhancedMainVisualization from "./visualization/EnhancedMainVisualization";
 
 const VisualPlayground = () => {
-  return <MainVisualization />;
+  return <EnhancedMainVisualization />;
 };
 
 export default VisualPlayground;
