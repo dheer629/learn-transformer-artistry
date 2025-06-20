@@ -124,29 +124,33 @@ export const handleAnswer = (
   return isCorrect;
 };
 
-// Enhanced function to save quiz results
+// Simplified function to save quiz results - stores locally for now
 export const saveQuizResult = async (
   score: number,
   totalQuestions: number,
   timeSpent: number
 ): Promise<void> => {
   try {
-    await withRetry(async () => {
-      const { error } = await supabase
-        .from('quiz_results')
-        .insert({
-          score,
-          total_questions: totalQuestions,
-          time_spent: timeSpent,
-          completed_at: new Date().toISOString()
-        });
+    // Store quiz results in localStorage as fallback since quiz_results table doesn't exist
+    const quizResult = {
+      score,
+      total_questions: totalQuestions,
+      time_spent: timeSpent,
+      completed_at: new Date().toISOString(),
+      percentage: Math.round((score / totalQuestions) * 100)
+    };
 
-      if (error) {
-        throw new Error(`Failed to save quiz result: ${error.message}`);
-      }
+    // Store in localStorage
+    const existingResults = JSON.parse(localStorage.getItem('quiz_results') || '[]');
+    existingResults.push(quizResult);
+    localStorage.setItem('quiz_results', JSON.stringify(existingResults));
+
+    toast.success(`Quiz completed! You scored ${score}/${totalQuestions} (${quizResult.percentage}%)`, {
+      description: `Time taken: ${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toString().padStart(2, '0')}`,
+      duration: 4000,
     });
 
-    toast.success('Quiz results saved successfully!');
+    console.log('Quiz result saved locally:', quizResult);
   } catch (error) {
     console.error('Failed to save quiz results:', error);
     toast.error('Failed to save results', {
